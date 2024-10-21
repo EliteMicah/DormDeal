@@ -31,6 +31,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7464af44-b096-4b8d-ba97-d0c86736f2b2"
+      }
+    },
+    "owner": "elitemicah"
   }
 }
