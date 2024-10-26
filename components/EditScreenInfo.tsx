@@ -10,11 +10,13 @@ import Colors from '@/constants/Colors';
 export default function EditScreenInfo({ path }: { path: string }) {
   return (
     <View>
+    </View>
+    /*
+    <View>
       <View style={styles.getStartedContainer}>
         <Text
           style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
+          lightColor="rgba(0,0,0,0)">
           Open up the code for this screen:
         </Text>
 
@@ -28,7 +30,7 @@ export default function EditScreenInfo({ path }: { path: string }) {
         <Text
           style={styles.getStartedText}
           lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
+          darkColor="rgba(0,0,0,1)">
           Change any of the text, save the file, and your app will automatically update.
         </Text>
       </View>
@@ -43,6 +45,7 @@ export default function EditScreenInfo({ path }: { path: string }) {
         </ExternalLink>
       </View>
     </View>
+    */
   );
 }
 
