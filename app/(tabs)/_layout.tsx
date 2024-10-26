@@ -5,7 +5,6 @@ import { Pressable } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -46,7 +45,7 @@ export default function TabLayout() {
           title: 'Profile',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/settingsModal" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
