@@ -1,12 +1,15 @@
-import { StyleSheet } from "react-native";
-import EditScreenInfo from "@/components/EditScreenInfo";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import "../../global.css";
 
-export default function homeScreen() {
+export default function HomeScreen() {
   return (
-    <View className="flex-1 items-center justify-center">
-      <Text className="text-blue-700 font-extrabold">Rebooked</Text>
-    </View>
+    <SafeAreaView className="h-screen flex justify-start">
+      <View className="w-full pt-[15vh] flex items-center">
+        <Text style={{ color: "#3B82F6" }} className="font-extrabold text-4xl">
+          Rebooked
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }

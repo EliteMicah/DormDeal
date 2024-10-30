@@ -13,10 +13,12 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "@expo/cli": "^0.18.30",
+    "@expo/cli": "^0.1.7",
+    "@expo/config-plugins": "^8.0.10",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^6.0.2",
-    "expo": "^51.0.38",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "expo": "^45.0.8",
     "expo-font": "~12.0.9",
     "expo-linking": "~6.3.1",
     "expo-router": "^3.1.0",
@@ -44,5 +46,13 @@
     "tailwindcss": "^3.3.2",
     "typescript": "~5.3.3"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "body-parser": "1.20.3",
+    "cookie": "0.7.0",
+    "qs": "6.10.3",
+    "semver": "7.5.2",
+    "xml2js": "0.5.0",
+    "send": "0.19.0"
+  }
 }
