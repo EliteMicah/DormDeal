@@ -1,11 +1,18 @@
-import { Button, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
-import EditScreenInfo from "@/components/EditScreenInfo";
+import {
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Image,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import "../../global.css";
 
-// const { width: deviceWidth } = Dimensions.get("window");
-const deviceWidth = Math.round(Dimensions.get("window").width);
+const { width: deviceWidth } = Dimensions.get("window");
+const cardTitleText = "Event 1";
+const cardDescriptionText =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
 
 export default function HomeScreen() {
   return (
@@ -13,12 +20,30 @@ export default function HomeScreen() {
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Rebooked</Text>
       </View>
-      <View style={styles.cardContainer}></View>
+      <View style={styles.cardContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            console.log("Image pressed!");
+          }}
+        >
+          <Image
+            source={require("../../assets/images/image1.png")}
+            style={styles.imageStyle}
+          ></Image>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.cardTitleDescContainer}>
+        <Text style={styles.cardTitle}>{cardTitleText}</Text>
+        <Text style={styles.cardDescription}>{cardDescriptionText}</Text>
+      </View>
+      <View style={styles.shopTitleContainer}>
+        <Text style={styles.shopTitle}>Shop</Text>
+      </View>
       <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
         <TouchableOpacity
           onPress={() => {
-            console.log("Button pressed!");
+            console.log("Resources button pressed!");
           }}
         >
           <Text style={styles.resourcesButton}>Resources</Text>
@@ -41,7 +66,7 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#f2f2f2",
     marginVertical: 10,
-    marginBottom: 40,
+    marginBottom: 30,
   },
   title: {
     fontSize: 35,
@@ -53,22 +78,64 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.5,
-    //borderWidth: 2,
-    //borderRadius: 10,
-    //borderColor: "black",
   },
   cardContainer: {
-    //width: deviceWidth - 25,
+    width: deviceWidth - 50,
     backgroundColor: "#aaaaaa",
     height: 200,
     borderRadius: 10,
     marginHorizontal: 30,
+    overflow: "scroll",
     shadowColor: "#aaa",
     shadowOffset: {
       width: 5,
       height: 5,
     },
     shadowOpacity: 0.75,
+    marginBottom: 10,
+  },
+  imageStyle: {
+    height: 200,
+    borderRadius: 10,
+    width: deviceWidth - 50,
+  },
+  cardTitleDescContainer: {
+    backgroundColor: "#f2f2f2",
+    alignItems: "flex-start",
+    marginHorizontal: 30,
+  },
+  cardTitle: {
+    fontWeight: "900",
+    fontSize: 20,
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 5,
+  },
+  cardDescription: {
+    fontWeight: "600",
+    fontSize: 12,
+    marginHorizontal: 10,
+    marginBottom: 25,
+  },
+  shopTitleContainer: {
+    backgroundColor: "#f2f2f2",
+    alignItems: "flex-start",
+    marginHorizontal: 30,
+  },
+  shopTitle: {
+    fontWeight: "900",
+    fontSize: 20,
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 5,
   },
   resourcesContainer: {
     alignItems: "center",
@@ -90,12 +157,13 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "800",
     color: "#FFFFFF",
-    //borderWidth: 2,
-    //borderRadius: 10,
-    //borderColor: "black",
     margin: 8,
   },
   separator: {
-    marginVertical: 170,
+    marginVertical: 90,
   },
 });
+
+//borderWidth: 2,
+//borderRadius: 10,
+//borderColor: "black",
