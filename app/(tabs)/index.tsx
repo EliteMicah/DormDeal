@@ -1,15 +1,10 @@
-import {
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  Image,
-} from "react-native";
+import { StyleSheet, TouchableOpacity, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import "../../global.css";
 
 const { width: deviceWidth } = Dimensions.get("window");
+const { height: deviceHeight } = Dimensions.get("window");
 const cardTitleText = "Event 1";
 const cardDescriptionText =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
@@ -23,12 +18,12 @@ export default function HomeScreen() {
       <View style={styles.cardContainer}>
         <TouchableOpacity
           onPress={() => {
-            console.log("Image pressed!");
+            console.log("Main card pressed!");
           }}
         >
           <Image
             source={require("../../assets/images/image1.png")}
-            style={styles.imageStyle}
+            style={styles.mainImageStyle}
           ></Image>
         </TouchableOpacity>
       </View>
@@ -38,6 +33,30 @@ export default function HomeScreen() {
       </View>
       <View style={styles.shopTitleContainer}>
         <Text style={styles.shopTitle}>Shop</Text>
+      </View>
+      <View style={styles.shopCardsContainer}>
+        <View style={styles.shopBooksCard}>
+          <TouchableOpacity
+            onPress={() => {
+              console.log("Shop Card pressed!");
+            }}
+          >
+            <View style={styles.shopCardsStyle}>
+              <Text style={styles.shopCardText}>Books</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.shopItemsCards}>
+          <TouchableOpacity
+            onPress={() => {
+              console.log("Items Card pressed!");
+            }}
+          >
+            <View style={styles.shopCardsStyle}>
+              <Text style={styles.shopCardText}>Items</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
@@ -86,18 +105,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 30,
     overflow: "scroll",
+    marginBottom: 10,
+  },
+  mainImageStyle: {
+    height: 200,
+    borderRadius: 10,
+    width: deviceWidth - 50,
     shadowColor: "#aaa",
     shadowOffset: {
       width: 5,
       height: 5,
     },
     shadowOpacity: 0.75,
-    marginBottom: 10,
-  },
-  imageStyle: {
-    height: 200,
-    borderRadius: 10,
-    width: deviceWidth - 50,
   },
   cardTitleDescContainer: {
     backgroundColor: "#f2f2f2",
@@ -135,7 +154,62 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.5,
-    marginBottom: 5,
+    marginBottom: 10,
+  },
+  shopCardsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    flexDirection: "row",
+    width: deviceWidth - 60,
+    height: deviceWidth - 200,
+    backgroundColor: "#f2f2f2",
+    borderRadius: 10,
+    marginHorizontal: 30,
+    marginBottom: 0,
+  },
+  shopBooksCard: {
+    width: deviceWidth - 235,
+    height: deviceWidth - 235,
+    borderRadius: 10,
+    marginRight: 10,
+    backgroundColor: "#C4DFFF",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 5,
+      height: 5,
+    },
+    shadowOpacity: 0.75,
+  },
+  shopItemsCards: {
+    width: deviceWidth - 235,
+    height: deviceWidth - 235,
+    borderRadius: 10,
+    marginLeft: 10,
+    backgroundColor: "#C4DFFF",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 5,
+      height: 5,
+    },
+    shadowOpacity: 0.75,
+  },
+  shopCardsStyle: {
+    width: deviceWidth - 235,
+    height: deviceWidth - 235,
+    borderRadius: 10,
+    backgroundColor: "#C4DFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shopCardText: {
+    color: "#6290F0",
+    fontWeight: "800",
+    fontSize: 25,
+  },
+  itemsCardText: {
+    color: "#6290F0",
+    fontWeight: "800",
+    fontSize: 25,
   },
   resourcesContainer: {
     alignItems: "center",
@@ -163,7 +237,3 @@ const styles = StyleSheet.create({
     marginVertical: 90,
   },
 });
-
-//borderWidth: 2,
-//borderRadius: 10,
-//borderColor: "black",
