@@ -1,18 +1,20 @@
 import { StyleSheet } from "react-native";
-
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
+import { createStackNavigator } from "@react-navigation/stack";
 
-export default function ProfileScreen() {
+const Stack = createStackNavigator();
+
+export default function ResourcesScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile Screen</Text>
+      <Text style={styles.title}>Resources Screen</Text>
       <View
         style={styles.separator}
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
+      <EditScreenInfo path="app/navigation/ResourcesScreen.tsx" />
     </View>
   );
 }

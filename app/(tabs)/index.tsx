@@ -1,15 +1,20 @@
 import { StyleSheet, TouchableOpacity, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
-import "../../global.css";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { Link } from "expo-router";
+import ResourcesScreen from "../navigation/ResourcesScreen";
 
 const { width: deviceWidth } = Dimensions.get("window");
 const { height: deviceHeight } = Dimensions.get("window");
-const cardTitleText = "Event 1";
-const cardDescriptionText =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
 
 export default function HomeScreen() {
+  const cardTitleText = "Event 1";
+  const cardDescriptionText =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
+  const navigation = useNavigation();
+  const route = useRoute();
+
   return (
     <SafeAreaView style={styles.maincontainer}>
       <View style={styles.titleContainer}>
@@ -60,13 +65,12 @@ export default function HomeScreen() {
       </View>
       <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            console.log("Resources button pressed!");
-          }}
+        <Link
+          style={styles.resourcesButton}
+          href={{ pathname: "/navigation/ResourcesScreen" }}
         >
-          <Text style={styles.resourcesButton}>Resources</Text>
-        </TouchableOpacity>
+          Resources
+        </Link>
       </View>
     </SafeAreaView>
   );
