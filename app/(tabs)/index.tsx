@@ -3,9 +3,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 
-const { width: deviceWidth } = Dimensions.get("window");
-const { height: deviceHeight } = Dimensions.get("window");
-
 export default function HomeScreen() {
   const cardTitleText = "Event 1";
   const cardDescriptionText =
@@ -33,39 +30,22 @@ export default function HomeScreen() {
         <Text style={styles.shopTitle}>Shop</Text>
       </View>
       <View style={styles.shopCardsContainer}>
-        <View style={styles.shopBooksCard}>
-          <TouchableOpacity
-            onPress={() => {
-              console.log("Shop Card pressed!");
-            }}
-          >
-            <View style={styles.shopCardsStyle}>
-              <Text style={styles.shopCardText}>Books</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.shopItemsCards}>
-          <TouchableOpacity
-            onPress={() => {
-              console.log("Items Card pressed!");
-            }}
-          >
-            <View style={styles.shopCardsStyle}>
-              <Text style={styles.shopCardText}>Items</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        <Link href={{ pathname: "/navigation/shopBooksScreen" }}>
+          <View style={styles.shopBooksCard}>
+            <Text style={styles.shopCardText}>Books</Text>
+          </View>
+        </Link>
+        <Link href={{ pathname: "/navigation/shopItemsScreen" }}>
+          <View style={styles.shopItemsCard}>
+            <Text style={styles.shopCardText}>Items</Text>
+          </View>
+        </Link>
       </View>
-      <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
-        <Link
-          href={{ pathname: "/navigation/ResourcesScreen" }}
-          style={styles.resourcesTextContainer}
-        >
-          Resources
-          {/* <View style={styles.resourcesText}>
-            <Text style={styles.test}>Resources</Text>
-          </View> */}
+        <Link href={{ pathname: "/navigation/ResourcesScreen" }}>
+          <View style={styles.resourcesTextContainer}>
+            <Text style={styles.resourcesText}>Resources</Text>
+          </View>
         </Link>
       </View>
     </SafeAreaView>
@@ -77,6 +57,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f2f2",
     flexDirection: "column",
+    justifyContent: "flex-start",
     // Main container does not go past bottom navigation bar with safeview
   },
   titleContainer: {
@@ -99,7 +80,7 @@ const styles = StyleSheet.create({
   },
   mainCardContainer: {
     width: "85%",
-    height: 200,
+    height: "30%",
     borderRadius: 10,
     marginHorizontal: 30,
     overflow: "hidden",
@@ -154,20 +135,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   shopCardsContainer: {
-    flex: 1,
-    justifyContent: "center",
     flexDirection: "row",
-    width: deviceWidth - 60,
-    height: deviceWidth - 200,
+    alignSelf: "center",
     backgroundColor: "#f2f2f2",
     borderRadius: 10,
     marginHorizontal: 30,
+    width: "85%",
+    height: 150,
+    justifyContent: "space-between",
   },
   shopBooksCard: {
-    width: deviceWidth - 235,
-    height: deviceWidth - 235,
+    width: 150,
+    height: "100%",
     borderRadius: 10,
-    marginRight: 10,
     backgroundColor: "#C4DFFF",
     shadowColor: "#aaa",
     shadowOffset: {
@@ -175,12 +155,13 @@ const styles = StyleSheet.create({
       height: 5,
     },
     shadowOpacity: 0.75,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  shopItemsCards: {
-    width: deviceWidth - 235,
-    height: deviceWidth - 235,
+  shopItemsCard: {
+    width: 150,
+    height: "100%",
     borderRadius: 10,
-    marginLeft: 10,
     backgroundColor: "#C4DFFF",
     shadowColor: "#aaa",
     shadowOffset: {
@@ -188,12 +169,6 @@ const styles = StyleSheet.create({
       height: 5,
     },
     shadowOpacity: 0.75,
-  },
-  shopCardsStyle: {
-    width: deviceWidth - 235,
-    height: deviceWidth - 235,
-    borderRadius: 10,
-    backgroundColor: "#C4DFFF",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -208,46 +183,35 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
   resourcesContainer: {
+    position: "absolute",
+    bottom: 10,
     marginHorizontal: 30,
     width: "85%",
-    height: 90,
+    height: "10%",
     justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#f2f2f2",
   },
   resourcesTextContainer: {
-    alignSelf: "center",
-    alignContent: "center",
+    justifyContent: "center",
+    width: 250,
+    height: 45,
     backgroundColor: "#38B6FF",
-    width: "80%",
-    height: "50%",
-    borderRadius: 6,
+    borderRadius: 7,
     shadowColor: "#aaa",
     shadowOffset: {
       width: 5,
       height: 5,
     },
     shadowOpacity: 0.75,
+    alignItems: "center",
+  },
+  resourcesText: {
     fontSize: 25,
     fontWeight: "800",
     color: "#FFFFFF",
-    textAlign: "center",
-    display: "flex",
-    lineHeight: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    verticalAlign: "middle",
   },
-  // resourcesText: {
-  //   backgroundColor: "#aaa",
-  //   width: "100%",
-  //   height: "100%",
-  // },
-  // test: {
-  //   fontSize: 25,
-  //   fontWeight: "800",
-  //   color: "#FFFFFF",
-  // },
   separator: {
-    marginVertical: "22%",
+    marginVertical: 0,
   },
 });
