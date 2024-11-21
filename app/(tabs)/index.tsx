@@ -1,9 +1,7 @@
 import { StyleSheet, TouchableOpacity, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { Link } from "expo-router";
-import ResourcesScreen from "../navigation/ResourcesScreen";
 
 const { width: deviceWidth } = Dimensions.get("window");
 const { height: deviceHeight } = Dimensions.get("window");
@@ -12,26 +10,21 @@ export default function HomeScreen() {
   const cardTitleText = "Event 1";
   const cardDescriptionText =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
-  const navigation = useNavigation();
-  const route = useRoute();
 
   return (
     <SafeAreaView style={styles.maincontainer}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Rebooked</Text>
       </View>
-      <View style={styles.cardContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            console.log("Main card pressed!");
-          }}
-        >
+      <View style={styles.mainCardContainer}>
+        <Link href={{ pathname: "/navigation/eventCardScreen" }}>
           <Image
             source={require("../../assets/images/image1.png")}
-            style={styles.mainImageStyle}
-          ></Image>
-        </TouchableOpacity>
+            resizeMode="cover"
+          />
+        </Link>
       </View>
+
       <View style={styles.cardTitleDescContainer}>
         <Text style={styles.cardTitle}>{cardTitleText}</Text>
         <Text style={styles.cardDescription}>{cardDescriptionText}</Text>
@@ -66,10 +59,13 @@ export default function HomeScreen() {
       <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
         <Link
-          style={styles.resourcesButton}
           href={{ pathname: "/navigation/ResourcesScreen" }}
+          style={styles.resourcesTextContainer}
         >
           Resources
+          {/* <View style={styles.resourcesText}>
+            <Text style={styles.test}>Resources</Text>
+          </View> */}
         </Link>
       </View>
     </SafeAreaView>
@@ -79,10 +75,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
-    width: deviceWidth,
-    height: "100%",
     backgroundColor: "#f2f2f2",
-    // Main container does not go past bottom navigation bar
+    flexDirection: "column",
+    // Main container does not go past bottom navigation bar with safeview
   },
   titleContainer: {
     alignItems: "center",
@@ -102,25 +97,23 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.5,
   },
-  cardContainer: {
-    width: deviceWidth - 50,
-    backgroundColor: "#aaaaaa",
+  mainCardContainer: {
+    width: "85%",
     height: 200,
     borderRadius: 10,
     marginHorizontal: 30,
-    overflow: "scroll",
+    overflow: "hidden",
     marginBottom: 10,
   },
-  mainImageStyle: {
-    height: 200,
-    borderRadius: 10,
-    width: deviceWidth - 50,
-    shadowColor: "#aaa",
+  imageShadow: {
+    shadowColor: "#000",
     shadowOffset: {
-      width: 5,
-      height: 5,
+      width: 0,
+      height: 2,
     },
-    shadowOpacity: 0.75,
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
   },
   cardTitleDescContainer: {
     backgroundColor: "#f2f2f2",
@@ -169,7 +162,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
     borderRadius: 10,
     marginHorizontal: 30,
-    marginBottom: 0,
   },
   shopBooksCard: {
     width: deviceWidth - 235,
@@ -216,28 +208,46 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
   resourcesContainer: {
-    alignItems: "center",
-    width: "50%",
-    backgroundColor: "#38B6FF",
-    borderWidth: 0,
-    borderRadius: 10,
-    borderColor: "black",
-    marginTop: 20,
+    marginHorizontal: 30,
+    width: "85%",
+    height: 90,
+    justifyContent: "center",
+    backgroundColor: "#f2f2f2",
+  },
+  resourcesTextContainer: {
     alignSelf: "center",
+    alignContent: "center",
+    backgroundColor: "#38B6FF",
+    width: "80%",
+    height: "50%",
+    borderRadius: 6,
     shadowColor: "#aaa",
     shadowOffset: {
       width: 5,
       height: 5,
     },
     shadowOpacity: 0.75,
-  },
-  resourcesButton: {
     fontSize: 25,
     fontWeight: "800",
     color: "#FFFFFF",
-    margin: 8,
+    textAlign: "center",
+    display: "flex",
+    lineHeight: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    verticalAlign: "middle",
   },
+  // resourcesText: {
+  //   backgroundColor: "#aaa",
+  //   width: "100%",
+  //   height: "100%",
+  // },
+  // test: {
+  //   fontSize: 25,
+  //   fontWeight: "800",
+  //   color: "#FFFFFF",
+  // },
   separator: {
-    marginVertical: 90,
+    marginVertical: "22%",
   },
 });
