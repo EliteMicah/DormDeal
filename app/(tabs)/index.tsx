@@ -42,7 +42,7 @@ export default function HomeScreen() {
         </Link>
       </View>
       <View style={styles.resourcesContainer}>
-        <Link href={{ pathname: "/ResourcesScreen" }}>
+        <Link href={{ pathname: "/resourcesScreen" }}>
           <View style={styles.resourcesTextContainer}>
             <Text style={styles.resourcesText}>Resources</Text>
           </View>

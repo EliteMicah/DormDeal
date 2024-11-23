@@ -11,7 +11,7 @@ export default function ResourcesScreen() {
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <EditScreenInfo path="app/(tabs)/ResourcesScreen.tsx" />
+      <EditScreenInfo path="app/(tabs)/resourcesScreen.tsx" />
     </View>
   );
 }
@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#f2f2f2",
   },
   title: {
     fontSize: 20,
