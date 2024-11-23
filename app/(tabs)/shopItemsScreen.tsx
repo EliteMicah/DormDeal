@@ -11,7 +11,7 @@ export default function shopItemsScreen() {
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <EditScreenInfo path="app/navigation/shopItemsScreen.tsx" />
+      <EditScreenInfo path="app/(tabs)/shopItemsScreen.tsx" />
     </View>
   );
 }

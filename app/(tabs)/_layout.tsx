@@ -48,6 +48,30 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="eventCardScreen"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="shopBooksScreen"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="shopItemsScreen"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="ResourcesScreen"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="profileScreen"
         options={{
           title: "Profile",

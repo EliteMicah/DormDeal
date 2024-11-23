@@ -14,7 +14,7 @@ export default function HomeScreen() {
         <Text style={styles.title}>Rebooked</Text>
       </View>
       <View style={styles.mainCardContainer}>
-        <Link href={{ pathname: "/navigation/eventCardScreen" }}>
+        <Link href={{ pathname: "/eventCardScreen" }}>
           <Image
             source={require("../../assets/images/image1.png")}
             resizeMode="cover"
@@ -30,19 +30,19 @@ export default function HomeScreen() {
         <Text style={styles.shopTitle}>Shop</Text>
       </View>
       <View style={styles.shopCardsContainer}>
-        <Link href={{ pathname: "/navigation/shopBooksScreen" }}>
+        <Link href={{ pathname: "/shopBooksScreen" }}>
           <View style={styles.shopBooksCard}>
             <Text style={styles.shopCardText}>Books</Text>
           </View>
         </Link>
-        <Link href={{ pathname: "/navigation/shopItemsScreen" }}>
+        <Link href={{ pathname: "/shopItemsScreen" }}>
           <View style={styles.shopItemsCard}>
             <Text style={styles.shopCardText}>Items</Text>
           </View>
         </Link>
       </View>
       <View style={styles.resourcesContainer}>
-        <Link href={{ pathname: "/navigation/ResourcesScreen" }}>
+        <Link href={{ pathname: "/ResourcesScreen" }}>
           <View style={styles.resourcesTextContainer}>
             <Text style={styles.resourcesText}>Resources</Text>
           </View>
