@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   mainCardContainer: {
     width: "85%",
-    height: "30%",
+    height: 200,
     borderRadius: 10,
     marginHorizontal: 30,
     overflow: "hidden",
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     bottom: 10,
     marginHorizontal: 30,
     width: "85%",
-    height: "10%",
+    height: 70,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f2f2f2",

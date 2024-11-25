@@ -4,8 +4,6 @@ import { Link, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
-import { createStackNavigator } from "@react-navigation/stack";
-import shopBooksScreen from "./shopBooksScreen";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -18,16 +16,6 @@ function TabBarIcon(props: {
       style={{ marginBottom: -10, marginTop: 12 }}
       {...props}
     />
-  );
-}
-
-const ShopStack = createStackNavigator();
-
-function ShopStackScreen() {
-  return (
-    <ShopStack.Navigator>
-      <ShopStack.Screen name="shopBooksScreen" component={shopBooksScreen} />
-    </ShopStack.Navigator>
   );
 }
 

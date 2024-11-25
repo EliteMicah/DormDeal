@@ -12,7 +12,7 @@ export default function ProfileScreen() {
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
+      <EditScreenInfo path="app/(tabs)/profileScreen.tsx" />
     </View>
   );
 }
