@@ -16,7 +16,7 @@ export default function HomeScreen() {
       <View style={styles.mainCardContainer}>
         <Link href={{ pathname: "/eventCardScreen" }}>
           <Image
-            source={require("../../assets/images/image1.png")}
+            source={require("../../assets/images/image2.png")}
             resizeMode="cover"
           />
         </Link>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#f2f2f2",
     marginVertical: 10,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   title: {
     fontSize: 35,

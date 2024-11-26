@@ -21,17 +21,46 @@ export default function shopBooksScreen() {
         </View>
       </Link>
       <View style={styles.separator}></View>
-      <ScrollView
-        contentContainerStyle={styles.gridContainer}
-        horizontal={false}
-      >
-        <View style={styles.cardContainer}></View>
-        <View style={styles.cardContainer}></View>
-        <View style={styles.cardContainer}></View>
-        <View style={styles.cardContainer}></View>
-        <View style={styles.cardContainer}></View>
-        <View style={styles.cardContainer}></View>
-      </ScrollView>
+      <View style={styles.gridContainer}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          horizontal={false}
+        >
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardImage}></View>
+            <View style={styles.cardDetails}></View>
+          </View>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -68,22 +97,36 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   gridContainer: {
-    width: 320,
-    height: "100%",
+    height: "89%",
+    marginHorizontal: 30,
     backgroundColor: "#f2f2f2",
-    flexWrap: "wrap",
+  },
+  scrollContainer: {
+    flexGrow: 1,
     flexDirection: "row",
-    justifyContent: "flex-start",
+    flexWrap: "wrap",
     columnGap: "4%",
-    rowGap: "5%",
+    rowGap: "2%",
+    paddingBottom: 50,
   },
   cardContainer: {
     width: "48%",
-    height: 180,
-    borderRadius: 8,
+    height: 200,
     justifyContent: "flex-start",
-    borderWidth: 2,
-    backgroundColor: "#e3e2e7",
+    backgroundColor: "#f2f2f2",
+    gap: "3%",
+  },
+  cardImage: {
+    width: "100%",
+    height: "80%",
+    backgroundColor: "#C9C9C9",
+    borderRadius: 8,
+  },
+  cardDetails: {
+    width: "100%",
+    height: "15%",
+    backgroundColor: "#C9C9C9",
+    borderRadius: 8,
   },
   separator: {
     marginVertical: 10,
