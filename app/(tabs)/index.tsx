@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Dimensions, Image } from "react-native";
+import { StyleSheet, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";

@@ -1,20 +1,18 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView } from "react-native";
 
 export default function shopBooksScreen() {
   return (
     <SafeAreaView style={styles.maincontainer}>
       <Text style={styles.title}>Explore Books</Text>
-      <Link href="/settingsModal">
+      <Link href="/searchModal">
         <View style={styles.searchContainer}>
           <Ionicons
             name="search"
             size={20}
-            color="#000"
             style={styles.searchIcon}
           ></Ionicons>
           <Text style={styles.searchText}>Search</Text>
@@ -75,8 +73,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 25,
-    fontWeight: "bold",
-    marginVertical: 10,
+    fontWeight: "700",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 10,
   },
   searchContainer: {
     width: 320,
@@ -97,7 +101,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   gridContainer: {
-    height: "89%",
+    height: "91%",
     marginHorizontal: 30,
     backgroundColor: "#f2f2f2",
   },
