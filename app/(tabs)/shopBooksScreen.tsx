@@ -1,23 +1,21 @@
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function shopBooksScreen() {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.maincontainer}>
       <Text style={styles.title}>Explore Books</Text>
-      <Link href="/searchModal">
-        <View style={styles.searchContainer}>
-          <Ionicons
-            name="search"
-            size={20}
-            style={styles.searchIcon}
-          ></Ionicons>
-          <Text style={styles.searchText}>Search</Text>
-        </View>
-      </Link>
+      <TouchableOpacity
+        style={styles.searchContainer}
+        onPress={() => router.push("/searchModal")}
+      >
+        <Ionicons name="search" size={20} style={styles.searchIcon} />
+        <Text style={styles.searchText}>Search</Text>
+      </TouchableOpacity>
       <View style={styles.separator}></View>
       <View style={styles.gridContainer}>
         <ScrollView
