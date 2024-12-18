@@ -14,7 +14,6 @@ export default function ModalScreen() {
   // Separate state for each input
   const [titleSearch, setTitleSearch] = useState("");
   const [isbnSearch, setISBNSearch] = useState("");
-  const [locationSearch, setLocationSearch] = useState("");
   const [condition, setCondition] = useState("Any");
   const [paymentType, setPaymentType] = useState("Any");
 
@@ -99,6 +98,9 @@ export default function ModalScreen() {
             placeholder="#"
             value={isbnSearch}
             onChangeText={setISBNSearch}
+            keyboardType="number-pad"
+            returnKeyType="done"
+            maxLength={13}
           />
         </View>
         <View style={styles.identifierContainer}>
