@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   searchContainer: {
-    width: 320,
-    height: 40,
+    width: "85%",
+    height: "6%",
     borderRadius: 10,
     backgroundColor: "#e3e2e7",
     flexDirection: "row",

@@ -121,15 +121,6 @@ export default function ModalScreen() {
             <Text style={styles.dropdownButtonText}>{paymentType}</Text>
           </TouchableOpacity>
         </View>
-        {/* <View style={styles.identifierContainer}>
-          <Text style={styles.titleName}>Location</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="⚲"
-            value={locationSearch}
-            onChangeText={setLocationSearch}
-          />
-        </View> */}
         <View style={[styles.searchButtonContainer]}>
           <View style={styles.searchButton}>
             <TouchableOpacity>
