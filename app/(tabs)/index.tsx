@@ -1,9 +1,10 @@
-import { StyleSheet, Image } from "react-native";
+import { StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
+  const router = useRouter();
   const cardTitleText = "Event 1";
   const cardDescriptionText =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
@@ -14,12 +15,14 @@ export default function HomeScreen() {
         <Text style={styles.title}>Rebooked</Text>
       </View>
       <View style={styles.mainCardContainer}>
-        <Link href={{ pathname: "/eventCardScreen" }}>
+        <TouchableOpacity
+          onPress={() => router.push("/moreScreens/eventCardScreen")}
+        >
           <Image
             source={require("../../assets/images/image2.png")}
-            resizeMode="cover"
+            style={styles.mainCardImage}
           />
-        </Link>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.cardTitleDescContainer}>
@@ -30,23 +33,29 @@ export default function HomeScreen() {
         <Text style={styles.shopTitle}>Shop</Text>
       </View>
       <View style={styles.shopCardsContainer}>
-        <Link href={{ pathname: "/shopBooksScreen" }}>
+        <TouchableOpacity
+          onPress={() => router.push("/moreScreens/shopBooksScreen")}
+        >
           <View style={styles.shopBooksCard}>
             <Text style={styles.shopCardText}>Books</Text>
           </View>
-        </Link>
-        <Link href={{ pathname: "/shopItemsScreen" }}>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => router.push("/moreScreens/shopItemsScreen")}
+        >
           <View style={styles.shopItemsCard}>
             <Text style={styles.shopCardText}>Items</Text>
           </View>
-        </Link>
+        </TouchableOpacity>
       </View>
       <View style={styles.resourcesContainer}>
-        <Link href={{ pathname: "/resourcesScreen" }}>
+        <TouchableOpacity
+          onPress={() => router.push("/moreScreens/resourcesScreen")}
+        >
           <View style={styles.resourcesTextContainer}>
             <Text style={styles.resourcesText}>Resources</Text>
           </View>
-        </Link>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -86,6 +95,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 10,
   },
+  mainCardImage: {
+    height: "100%",
+    width: "100%",
+  },
   imageShadow: {
     shadowColor: "#000",
     shadowOffset: {
@@ -102,7 +115,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
   },
   cardTitle: {
-    fontWeight: "900",
+    fontWeight: "800",
     fontSize: 20,
     shadowColor: "#aaa",
     shadowOffset: {
@@ -124,7 +137,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
   },
   shopTitle: {
-    fontWeight: "900",
+    fontWeight: "800",
     fontSize: 20,
     shadowColor: "#aaa",
     shadowOffset: {
