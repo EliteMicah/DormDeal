@@ -32,8 +32,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   mainTitle: {
-    fontSize: 25,
-    fontWeight: "700",
+    fontSize: 35,
+    fontWeight: "800",
+    color: "#38b6ff",
     shadowColor: "#aaa",
     shadowOffset: {
       width: 2,

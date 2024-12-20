@@ -48,6 +48,7 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
       </View>
+      <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
         <TouchableOpacity
           onPress={() => router.push("/moreScreens/resourcesScreen")}
@@ -64,6 +65,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
+    height: "100%",
     backgroundColor: "#f2f2f2",
     flexDirection: "column",
     justifyContent: "flex-start",
@@ -196,11 +198,9 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
   resourcesContainer: {
-    position: "absolute",
-    bottom: 10,
     marginHorizontal: 30,
     width: "85%",
-    height: 70,
+    height: "10%",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f2f2f2",
@@ -225,6 +225,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   separator: {
-    marginVertical: 0,
+    marginVertical: "5%",
   },
 });
