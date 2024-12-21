@@ -19,10 +19,10 @@ export default function shopBooksScreen() {
       />
 
       <SafeAreaView style={styles.maincontainer}>
-        <Text style={styles.title}>Explore Books</Text>
+        <Text style={styles.mainTitle}>Explore Books</Text>
         <TouchableOpacity
-          style={styles.searchContainer}
-          onPress={() => router.push("/searchModal")}
+          style={styles.searchButtonContainer}
+          onPress={() => router.push("/moreScreens/searchModal")}
         >
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <Text style={styles.searchText}>Search</Text>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
   },
-  title: {
+  mainTitle: {
     fontSize: 35,
     fontWeight: "800",
     color: "#38b6ff",
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     marginBottom: 10,
   },
-  searchContainer: {
+  searchButtonContainer: {
     width: "85%",
     height: "6%",
     borderRadius: 10,

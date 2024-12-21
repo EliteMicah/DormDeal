@@ -2,6 +2,7 @@ import { StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -36,15 +37,17 @@ export default function HomeScreen() {
         <TouchableOpacity
           onPress={() => router.push("/moreScreens/shopBooksScreen")}
         >
-          <View style={styles.shopBooksCard}>
-            <Text style={styles.shopCardText}>Books</Text>
+          <View style={styles.shopCards}>
+            <Text style={styles.shopCardText}>Textbooks</Text>
+            <Ionicons name="library-outline" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push("/moreScreens/shopItemsScreen")}
         >
-          <View style={styles.shopItemsCard}>
+          <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Items</Text>
+            <Ionicons name="bag-outline" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
       </View>
@@ -101,16 +104,6 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
   },
-  imageShadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
-  },
   cardTitleDescContainer: {
     backgroundColor: "#f2f2f2",
     alignItems: "flex-start",
@@ -156,24 +149,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 30,
     width: "85%",
-    height: 150,
+    height: "22%",
     justifyContent: "space-between",
   },
-  shopBooksCard: {
-    width: 150,
-    height: "100%",
-    borderRadius: 10,
-    backgroundColor: "#C4DFFF",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 5,
-      height: 5,
-    },
-    shadowOpacity: 0.75,
-    alignItems: "center",
-    justifyContent: "center",
+  icon: {
+    marginTop: "10%",
+    color: "#6290F0",
   },
-  shopItemsCard: {
+  shopCards: {
     width: 150,
     height: "100%",
     borderRadius: 10,
@@ -185,17 +168,13 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.75,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   shopCardText: {
+    marginTop: "10%",
     color: "#6290F0",
-    fontWeight: "800",
-    fontSize: 25,
-  },
-  itemsCardText: {
-    color: "#6290F0",
-    fontWeight: "800",
-    fontSize: 25,
+    fontWeight: "600",
+    fontSize: 15,
   },
   resourcesContainer: {
     marginHorizontal: 30,

@@ -21,7 +21,7 @@ export default function shopItemsScreen() {
         <Text style={styles.title}>Explore Items</Text>
         <TouchableOpacity
           style={styles.searchContainer}
-          onPress={() => router.push("/searchModal")}
+          onPress={() => router.push("/moreScreens/searchModal")}
         >
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <Text style={styles.searchText}>Search</Text>
