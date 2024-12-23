@@ -23,6 +23,7 @@ export default function createItemListing() {
         <TouchableOpacity style={styles.imageContainer}>
           <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
         </TouchableOpacity>
+        <View style={styles.identifierContainer}></View>
       </SafeAreaView>
     </>
   );
@@ -65,5 +66,14 @@ const styles = StyleSheet.create({
   imageIcon: {
     opacity: 1,
     color: "#878787",
+  },
+  identifierContainer: {
+    marginTop: "5%",
+    height: "50%",
+    width: "85%",
+    backgroundColor: "#f2f2f2",
+    flexDirection: "column",
+    justifyContent: "center",
+    borderWidth: 2,
   },
 });

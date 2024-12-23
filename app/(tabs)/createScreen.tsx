@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 30,
     width: "85%",
-    height: "30%",
+    height: "23%",
     justifyContent: "space-between",
   },
   sellCards: {
