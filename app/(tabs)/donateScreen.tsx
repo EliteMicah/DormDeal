@@ -1,7 +1,8 @@
 import { StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function donateScreen() {
   const router = useRouter();
@@ -13,8 +14,13 @@ export default function donateScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
-          headerTintColor: "black",
+          headerLeft: () => (
+            <HeaderBackButton
+              tintColor="black"
+              onPress={() => router.replace("/resourcesScreen")} // Bandaid fix for back button?
+              labelVisible={false}
+            />
+          ),
         }}
       />
       <SafeAreaView style={styles.mainContainer}>

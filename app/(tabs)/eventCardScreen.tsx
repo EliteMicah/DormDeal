@@ -1,10 +1,12 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function eventCardScreen() {
   const router = useRouter();
+
   return (
     <>
       <Stack.Screen
@@ -12,8 +14,13 @@ export default function eventCardScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
-          headerTintColor: "black",
+          headerLeft: () => (
+            <HeaderBackButton
+              tintColor="black"
+              onPress={() => router.replace("/")} // Bandaid fix for back button?
+              labelVisible={false}
+            />
+          ),
         }}
       />
       <SafeAreaView style={styles.mainContainer}>

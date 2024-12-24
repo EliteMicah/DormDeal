@@ -3,8 +3,9 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { HeaderBackButton } from "@react-navigation/elements";
 
-export default function createItemListing() {
+export default function createBookListing() {
   const router = useRouter();
 
   return (
@@ -14,8 +15,13 @@ export default function createItemListing() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
-          headerTintColor: "black",
+          headerLeft: () => (
+            <HeaderBackButton
+              tintColor="black"
+              onPress={() => router.replace("/createScreen")} // Bandaid fix for back button?
+              labelVisible={false}
+            />
+          ),
         }}
       />
       <SafeAreaView style={styles.maincontainer}>
@@ -23,7 +29,6 @@ export default function createItemListing() {
         <TouchableOpacity style={styles.imageContainer}>
           <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
         </TouchableOpacity>
-        <View style={styles.identifierContainer}></View>
       </SafeAreaView>
     </>
   );
@@ -66,14 +71,5 @@ const styles = StyleSheet.create({
   imageIcon: {
     opacity: 1,
     color: "#878787",
-  },
-  identifierContainer: {
-    marginTop: "5%",
-    height: "50%",
-    width: "85%",
-    backgroundColor: "#f2f2f2",
-    flexDirection: "column",
-    justifyContent: "center",
-    borderWidth: 2,
   },
 });

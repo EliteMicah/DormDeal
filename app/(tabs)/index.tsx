@@ -16,9 +16,7 @@ export default function HomeScreen() {
         <Text style={styles.title}>Rebooked</Text>
       </View>
       <View style={styles.mainCardContainer}>
-        <TouchableOpacity
-          onPress={() => router.push("/moreScreens/eventCardScreen")}
-        >
+        <TouchableOpacity onPress={() => router.push("/eventCardScreen")}>
           <Image
             source={require("../../assets/images/image2.png")}
             style={styles.mainCardImage}
@@ -34,17 +32,13 @@ export default function HomeScreen() {
         <Text style={styles.shopTitle}>Shop</Text>
       </View>
       <View style={styles.shopCardsContainer}>
-        <TouchableOpacity
-          onPress={() => router.push("/moreScreens/shopBooksScreen")}
-        >
+        <TouchableOpacity onPress={() => router.push("/shopBooksScreen")}>
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Textbooks</Text>
             <Ionicons name="library-outline" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push("/moreScreens/shopItemsScreen")}
-        >
+        <TouchableOpacity onPress={() => router.push("/shopItemsScreen")}>
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Items</Text>
             <Ionicons name="bag-outline" size={70} style={styles.icon} />
@@ -53,9 +47,7 @@ export default function HomeScreen() {
       </View>
       <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
-        <TouchableOpacity
-          onPress={() => router.push("/moreScreens/resourcesScreen")}
-        >
+        <TouchableOpacity onPress={() => router.push("/resourcesScreen")}>
           <View style={styles.resourcesTextContainer}>
             <Text style={styles.resourcesText}>Resources</Text>
           </View>

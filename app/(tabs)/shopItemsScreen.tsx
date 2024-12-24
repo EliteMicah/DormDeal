@@ -3,6 +3,7 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function shopItemsScreen() {
   const router = useRouter();
@@ -13,15 +14,20 @@ export default function shopItemsScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
-          headerTintColor: "black",
+          headerLeft: () => (
+            <HeaderBackButton
+              tintColor="black"
+              onPress={() => router.replace("/")} // Bandaid fix for back button?
+              labelVisible={false}
+            />
+          ),
         }}
       />
       <SafeAreaView style={styles.maincontainer}>
         <Text style={styles.title}>Explore Items</Text>
         <TouchableOpacity
           style={styles.searchContainer}
-          onPress={() => router.push("/moreScreens/searchModal")}
+          onPress={() => router.push("/searchModal")}
         >
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <Text style={styles.searchText}>Search</Text>
@@ -121,7 +127,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     columnGap: "4%",
     rowGap: "2%",
-    paddingBottom: 50,
+    paddingBottom: 70,
   },
   cardContainer: {
     width: "48%",

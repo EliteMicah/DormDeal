@@ -1,8 +1,8 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Tabs } from "expo-router";
+import { Tabs, Stack } from "expo-router";
 import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
@@ -18,15 +18,11 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors["light"].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: false,
+        headerShown: true,
       }}
     >
       <Tabs.Screen
@@ -35,6 +31,7 @@ export default function TabLayout() {
           title: "Home",
           tabBarLabel: "",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -43,6 +40,7 @@ export default function TabLayout() {
           title: "Create",
           tabBarLabel: "",
           tabBarIcon: ({ color }) => <TabBarIcon name="plus" color={color} />,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -51,6 +49,57 @@ export default function TabLayout() {
           title: "Profile",
           tabBarLabel: "",
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="createBookListing"
+        options={{
+          href: null,
+          headerShown: true,
+        }}
+      />
+      <Tabs.Screen
+        name="createItemListing"
+        options={{
+          href: null,
+          headerShown: true,
+        }}
+      />
+      <Tabs.Screen
+        name="donateScreen"
+        options={{
+          href: null,
+          headerShown: true,
+        }}
+      />
+      <Tabs.Screen
+        name="eventCardScreen"
+        options={{
+          href: null,
+          headerShown: true,
+          headerTitle: "",
+        }}
+      />
+      <Tabs.Screen
+        name="resourcesScreen"
+        options={{
+          href: null,
+          headerShown: true,
+        }}
+      />
+      <Tabs.Screen
+        name="shopBooksScreen"
+        options={{
+          href: null,
+          headerShown: true,
+        }}
+      />
+      <Tabs.Screen
+        name="shopItemsScreen"
+        options={{
+          href: null,
+          headerShown: true,
         }}
       />
     </Tabs>

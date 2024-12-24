@@ -3,6 +3,7 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function ResourcesScreen() {
   const router = useRouter();
@@ -13,8 +14,13 @@ export default function ResourcesScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
-          headerTintColor: "black",
+          headerLeft: () => (
+            <HeaderBackButton
+              tintColor="black"
+              onPress={() => router.replace("/")} // Bandaid fix for back button?
+              labelVisible={false}
+            />
+          ),
         }}
       />
 
@@ -85,7 +91,7 @@ export default function ResourcesScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() => router.push("/moreScreens/donateScreen")}
+            onPress={() => router.push("/donateScreen")}
           >
             <Ionicons name="heart-outline" size={23} style={styles.icon} />
             <Text style={styles.buttonTitle}>Donate</Text>
