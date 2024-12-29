@@ -18,7 +18,9 @@ export default function HomeScreen() {
       </View>
       <View style={styles.mainCardContainer}>
         <TouchableOpacity
-          onPress={() => router.push("/home/moreScreens/eventCardScreen")}
+          onPress={() =>
+            router.push("/(tabs)/home/homeScreens/eventCardScreen")
+          }
         >
           <Image
             source={require("../../../assets/images/image2.png")}
@@ -36,7 +38,7 @@ export default function HomeScreen() {
       </View>
       <View style={styles.shopCardsContainer}>
         <TouchableOpacity
-          onPress={() => router.push("/home/moreScreens/shopBooksScreen")}
+          onPress={() => router.push("/home/homeScreens/shopBooksScreen")}
         >
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Textbooks</Text>
@@ -44,7 +46,7 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push("/home/moreScreens/shopItemsScreen")}
+          onPress={() => router.push("/home/homeScreens/shopItemsScreen")}
         >
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Items</Text>
@@ -55,7 +57,7 @@ export default function HomeScreen() {
       <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
         <TouchableOpacity
-          onPress={() => router.push("/home/moreScreens/resourcesScreen")}
+          onPress={() => router.push("/home/homeScreens/resourcesScreen")}
         >
           <View style={styles.resourcesTextContainer}>
             <Text style={styles.resourcesText}>Resources</Text>
@@ -150,7 +152,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 30,
     width: "85%",
-    height: "22%",
+    height: 155,
     justifyContent: "space-between",
   },
   icon: {
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
   resourcesContainer: {
     marginHorizontal: 30,
     width: "85%",
-    height: "10%",
+    height: 75,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f2f2f2",
