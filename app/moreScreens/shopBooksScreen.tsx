@@ -14,13 +14,8 @@ export default function shopBooksScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerLeft: () => (
-            <HeaderBackButton
-              tintColor="black"
-              onPress={() => router.replace("/")} // Bandaid fix for back button?
-              labelVisible={false}
-            />
-          ),
+          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerTintColor: "black",
         }}
       />
 

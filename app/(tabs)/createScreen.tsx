@@ -13,13 +13,17 @@ export default function createScreen() {
         <Text style={styles.text}>Choose a Category</Text>
       </View>
       <View style={styles.cardsContainer}>
-        <TouchableOpacity onPress={() => router.push("/createBookListing")}>
+        <TouchableOpacity
+          onPress={() => router.push("/moreScreens/createBookListing")}
+        >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Textbooks</Text>
             <Ionicons name="library-outline" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/createItemListing")}>
+        <TouchableOpacity
+          onPress={() => router.push("/moreScreens/createItemListing")}
+        >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Items</Text>
             <Ionicons name="bag-outline" size={70} style={styles.icon} />

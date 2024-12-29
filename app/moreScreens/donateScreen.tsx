@@ -3,6 +3,7 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { HeaderBackButton } from "@react-navigation/elements";
+import { Header } from "react-bootstrap/lib/Modal";
 
 export default function donateScreen() {
   const router = useRouter();
@@ -14,13 +15,8 @@ export default function donateScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerLeft: () => (
-            <HeaderBackButton
-              tintColor="black"
-              onPress={() => router.replace("/resourcesScreen")} // Bandaid fix for back button?
-              labelVisible={false}
-            />
-          ),
+          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerTintColor: "black",
         }}
       />
       <SafeAreaView style={styles.mainContainer}>

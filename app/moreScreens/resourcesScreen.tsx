@@ -14,13 +14,8 @@ export default function ResourcesScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerLeft: () => (
-            <HeaderBackButton
-              tintColor="black"
-              onPress={() => router.replace("/")} // Bandaid fix for back button?
-              labelVisible={false}
-            />
-          ),
+          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerTintColor: "black",
         }}
       />
 
@@ -91,7 +86,7 @@ export default function ResourcesScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() => router.push("/donateScreen")}
+            onPress={() => router.push("/moreScreens/donateScreen")}
           >
             <Ionicons name="heart-outline" size={23} style={styles.icon} />
             <Text style={styles.buttonTitle}>Donate</Text>
