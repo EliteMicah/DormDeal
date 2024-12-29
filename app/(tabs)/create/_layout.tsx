@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-export default function HomeLayout() {
+export default function CreateLayout() {
   return (
     <Stack
       screenOptions={{
@@ -13,6 +13,13 @@ export default function HomeLayout() {
         headerBackTitle: "‎", // Empty whitespace character for back button [U+200E]
         headerTintColor: "black",
       }}
-    ></Stack>
+    >
+      <Stack.Screen
+        name="createScreen"
+        options={{
+          headerShown: false, // Hide header on home screen
+        }}
+      />
+    </Stack>
   );
 }

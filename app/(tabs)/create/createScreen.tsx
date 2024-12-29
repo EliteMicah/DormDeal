@@ -14,7 +14,9 @@ export default function createScreen() {
       </View>
       <View style={styles.cardsContainer}>
         <TouchableOpacity
-          onPress={() => router.push("/home/moreScreens/createBookListing")}
+          onPress={() =>
+            router.push("/(tabs)/create/createScreens/createBookListing")
+          }
         >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Textbooks</Text>
@@ -22,7 +24,9 @@ export default function createScreen() {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push("/home/moreScreens/createItemListing")}
+          onPress={() =>
+            router.push("/(tabs)/create/createScreens/createItemListing")
+          }
         >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Items</Text>

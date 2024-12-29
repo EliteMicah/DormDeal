@@ -43,7 +43,7 @@ export default function TabLayout() {
         redirect={true}
       />
       <Tabs.Screen
-        name="createScreen"
+        name="create"
         options={{
           title: "Create",
           tabBarLabel: "",
