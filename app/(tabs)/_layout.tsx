@@ -2,17 +2,43 @@ import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
+import { View } from "react-native";
 
-function TabBarIcon(props: {
+function TabBarIcon({
+  name,
+  color,
+  focused,
+  ...otherProps
+}: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
   color: string;
+  focused: boolean;
 }) {
   return (
-    <FontAwesome
-      size={28}
-      style={{ marginBottom: -10, marginTop: 12 }}
-      {...props}
-    />
+    <View
+      style={[
+        {
+          padding: 8,
+          borderRadius: 50,
+          height: 55,
+          width: 55,
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 40,
+          marginBottom: 10,
+        },
+        focused && {
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+        },
+      ]}
+    >
+      <FontAwesome
+        size={28}
+        color={focused ? "#eee" : color}
+        name={name}
+        {...otherProps}
+      />
+    </View>
   );
 }
 
@@ -24,6 +50,8 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           display: "flex",
+          height: 80,
+          paddingBottom: 5,
         },
       }}
     >
@@ -32,7 +60,9 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarLabel: "",
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="home" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -47,7 +77,9 @@ export default function TabLayout() {
         options={{
           title: "Create",
           tabBarLabel: "",
-          tabBarIcon: ({ color }) => <TabBarIcon name="plus" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="plus" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -55,7 +87,9 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarLabel: "",
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="user" color={color} focused={focused} />
+          ),
         }}
       />
     </Tabs>

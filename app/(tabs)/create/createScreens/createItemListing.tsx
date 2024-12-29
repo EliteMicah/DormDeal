@@ -32,6 +32,7 @@ export default function createItemListing() {
 const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
+    height: "100%",
     flexDirection: "column",
     backgroundColor: "#f2f2f2",
     alignItems: "center",
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
   },
   identifierContainer: {
     marginTop: "5%",
-    height: "50%",
+    height: 400,
     width: "85%",
     backgroundColor: "#f2f2f2",
     flexDirection: "column",
