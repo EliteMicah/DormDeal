@@ -22,15 +22,25 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors["light"].tint,
         headerShown: false,
+        tabBarStyle: {
+          display: "flex",
+        },
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: "Home",
           tabBarLabel: "",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+        redirect={true}
       />
       <Tabs.Screen
         name="createScreen"

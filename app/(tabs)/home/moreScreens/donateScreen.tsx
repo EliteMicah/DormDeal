@@ -32,7 +32,7 @@ export default function donateScreen() {
             onPress={() => Linking.openURL("https://venmo.com/u/EliteMicah")}
           >
             <Image
-              source={require("../../assets/images/myVenmo.png")}
+              source={require("../../../../assets/images/myVenmo.png")}
               style={styles.mainCardImage}
             />
           </TouchableOpacity>

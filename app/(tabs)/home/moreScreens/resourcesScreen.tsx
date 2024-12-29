@@ -86,7 +86,7 @@ export default function ResourcesScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() => router.push("/moreScreens/donateScreen")}
+            onPress={() => router.push("/home/moreScreens/donateScreen")}
           >
             <Ionicons name="heart-outline" size={23} style={styles.icon} />
             <Text style={styles.buttonTitle}>Donate</Text>
