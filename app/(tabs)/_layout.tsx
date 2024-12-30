@@ -28,7 +28,7 @@ function TabBarIcon({
           marginBottom: 10,
         },
         focused && {
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          backgroundColor: "#38B6FF",
         },
       ]}
     >
@@ -59,7 +59,7 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Home",
-          tabBarLabel: "",
+          tabBarLabel: "hello",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name="home" color={color} focused={focused} />
           ),
@@ -69,6 +69,7 @@ export default function TabLayout() {
         name="index"
         options={{
           href: null,
+          tabBarLabel: "",
         }}
         redirect={true}
       />

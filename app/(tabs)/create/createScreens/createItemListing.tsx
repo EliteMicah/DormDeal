@@ -1,11 +1,36 @@
-import { StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
 
 export default function createItemListing() {
   const router = useRouter();
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    // Request permission
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   return (
     <>
@@ -20,10 +45,66 @@ export default function createItemListing() {
       />
       <SafeAreaView style={styles.maincontainer}>
         <Text style={styles.mainTitle}>Create Listing</Text>
-        <TouchableOpacity style={styles.imageContainer}>
-          <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
+        <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
+          )}
         </TouchableOpacity>
-        <View style={styles.identifierContainer}></View>
+        <View style={styles.identifierContainer}>
+          <View style={styles.singleIdentifierContainer}>
+            <Text style={styles.identifierText}>Title</Text>
+            <TextInput
+              style={styles.userTextInput}
+              placeholder="Name of the Item"
+            ></TextInput>
+          </View>
+          <View style={styles.singleIdentifierContainer}>
+            <Text style={styles.identifierText}>Category</Text>
+            <TextInput
+              style={styles.userTextInput}
+              placeholder="Ex. Furniture"
+            ></TextInput>
+          </View>
+          <View style={styles.singleIdentifierContainer}>
+            <Text style={styles.identifierText}>Condition</Text>
+            <TextInput
+              style={styles.userTextInput}
+              placeholder="New, Like New, Used, Trash"
+            ></TextInput>
+          </View>
+          <View style={styles.singleIdentifierContainer}>
+            <Text style={styles.identifierText}>Price</Text>
+            <TextInput
+              style={styles.userTextInput}
+              placeholder="$20"
+              keyboardType="number-pad"
+              returnKeyType="done"
+            ></TextInput>
+          </View>
+          <View style={styles.singleIdentifierContainer}>
+            <Text style={styles.identifierText}>Payment Type</Text>
+            <TextInput
+              style={styles.userTextInput}
+              placeholder="New, Like New, Used, Trash"
+            ></TextInput>
+          </View>
+        </View>
+        <View style={styles.createButtonContainer}>
+          <View style={styles.createButton}>
+            <TouchableOpacity>
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: "#FFFFFF", fontWeight: "800" },
+                ]}
+              >
+                Create Listing!
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </SafeAreaView>
     </>
   );
@@ -32,11 +113,9 @@ export default function createItemListing() {
 const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
-    height: "100%",
+    alignItems: "center",
     flexDirection: "column",
     backgroundColor: "#f2f2f2",
-    alignItems: "center",
-    justifyContent: "flex-start",
   },
   mainTitle: {
     fontSize: 35,
@@ -70,11 +149,69 @@ const styles = StyleSheet.create({
   },
   identifierContainer: {
     marginTop: "5%",
-    height: 400,
+    height: "50%",
     width: "85%",
     backgroundColor: "#f2f2f2",
     flexDirection: "column",
+    justifyContent: "flex-start",
+  },
+  singleIdentifierContainer: {
+    height: "18%",
+    flexDirection: "column",
+    backgroundColor: "#f2f2f2",
+    marginBottom: "2%",
+  },
+  identifierText: {
+    fontSize: 20,
+    fontWeight: "600",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 5,
+  },
+  userTextInput: {
+    height: 35,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+  },
+  createButtonContainer: {
+    marginTop: "2%",
+    height: "14%",
+    width: "85%",
+    flexDirection: "column",
+    marginHorizontal: 30,
+    backgroundColor: "#f2f2f2",
     justifyContent: "center",
-    borderWidth: 2,
+    alignItems: "center",
+  },
+  createButton: {
+    height: "50%",
+    width: "70%",
+    borderRadius: 8,
+    backgroundColor: "#38B6FF",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 5,
+      height: 5,
+    },
+    shadowOpacity: 0.75,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 20,
+    fontWeight: "600",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 5,
   },
 });

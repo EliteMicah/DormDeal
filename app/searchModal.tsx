@@ -121,7 +121,7 @@ export default function ModalScreen() {
             <Text style={styles.dropdownButtonText}>{paymentType}</Text>
           </TouchableOpacity>
         </View>
-        <View style={[styles.searchButtonContainer]}>
+        <View style={styles.searchButtonContainer}>
           <View style={styles.searchButton}>
             <TouchableOpacity>
               <Text
@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   // Modal Styles
   modalOverlay: {
     flex: 1,
