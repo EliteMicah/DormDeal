@@ -3,7 +3,6 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function shopItemsScreen() {
   const router = useRouter();
@@ -34,38 +33,38 @@ export default function shopItemsScreen() {
             showsVerticalScrollIndicator={false}
             horizontal={false}
           >
-            <View style={styles.cardContainer}>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </SafeAreaView>

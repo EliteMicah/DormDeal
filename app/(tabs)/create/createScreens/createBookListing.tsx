@@ -84,7 +84,7 @@ export default function createBookListing() {
             <Text style={styles.identifierText}>Payment Type</Text>
             <TextInput
               style={styles.userTextInput}
-              placeholder="New, Like New, Used, Trash"
+              placeholder="All, In-App, Venmo, Zelle"
             ></TextInput>
           </View>
         </View>

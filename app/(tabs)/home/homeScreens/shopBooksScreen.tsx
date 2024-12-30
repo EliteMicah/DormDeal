@@ -3,7 +3,6 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function shopBooksScreen() {
   const router = useRouter();
@@ -29,44 +28,91 @@ export default function shopBooksScreen() {
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
         <View style={styles.separator}></View>
-        <View style={styles.gridContainer}>
+        <Text style={styles.conditionText}>New</Text>
+        <View style={styles.conditionContainer}>
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            horizontal={false}
+            showsHorizontalScrollIndicator={false} // Change from showsVerticalScrollIndicator
+            horizontal={true} // Change to true
           >
-            <View style={styles.cardContainer}>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+        <Text style={styles.conditionText}>Used</Text>
+        <View style={styles.conditionContainer}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsHorizontalScrollIndicator={false} // Change from showsVerticalScrollIndicator
+            horizontal={true} // Change to true
+          >
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
-            <View style={styles.cardContainer}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
-            </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+        <Text style={styles.conditionText}>Noted</Text>
+        <View style={styles.conditionContainer}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsHorizontalScrollIndicator={false} // Change from showsVerticalScrollIndicator
+            horizontal={true} // Change to true
+          >
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cardContainer}>
+              <View style={styles.cardImage}></View>
+              <View style={styles.cardDetails}></View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -79,10 +125,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     backgroundColor: "#f2f2f2",
-    alignItems: "center",
     justifyContent: "flex-start",
   },
   mainTitle: {
+    alignSelf: "center",
     fontSize: 35,
     fontWeight: "800",
     color: "#38b6ff",
@@ -97,6 +143,7 @@ const styles = StyleSheet.create({
   searchButtonContainer: {
     width: "85%",
     height: "6%",
+    alignSelf: "center",
     borderRadius: 10,
     backgroundColor: "#e3e2e7",
     flexDirection: "row",
@@ -112,23 +159,33 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     opacity: 0.7,
   },
-  gridContainer: {
-    height: "91%",
+  conditionText: {
+    marginHorizontal: 30,
+    fontSize: 20,
+    fontWeight: "600",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 5,
+  },
+  conditionContainer: {
+    height: "26%",
+    width: "85%",
     marginHorizontal: 30,
     backgroundColor: "#f2f2f2",
   },
   scrollContainer: {
-    flexGrow: 1,
+    paddingHorizontal: 10,
     flexDirection: "row",
-    flexWrap: "wrap",
-    columnGap: "4%",
-    rowGap: "2%",
-    paddingBottom: 70,
+    gap: 15,
   },
   cardContainer: {
-    width: "48%",
-    height: 200,
-    justifyContent: "flex-start",
+    width: 140,
+    height: 175,
+    left: -10,
     backgroundColor: "#f2f2f2",
     gap: "3%",
   },
@@ -145,6 +202,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   separator: {
-    marginVertical: 10,
+    marginVertical: 4,
   },
 });

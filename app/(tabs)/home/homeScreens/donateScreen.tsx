@@ -2,8 +2,6 @@ import { StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
-import { HeaderBackButton } from "@react-navigation/elements";
-import { Header } from "react-bootstrap/lib/Modal";
 
 export default function donateScreen() {
   const router = useRouter();

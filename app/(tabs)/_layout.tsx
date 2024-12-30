@@ -59,7 +59,7 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Home",
-          tabBarLabel: "hello",
+          tabBarLabel: "",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name="home" color={color} focused={focused} />
           ),

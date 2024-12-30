@@ -3,7 +3,6 @@ import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { HeaderBackButton } from "@react-navigation/elements";
 
 export default function ResourcesScreen() {
   const router = useRouter();
