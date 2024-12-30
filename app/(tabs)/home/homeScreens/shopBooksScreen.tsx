@@ -28,12 +28,17 @@ export default function shopBooksScreen() {
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
         <View style={styles.separator}></View>
-        <Text style={styles.conditionText}>New</Text>
+
+        {/* New Books Section */}
+        <View style={styles.conditionTextContainer}>
+          <Text style={styles.conditionText}>New</Text>
+          <Text style={styles.seeAllText}>See All</Text>
+        </View>
         <View style={styles.conditionContainer}>
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
-            showsHorizontalScrollIndicator={false} // Change from showsVerticalScrollIndicator
-            horizontal={true} // Change to true
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
           >
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
@@ -57,12 +62,17 @@ export default function shopBooksScreen() {
             </TouchableOpacity>
           </ScrollView>
         </View>
-        <Text style={styles.conditionText}>Used</Text>
+
+        {/* Used Books Section */}
+        <View style={styles.conditionTextContainer}>
+          <Text style={styles.conditionText}>Used</Text>
+          <Text style={styles.seeAllText}>See All</Text>
+        </View>
         <View style={styles.conditionContainer}>
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
-            showsHorizontalScrollIndicator={false} // Change from showsVerticalScrollIndicator
-            horizontal={true} // Change to true
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
           >
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
@@ -86,12 +96,17 @@ export default function shopBooksScreen() {
             </TouchableOpacity>
           </ScrollView>
         </View>
-        <Text style={styles.conditionText}>Noted</Text>
+
+        {/* Noted Books Section */}
+        <View style={styles.conditionTextContainer}>
+          <Text style={styles.conditionText}>Noted</Text>
+          <Text style={styles.seeAllText}>See All</Text>
+        </View>
         <View style={styles.conditionContainer}>
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
-            showsHorizontalScrollIndicator={false} // Change from showsVerticalScrollIndicator
-            horizontal={true} // Change to true
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
           >
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
@@ -159,9 +174,27 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     opacity: 0.7,
   },
-  conditionText: {
+  conditionTextContainer: {
+    backgroundColor: "#f2f2f2",
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginHorizontal: 30,
+  },
+  conditionText: {
     fontSize: 20,
+    fontWeight: "600",
+    shadowColor: "#aaa",
+    shadowOffset: {
+      width: 2,
+      height: 2,
+    },
+    shadowOpacity: 0.5,
+    marginBottom: 5,
+  },
+  seeAllText: {
+    alignSelf: "flex-end",
+    fontSize: 12,
+    opacity: 0.6,
     fontWeight: "600",
     shadowColor: "#aaa",
     shadowOffset: {
