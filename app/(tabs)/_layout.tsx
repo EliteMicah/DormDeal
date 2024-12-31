@@ -93,6 +93,20 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="signUpScreen"
+        options={{
+          href: null,
+          tabBarStyle: { display: "none" },
+        }}
+      />
+      <Tabs.Screen
+        name="signInScreen"
+        options={{
+          href: null,
+          tabBarStyle: { display: "none" },
+        }}
+      />
     </Tabs>
   );
 }

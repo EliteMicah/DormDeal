@@ -29,12 +29,17 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-router", "expo-font"],
     "experiments": {
       "typedRoutes": true
+    },
+    "router": {
+      "initialRoute": "/index"
+    },
+    "log": {
+      "ignoreLogs": [
+        "[Reanimated] Reduced motion setting is enabled on this device."
+      ]
     },
     "extra": {
       "eas": {
