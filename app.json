@@ -34,7 +34,7 @@
       "typedRoutes": true
     },
     "router": {
-      "initialRoute": "/index"
+      "initialRoute": "/(tabs)/index"
     },
     "log": {
       "ignoreLogs": [

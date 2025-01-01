@@ -94,14 +94,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="signUpScreen"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="signInScreen"
+        name="accountCreation"
         options={{
           href: null,
           tabBarStyle: { display: "none" },
