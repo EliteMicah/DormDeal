@@ -2,7 +2,7 @@ import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 
 export default function SignUpScreen() {
@@ -12,81 +12,96 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>Sign Up</Text>
-        <Text style={styles.subtitle}>Create your account</Text>
+      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.subtitle}>Create your account</Text>
 
-        <View style={styles.inputContainer}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          placeholderTextColor="#999"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#999"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.input}
-            placeholder="Full name"
+            style={styles.passwordInput}
+            placeholder="Password"
             placeholderTextColor="#999"
+            secureTextEntry={!showPassword}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#999"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Password"
-              placeholderTextColor="#999"
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Feather
-                name={showPassword ? "eye" : "eye-off"}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Confirm your password"
-              placeholderTextColor="#999"
-              secureTextEntry={!showConfirmPassword}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              <Feather
-                name={showConfirmPassword ? "eye" : "eye-off"}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <TouchableOpacity style={styles.signUpButton}>
-          <Text style={styles.signUpButtonText}>SIGN UP</Text>
-        </TouchableOpacity>
-
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account? </Text>
           <TouchableOpacity
-            onPress={() =>
-              router.replace("/(tabs)/accountCreation/account/signInScreen")
-            }
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
           >
-            <Text style={styles.loginLink}>Login</Text>
+            <Feather
+              name={showPassword ? "eye" : "eye-off"}
+              size={20}
+              color="#999"
+            />
           </TouchableOpacity>
         </View>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Confirm your password"
+            placeholderTextColor="#999"
+            secureTextEntry={!showConfirmPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <Feather
+              name={showConfirmPassword ? "eye" : "eye-off"}
+              size={20}
+              color="#999"
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-        <View style={styles.skipButton}>
-          <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
-            <Text style={styles.skipText}>Skip to Home Screen</Text>
-          </TouchableOpacity>
-        </View>
+      <TouchableOpacity style={styles.signUpButton}>
+        <Text style={styles.signUpButtonText}>SIGN UP</Text>
+      </TouchableOpacity>
+
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account? </Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.replace("/(tabs)/accountCreation/account/signInScreen")
+          }
+        >
+          <Text style={styles.loginLink}>Login</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.dividerContainer}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>Or Sign Up with</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <View style={styles.socialButtonsContainer}>
+        <TouchableOpacity style={styles.socialButton}>
+          <AntDesign name="apple1" size={20} color="black" />
+          <Text style={styles.socialButtonText}>Apple</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton}>
+          <AntDesign name="google" size={20} color="#DB4437" />
+          <Text style={styles.socialButtonText}>Google</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.skipButton}>
+        <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
+          <Text style={styles.skipText}>Skip to Home Screen</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -94,10 +109,6 @@ export default function SignUpScreen() {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  contentContainer: {
     flex: 1,
     padding: 20,
     backgroundColor: "white",
@@ -172,5 +183,41 @@ const styles = StyleSheet.create({
   skipText: {
     color: "#999",
     fontSize: 16,
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 30,
+    paddingHorizontal: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ddd",
+  },
+  dividerText: {
+    paddingHorizontal: 10,
+    color: "#999",
+    fontSize: 14,
+  },
+  socialButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+  },
+  socialButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "white",
+  },
+  socialButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
