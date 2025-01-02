@@ -20,6 +20,7 @@ export default function SignUpScreen() {
           style={styles.input}
           placeholder="Username"
           placeholderTextColor="#999"
+          maxLength={20}
         />
         <TextInput
           style={styles.input}
