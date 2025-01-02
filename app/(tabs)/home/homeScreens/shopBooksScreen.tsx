@@ -32,7 +32,9 @@ export default function shopBooksScreen() {
         {/* New Books Section */}
         <View style={styles.conditionTextContainer}>
           <Text style={styles.conditionText}>New</Text>
-          <Text style={styles.seeAllText}>See All</Text>
+          <TouchableOpacity style={styles.seeAllTextContainer}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.conditionContainer}>
           <ScrollView
@@ -66,7 +68,9 @@ export default function shopBooksScreen() {
         {/* Used Books Section */}
         <View style={styles.conditionTextContainer}>
           <Text style={styles.conditionText}>Used</Text>
-          <Text style={styles.seeAllText}>See All</Text>
+          <TouchableOpacity style={styles.seeAllTextContainer}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.conditionContainer}>
           <ScrollView
@@ -100,7 +104,9 @@ export default function shopBooksScreen() {
         {/* Noted Books Section */}
         <View style={styles.conditionTextContainer}>
           <Text style={styles.conditionText}>Noted</Text>
-          <Text style={styles.seeAllText}>See All</Text>
+          <TouchableOpacity style={styles.seeAllTextContainer}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.conditionContainer}>
           <ScrollView
@@ -190,6 +196,9 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.5,
     marginBottom: 5,
+  },
+  seeAllTextContainer: {
+    justifyContent: "flex-end",
   },
   seeAllText: {
     alignSelf: "flex-end",

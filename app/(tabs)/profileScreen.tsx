@@ -1,7 +1,7 @@
-import { StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
-import { MaterialIcons } from "@expo/vector-icons"; // Make sure to install expo vector icons
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   const sellingItems = [
@@ -16,10 +16,9 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <Image
-          // <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
-          style={styles.profileImage}
-        />
+        <View style={styles.profileImage}>
+          <Ionicons name="person" size={75} style={styles.imageIcon} />
+        </View>
 
         <View style={styles.userInfo}>
           <Text style={styles.username}>Username</Text>
@@ -45,9 +44,9 @@ export default function ProfileScreen() {
 
         <View style={styles.itemGrid}>
           {sellingItems.map((item) => (
-            <View key={item.id} style={styles.itemCard}>
-              {/* Add your item content here */}
-            </View>
+            <TouchableOpacity key={item.id} style={styles.itemCard}>
+              {/* Add item content here */}
+            </TouchableOpacity>
           ))}
         </View>
       </View>
@@ -72,6 +71,13 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     backgroundColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageIcon: {
+    marginBottom: 10,
+    color: "gray",
+    opacity: 0.7,
   },
   userInfo: {
     alignItems: "center",

@@ -20,7 +20,7 @@ export default function createScreen() {
         >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Textbooks</Text>
-            <Ionicons name="library-outline" size={70} style={styles.icon} />
+            <Ionicons name="library" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -30,7 +30,7 @@ export default function createScreen() {
         >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Items</Text>
-            <Ionicons name="bag-outline" size={70} style={styles.icon} />
+            <Ionicons name="bag" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
       </View>
@@ -94,13 +94,14 @@ const styles = StyleSheet.create({
   },
   cardText: {
     marginTop: "3%",
-    color: "#6290F0",
+    color: "blue",
     fontWeight: "600",
     fontSize: 15,
   },
   icon: {
     marginTop: "10%",
-    color: "#6290F0",
+    color: "blue",
+    opacity: 0.6,
   },
   separator: {
     marginVertical: 30,

@@ -42,7 +42,7 @@ export default function HomeScreen() {
         >
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Textbooks</Text>
-            <Ionicons name="library-outline" size={70} style={styles.icon} />
+            <Ionicons name="library" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -50,7 +50,7 @@ export default function HomeScreen() {
         >
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Items</Text>
-            <Ionicons name="bag-outline" size={70} style={styles.icon} />
+            <Ionicons name="bag" size={70} style={styles.icon} />
           </View>
         </TouchableOpacity>
       </View>
@@ -75,7 +75,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
     flexDirection: "column",
     justifyContent: "flex-start",
-    // Main container does not go past bottom navigation bar with safeview
   },
   titleContainer: {
     alignItems: "center",
@@ -156,7 +155,8 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginTop: "10%",
-    color: "#6290F0",
+    color: "blue",
+    opacity: 0.6,
   },
   shopCards: {
     width: 150,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   shopCardText: {
     marginTop: "10%",
-    color: "#6290F0",
+    color: "blue",
     fontWeight: "600",
     fontSize: 15,
   },
