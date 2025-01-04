@@ -2,7 +2,6 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function createScreen() {
   const router = useRouter();
@@ -20,7 +19,7 @@ export default function createScreen() {
         >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Textbooks</Text>
-            <Ionicons name="library" size={70} style={styles.icon} />
+            <Text style={styles.emojiIcon}>📚</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -30,7 +29,7 @@ export default function createScreen() {
         >
           <View style={styles.sellCards}>
             <Text style={styles.cardText}>Items</Text>
-            <Ionicons name="bag" size={70} style={styles.icon} />
+            <Text style={styles.emojiIcon}>🎁</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -93,15 +92,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cardText: {
-    marginTop: "3%",
-    color: "blue",
+    color: "gray",
     fontWeight: "600",
+    opacity: 0.7,
     fontSize: 15,
   },
-  icon: {
+  emojiIcon: {
     marginTop: "10%",
-    color: "blue",
-    opacity: 0.6,
+    fontSize: 70,
   },
   separator: {
     marginVertical: 30,

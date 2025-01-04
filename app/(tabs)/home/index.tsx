@@ -2,7 +2,6 @@ import { StyleSheet, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { useRouter, Stack } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -42,7 +41,7 @@ export default function HomeScreen() {
         >
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Textbooks</Text>
-            <Ionicons name="library" size={70} style={styles.icon} />
+            <Text style={styles.emojiIcon}>📚</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -50,7 +49,7 @@ export default function HomeScreen() {
         >
           <View style={styles.shopCards}>
             <Text style={styles.shopCardText}>Items</Text>
-            <Ionicons name="bag" size={70} style={styles.icon} />
+            <Text style={styles.emojiIcon}>🎁</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -153,10 +152,9 @@ const styles = StyleSheet.create({
     height: 155,
     justifyContent: "space-between",
   },
-  icon: {
+  emojiIcon: {
     marginTop: "10%",
-    color: "blue",
-    opacity: 0.6,
+    fontSize: 70,
   },
   shopCards: {
     width: 150,
@@ -174,8 +172,9 @@ const styles = StyleSheet.create({
   },
   shopCardText: {
     marginTop: "10%",
-    color: "blue",
+    color: "gray",
     fontWeight: "600",
+    opacity: 0.7,
     fontSize: 15,
   },
   resourcesContainer: {

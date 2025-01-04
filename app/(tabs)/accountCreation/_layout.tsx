@@ -21,6 +21,12 @@ export default function AccountCreationLayout() {
         }}
       />
       <Stack.Screen
+        name="account/schoolVerificationScreen"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="index"
         options={{
           headerShown: false,

@@ -67,7 +67,14 @@ export default function SignUpScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.signUpButton}>
+      <TouchableOpacity
+        style={styles.signUpButton}
+        onPress={() =>
+          router.push(
+            "/(tabs)/accountCreation/account/schoolVerificationScreen"
+          )
+        }
+      >
         <Text style={styles.signUpButtonText}>SIGN UP</Text>
       </TouchableOpacity>
 
