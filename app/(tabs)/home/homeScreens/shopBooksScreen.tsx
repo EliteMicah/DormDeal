@@ -42,23 +42,48 @@ export default function shopBooksScreen() {
             showsHorizontalScrollIndicator={false}
             horizontal={true}
           >
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
@@ -78,23 +103,48 @@ export default function shopBooksScreen() {
             showsHorizontalScrollIndicator={false}
             horizontal={true}
           >
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
@@ -114,23 +164,48 @@ export default function shopBooksScreen() {
             showsHorizontalScrollIndicator={false}
             horizontal={true}
           >
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
+            <TouchableOpacity
+              style={styles.cardContainer}
+              onPress={() => {
+                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
+              }}
+            >
               <View style={styles.cardImage}></View>
               <View style={styles.cardDetails}></View>
             </TouchableOpacity>
