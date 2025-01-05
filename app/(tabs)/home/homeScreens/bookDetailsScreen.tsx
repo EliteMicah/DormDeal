@@ -15,7 +15,7 @@ export default function BookDetailsScreen() {
     professor: "Dr. John Williams",
     isbn: "#0123456789123",
     edition: "13th",
-    paymentTypes: ["App", "Cash", "Venmo", "Zelle"],
+    paymentTypes: ["In-App", "Cash", "Venmo", "Zelle"],
     amazonPrice: "$19.99",
     negotiable: false,
   };
@@ -89,15 +89,9 @@ export default function BookDetailsScreen() {
           <View style={styles.sellerInfo}>
             <Text style={styles.username}>Username</Text>
             <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4].map((star) => (
-                <MaterialIcons
-                  key={star}
-                  name="star"
-                  size={20}
-                  color="#FFD700"
-                />
+              {[1, 2, 3, 4, 5].map((star) => (
+                <MaterialIcons key={star} name="star" size={20} color="gray" />
               ))}
-              <MaterialIcons name="star-half" size={20} color="#FFD700" />
             </View>
           </View>
         </View>
@@ -110,10 +104,6 @@ export default function BookDetailsScreen() {
           <DetailRow label="ISBN" value={bookDetails.isbn} />
           <DetailRow label="Edition" value={bookDetails.edition} />
           <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
-          <DetailRow
-            label="Willing to Negotiate"
-            value={bookDetails.negotiable ? "Yes" : "No"}
-          />
           <DetailRow label="Amazon's Price" value={bookDetails.amazonPrice} />
         </View>
       </SafeAreaView>
@@ -167,9 +157,10 @@ const styles = StyleSheet.create({
     marginTop: "2%",
   },
   buyingSection: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomStartRadius: "10%",
     backgroundColor: "#f2f2f2",
   },
   buyingTitle: {
@@ -201,14 +192,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   sellerSection: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     backgroundColor: "#f2f2f2",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: 4,
   },
   sellerInfo: {
     flexDirection: "row",
@@ -227,13 +220,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
   },
   detailsSection: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 6,
     backgroundColor: "#f2f2f2",
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: 4,
     backgroundColor: "#f2f2f2",
   },
   detailLabel: {
