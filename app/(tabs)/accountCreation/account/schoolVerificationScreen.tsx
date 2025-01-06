@@ -11,26 +11,37 @@ export default function SchoolVerificationScreen() {
   const [verificationCode, setVerificationCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const validateSchoolEmail = (email: string): boolean => {
-    const eduEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.edu$/;
-    return eduEmailRegex.test(email);
+    // Check only for Biola Emails
+    return email.toLowerCase().endsWith("@biola.edu");
   };
 
   const handleSendCode = async () => {
+    // Clear any existing error message
+    setEmailError("");
+
+    // Check if it's a .edu email but not biola.edu
+    if (
+      schoolEmail.toLowerCase().endsWith(".edu") &&
+      !schoolEmail.toLowerCase().endsWith("@biola.edu")
+    ) {
+      setEmailError("Your institution hasn't been added yet");
+      return;
+    }
+
     if (!validateSchoolEmail(schoolEmail)) {
-      // You might want to add your own error handling UI here
-      alert("Please enter a valid .edu email address");
+      setEmailError("Please enter a valid Biola email address");
       return;
     }
 
     setLoading(true);
     try {
-      // Add your email verification logic here
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated delay
       setCodeSent(true);
     } catch (error) {
-      alert("Failed to send verification code. Please try again.");
+      setEmailError("Failed to send verification code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,15 +74,19 @@ export default function SchoolVerificationScreen() {
 
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, emailError ? { borderColor: "red" } : null]}
           placeholder="School Email (.edu)"
           placeholderTextColor="#999"
           value={schoolEmail}
-          onChangeText={setSchoolEmail}
+          onChangeText={(text) => {
+            setSchoolEmail(text);
+            setEmailError(""); // Clear error when user types
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
           editable={!codeSent}
         />
+        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         {codeSent && (
           <TextInput
             style={styles.input}
@@ -87,9 +102,13 @@ export default function SchoolVerificationScreen() {
 
       {!codeSent ? (
         <TouchableOpacity
-          style={[styles.verifyButton, loading && styles.buttonDisabled]}
+          style={[
+            styles.verifyButton,
+            (loading || !validateSchoolEmail(schoolEmail)) &&
+              styles.buttonDisabled,
+          ]}
           onPress={handleSendCode}
-          disabled={loading}
+          disabled={loading || !validateSchoolEmail(schoolEmail)}
         >
           {loading ? (
             <ActivityIndicator color="white" />
@@ -193,5 +212,11 @@ const styles = StyleSheet.create({
   skipText: {
     color: "#999",
     fontSize: 16,
+  },
+  errorText: {
+    color: "red",
+    marginTop: 5,
+    marginLeft: 10,
+    fontSize: 12,
   },
 });
