@@ -8,6 +8,13 @@ import { useState } from "react";
 export default function SignInScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Function to check if all fields are filled
+  const areAllFieldsFilled = () => {
+    return email.trim() !== "" && password.trim() !== "";
+  };
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -22,6 +29,8 @@ export default function SignInScreen() {
           placeholderTextColor="#999"
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
         <View style={styles.passwordContainer}>
           <TextInput
@@ -29,6 +38,8 @@ export default function SignInScreen() {
             placeholder="Password"
             placeholderTextColor="#999"
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
           />
           <TouchableOpacity
             style={styles.eyeIcon}
@@ -43,18 +54,28 @@ export default function SignInScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.signUpButton}>
+      <TouchableOpacity
+        style={[styles.signUpButton, !areAllFieldsFilled() && { opacity: 0.5 }]}
+        disabled={!areAllFieldsFilled()}
+        onPress={() => {
+          if (!areAllFieldsFilled()) {
+            return;
+          }
+          // Add your login logic here
+          router.push("/(tabs)/home");
+        }}
+      >
         <Text style={styles.signUpButtonText}>LOGIN</Text>
       </TouchableOpacity>
 
       <View style={styles.loginContainer}>
-        <Text style={styles.loginText}>Already have an account? </Text>
+        <Text style={styles.loginText}>Don't have an account? </Text>
         <TouchableOpacity
           onPress={() =>
             router.replace("/(tabs)/accountCreation/account/signUpScreen")
           }
         >
-          <Text style={styles.loginLink}>Login</Text>
+          <Text style={styles.loginLink}>Sign Up</Text>
         </TouchableOpacity>
       </View>
 

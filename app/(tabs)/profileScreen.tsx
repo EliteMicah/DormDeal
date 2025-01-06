@@ -80,12 +80,12 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   userInfo: {
-    alignItems: "center",
+    alignItems: "flex-start",
     marginTop: 10,
     backgroundColor: "transparent",
   },
   username: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "600",
     color: "#4169e1", // Royal blue color
     marginBottom: 5,
