@@ -21,8 +21,9 @@ export default function donateScreen() {
         <Text style={styles.mainTitle}>Donate</Text>
         <View style={styles.columnContainer}>
           <Text style={styles.columnTitle}>
-            Donating helps motivate me to keep working on this app! Every
-            donation helps tremendously and I appreciate any help I can get!
+            Donating helps pay for the app to stay running and motivates me to
+            keep working on this app! Every donation helps tremendously and I
+            appreciate any help I can get!
           </Text>
         </View>
         <View style={styles.mainCardContainer}>

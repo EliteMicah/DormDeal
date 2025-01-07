@@ -35,35 +35,59 @@ export default function shopItemsScreen() {
           >
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cardContainer}>
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -140,7 +164,22 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "15%",
     backgroundColor: "#C9C9C9",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
     borderRadius: 8,
+  },
+  cardPrice: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "black",
+    left: -5,
+  },
+  cardSeller: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "blue",
+    left: -5,
   },
   separator: {
     marginVertical: 10,

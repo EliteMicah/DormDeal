@@ -50,7 +50,12 @@ export default function BookDetailsScreen() {
       <SafeAreaView style={styles.mainContainer}>
         <View style={styles.imageContainer}>
           <View>
-            <MaterialIcons name="photo" size={48} color="gray" />
+            <MaterialIcons
+              name="photo"
+              size={70}
+              color="gray"
+              backgroundColor="#ddd"
+            />
           </View>
         </View>
 

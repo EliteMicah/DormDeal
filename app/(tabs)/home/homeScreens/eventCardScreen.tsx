@@ -18,7 +18,10 @@ export default function eventCardScreen() {
         }}
       />
       <SafeAreaView style={styles.mainContainer}>
-        <Text style={styles.mainTitle}>Main Event Card</Text>
+        <Text style={styles.mainTitle}>Event</Text>
+        <View style={styles.textContainer}>
+          <Text>Coming Soon!</Text>
+        </View>
       </SafeAreaView>
     </>
   );
@@ -44,9 +47,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     marginBottom: 10,
   },
+  textContainer: {
+    justifyContent: "center",
+    height: "80%",
+    backgroundColor: "#f2f2f2",
+  },
   separator: {
     marginVertical: 30,
     height: 1,
-    width: "80%",
+    width: "85%",
   },
 });

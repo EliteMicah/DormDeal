@@ -49,7 +49,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -58,7 +61,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -67,7 +73,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -76,7 +85,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -85,7 +97,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -110,7 +125,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -119,7 +137,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -128,7 +149,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -137,7 +161,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -146,7 +173,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -171,7 +201,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -180,7 +213,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -189,7 +225,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -198,7 +237,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cardContainer}
@@ -207,7 +249,10 @@ export default function shopBooksScreen() {
               }}
             >
               <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}></View>
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>$10</Text>
+                <Text style={styles.cardSeller}>Username</Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -289,7 +334,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   conditionContainer: {
-    height: "26%",
+    height: "25%",
     width: "85%",
     marginHorizontal: 30,
     backgroundColor: "#f2f2f2",
@@ -300,8 +345,8 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   cardContainer: {
-    width: 140,
-    height: 175,
+    width: "25%",
+    height: "95%", //175
     left: -10,
     backgroundColor: "#f2f2f2",
     gap: "3%",
@@ -314,9 +359,22 @@ const styles = StyleSheet.create({
   },
   cardDetails: {
     width: "100%",
-    height: "15%",
+    height: "16%",
     backgroundColor: "#C9C9C9",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
     borderRadius: 8,
+  },
+  cardPrice: {
+    fontWeight: "600",
+    color: "black",
+    left: -5,
+  },
+  cardSeller: {
+    fontWeight: "600",
+    color: "blue",
+    left: -5,
   },
   separator: {
     marginVertical: 4,
