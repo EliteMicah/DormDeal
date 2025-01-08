@@ -4,7 +4,7 @@ import { Text, View } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
 
-export default function BookDetailsScreen() {
+export default function ItemDetailsScreen() {
   const bookDetails = {
     title: "Playing with Fire",
     price: "$10",

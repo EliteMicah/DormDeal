@@ -4,6 +4,39 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+const ITEMS_DATA = [
+  { id: "1", price: 10, seller: "MediumLengthName1", image: null },
+  { id: "2", price: 15, seller: "Username2", image: null },
+  { id: "3", price: 20, seller: "LongUsername3456", image: null },
+  { id: "4", price: 25, seller: "User4", image: null },
+  { id: "5", price: 30, seller: "VeryLongUsername5", image: null },
+  { id: "6", price: 35, seller: "Username6", image: null },
+  { id: "7", price: 40, seller: "ShortName7", image: null },
+  { id: "8", price: 45, seller: "User8Long", image: null },
+];
+
+const ItemCard = ({
+  item,
+  onPress,
+}: {
+  item: { id: string; price: number; seller: string; image: string | null };
+  onPress: () => void;
+}) => (
+  <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
+    <View style={styles.cardImage} />
+    <View style={styles.cardDetails}>
+      <Text style={styles.cardPrice}>${item.price}</Text>
+      <Text
+        numberOfLines={1} // Limit text to a single line
+        ellipsizeMode="tail" // Add ... at the end of truncated text
+        style={styles.cardSeller}
+      >
+        {item.seller}
+      </Text>
+    </View>
+  </TouchableOpacity>
+);
+
 export default function shopItemsScreen() {
   const router = useRouter();
   return (
@@ -26,70 +59,25 @@ export default function shopItemsScreen() {
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
-        <View style={styles.separator}></View>
-        <View style={styles.gridContainer}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            horizontal={false}
-          >
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cardContainer}>
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-          </ScrollView>
+        <View style={styles.separator} />
+
+        <View style={styles.heightForGridContainer}>
+          <View style={styles.gridContainer}>
+            <ScrollView
+              contentContainerStyle={styles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+            >
+              {ITEMS_DATA.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  onPress={() =>
+                    router.push("/(tabs)/home/homeScreens/itemDetailsScreen")
+                  }
+                />
+              ))}
+            </ScrollView>
+          </View>
         </View>
       </SafeAreaView>
     </>
@@ -134,21 +122,22 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     opacity: 0.7,
   },
+  heightForGridContainer: {
+    height: "87%",
+  },
   gridContainer: {
-    height: "91%",
-    marginHorizontal: 30,
+    flex: 1,
+    width: "85%",
     backgroundColor: "#f2f2f2",
   },
   scrollContainer: {
-    flexGrow: 1,
     flexDirection: "row",
     flexWrap: "wrap",
-    columnGap: "4%",
-    rowGap: "2%",
-    paddingBottom: 70,
+    justifyContent: "space-between",
+    gap: 15,
   },
   cardContainer: {
-    width: "48%",
+    width: "47%",
     height: 200,
     justifyContent: "flex-start",
     backgroundColor: "#f2f2f2",
@@ -164,22 +153,27 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "15%",
     backgroundColor: "#C9C9C9",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
     borderRadius: 8,
+    position: "relative",
+    paddingHorizontal: 8,
+    justifyContent: "center",
   },
   cardPrice: {
-    fontSize: 16,
+    position: "absolute",
+    left: 8,
     fontWeight: "600",
     color: "black",
-    left: -5,
+    fontSize: 16,
   },
   cardSeller: {
-    fontSize: 16,
+    position: "absolute",
+    right: 8,
     fontWeight: "600",
+    left: "35%",
     color: "blue",
-    left: -5,
+    fontSize: 16,
+    maxWidth: "90%",
+    textAlign: "left",
   },
   separator: {
     marginVertical: 10,

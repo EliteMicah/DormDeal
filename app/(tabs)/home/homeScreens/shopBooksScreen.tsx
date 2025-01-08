@@ -4,8 +4,87 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+// Book data structure
+const BOOKS_DATA = {
+  new: [
+    { id: "new-1", price: 10, seller: "Username1", image: null },
+    { id: "new-2", price: 15, seller: "Username2", image: null },
+    { id: "new-3", price: 12, seller: "Username3", image: null },
+    { id: "new-4", price: 20, seller: "Username4", image: null },
+    { id: "new-5", price: 18, seller: "Username5", image: null },
+  ],
+  used: [
+    { id: "used-1", price: 8, seller: "Username6", image: null },
+    { id: "used-2", price: 6, seller: "Username7", image: null },
+    { id: "used-3", price: 7, seller: "Username8", image: null },
+    { id: "used-4", price: 5, seller: "Username9", image: null },
+    { id: "used-5", price: 9, seller: "Username10", image: null },
+  ],
+  noted: [
+    { id: "noted-1", price: 5, seller: "Username11", image: null },
+    { id: "noted-2", price: 4, seller: "Username12", image: null },
+    { id: "noted-3", price: 6, seller: "Username13", image: null },
+    { id: "noted-4", price: 3, seller: "Username14", image: null },
+    { id: "noted-5", price: 7, seller: "Username15", image: null },
+  ],
+};
+
+const BookSection = ({
+  title,
+  books,
+  router,
+}: {
+  title: string;
+  books: Array<{
+    id: string;
+    price: number;
+    seller: string;
+    image: string | null;
+  }>;
+  router: any;
+}) => (
+  <>
+    <View style={styles.conditionTextContainer}>
+      <Text style={styles.conditionText}>{title}</Text>
+      <TouchableOpacity style={styles.seeAllTextContainer}>
+        <Text style={styles.seeAllText}>See All</Text>
+      </TouchableOpacity>
+    </View>
+    <View style={styles.conditionContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {books.map((book) => (
+          <TouchableOpacity
+            key={book.id}
+            style={styles.cardContainer}
+            onPress={() =>
+              router.push("/(tabs)/home/homeScreens/bookDetailsScreen")
+            }
+          >
+            <View style={styles.cardImage} />
+            <View style={styles.cardDetails}>
+              <Text style={styles.cardPrice}>${book.price}</Text>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={styles.cardSeller}
+              >
+                {book.seller}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  </>
+);
+
 export default function shopBooksScreen() {
   const router = useRouter();
+
   return (
     <>
       <Stack.Screen
@@ -27,235 +106,11 @@ export default function shopBooksScreen() {
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
-        <View style={styles.separator}></View>
+        <View style={styles.separator} />
 
-        {/* New Books Section */}
-        <View style={styles.conditionTextContainer}>
-          <Text style={styles.conditionText}>New</Text>
-          <TouchableOpacity style={styles.seeAllTextContainer}>
-            <Text style={styles.seeAllText}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.conditionContainer}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-          >
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-
-        {/* Used Books Section */}
-        <View style={styles.conditionTextContainer}>
-          <Text style={styles.conditionText}>Used</Text>
-          <TouchableOpacity style={styles.seeAllTextContainer}>
-            <Text style={styles.seeAllText}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.conditionContainer}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-          >
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-
-        {/* Noted Books Section */}
-        <View style={styles.conditionTextContainer}>
-          <Text style={styles.conditionText}>Noted</Text>
-          <TouchableOpacity style={styles.seeAllTextContainer}>
-            <Text style={styles.seeAllText}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.conditionContainer}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-          >
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cardContainer}
-              onPress={() => {
-                router.push("/(tabs)/home/homeScreens/bookDetailsScreen");
-              }}
-            >
-              <View style={styles.cardImage}></View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardPrice}>$10</Text>
-                <Text style={styles.cardSeller}>Username</Text>
-              </View>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+        <BookSection title="New" books={BOOKS_DATA.new} router={router} />
+        <BookSection title="Used" books={BOOKS_DATA.used} router={router} />
+        <BookSection title="Noted" books={BOOKS_DATA.noted} router={router} />
       </SafeAreaView>
     </>
   );
@@ -340,16 +195,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
   },
   scrollContainer: {
-    paddingHorizontal: 10,
     flexDirection: "row",
     gap: 15,
   },
   cardContainer: {
-    width: "25%",
-    height: "95%", //175
-    left: -10,
+    width: 130,
+    height: 170,
     backgroundColor: "#f2f2f2",
-    gap: "3%",
+    gap: 5,
   },
   cardImage: {
     width: "100%",
@@ -369,12 +222,12 @@ const styles = StyleSheet.create({
   cardPrice: {
     fontWeight: "600",
     color: "black",
-    left: -5,
   },
   cardSeller: {
+    flexShrink: 1,
+    maxWidth: "65%",
     fontWeight: "600",
     color: "blue",
-    left: -5,
   },
   separator: {
     marginVertical: 4,
