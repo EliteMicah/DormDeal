@@ -6,18 +6,12 @@ import { useRouter, Stack } from "expo-router";
 
 export default function ItemDetailsScreen() {
   const bookDetails = {
-    title: "Playing with Fire",
-    price: "$10",
+    title: "SkateBoard",
+    price: "$50",
     condition: "New",
     postedTime: "one day ago",
     institution: "Biola University",
-    class: "HIST 100",
-    professor: "Dr. John Williams",
-    isbn: "#0123456789123",
-    edition: "13th",
     paymentTypes: ["In-App", "Cash", "Venmo", "Zelle"],
-    amazonPrice: "$19.99",
-    negotiable: false,
   };
 
   const DetailRow = ({
@@ -77,7 +71,7 @@ export default function ItemDetailsScreen() {
           <View style={styles.offerButtons}>
             <TouchableOpacity style={styles.offerButton}>
               <Text style={styles.offerButtonText}>
-                Place an offer for $10?
+                Place an offer for $50?
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -104,12 +98,7 @@ export default function ItemDetailsScreen() {
         {/* Details Section */}
         <View style={styles.detailsSection}>
           <Text style={styles.sectionTitle}>Details</Text>
-          <DetailRow label="Class" value={bookDetails.class} />
-          <DetailRow label="Professor" value={bookDetails.professor} />
-          <DetailRow label="ISBN" value={bookDetails.isbn} />
-          <DetailRow label="Edition" value={bookDetails.edition} />
           <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
-          <DetailRow label="Amazon's Price" value={bookDetails.amazonPrice} />
         </View>
       </SafeAreaView>
     </>
