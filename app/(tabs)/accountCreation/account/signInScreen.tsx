@@ -1,107 +1,162 @@
-import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
 import { Feather, AntDesign } from "@expo/vector-icons";
-import { useState } from "react";
+import { supabase } from "../../../../lib/supabase";
 
 export default function SignInScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Function to check if all fields are filled
   const areAllFieldsFilled = () => {
     return email.trim() !== "" && password.trim() !== "";
   };
 
-  return (
-    <SafeAreaView style={styles.mainContainer}>
-      <Text style={styles.title}>Sign In</Text>
-      <Text style={styles.subtitle}>Enter your Email and Password</Text>
-      <View style={styles.separator}></View>
+  async function signInWithEmail() {
+    if (!areAllFieldsFilled()) return;
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <View style={styles.passwordContainer}>
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        Alert.alert("Error", error.message);
+        return;
+      }
+
+      if (data.session) {
+        // Successfully signed in
+        router.replace("/(tabs)/home");
+      }
+    } catch (error) {
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function signInWithGoogle() {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+
+      if (error) throw error;
+      // Successful OAuth sign-in will automatically redirect
+    } catch (error) {
+      Alert.alert("Error", "An error occurred during Google sign in");
+    }
+  }
+
+  async function signInWithApple() {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
+      });
+
+      if (error) throw error;
+      // Successful OAuth sign-in will automatically redirect
+    } catch (error) {
+      Alert.alert("Error", "An error occurred during Apple sign in");
+    }
+  }
+
+  return (
+    <>
+      <SafeAreaView style={styles.mainContainer}>
+        <Text style={styles.title}>Sign In</Text>
+        <Text style={styles.subtitle}>Enter your Email and Password</Text>
+        <View style={styles.separator}></View>
+
+        <View style={styles.inputContainer}>
           <TextInput
-            style={styles.passwordInput}
-            placeholder="Password"
+            style={styles.input}
+            placeholder="Email"
             placeholderTextColor="#999"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
           />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Feather
-              name={showPassword ? "eye" : "eye-off"}
-              size={20}
-              color="#999"
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Password"
+              placeholderTextColor="#999"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
             />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Feather
+                name={showPassword ? "eye" : "eye-off"}
+                size={20}
+                color="#999"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.signUpButton,
+            (!areAllFieldsFilled() || loading) && { opacity: 0.5 },
+          ]}
+          disabled={!areAllFieldsFilled() || loading}
+          onPress={signInWithEmail}
+        >
+          <Text style={styles.signUpButtonText}>
+            {loading ? "SIGNING IN..." : "LOGIN"}
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>Don't have an account? </Text>
+          <TouchableOpacity
+            onPress={() =>
+              router.replace("/(tabs)/accountCreation/account/signUpScreen")
+            }
+          >
+            <Text style={styles.loginLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <TouchableOpacity
-        style={[styles.signUpButton, !areAllFieldsFilled() && { opacity: 0.5 }]}
-        disabled={!areAllFieldsFilled()}
-        onPress={() => {
-          if (!areAllFieldsFilled()) {
-            return;
-          }
-          // Add your login logic here
-          router.push("/(tabs)/home");
-        }}
-      >
-        <Text style={styles.signUpButtonText}>LOGIN</Text>
-      </TouchableOpacity>
+        <View style={styles.dividerContainer}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>Or Sign In with</Text>
+          <View style={styles.dividerLine} />
+        </View>
 
-      <View style={styles.loginContainer}>
-        <Text style={styles.loginText}>Don't have an account? </Text>
-        <TouchableOpacity
-          onPress={() =>
-            router.replace("/(tabs)/accountCreation/account/signUpScreen")
-          }
-        >
-          <Text style={styles.loginLink}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.dividerContainer}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>Or Sign In with</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-      <View style={styles.socialButtonsContainer}>
-        <TouchableOpacity style={styles.socialButton}>
-          <AntDesign name="apple1" size={20} color="black" />
-          <Text style={styles.socialButtonText}>Apple</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <AntDesign name="google" size={20} color="#DB4437" />
-          <Text style={styles.socialButtonText}>Google</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.skipButton}>
-        <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
-          <Text style={styles.skipText}>Skip to Home Screen</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        <View style={styles.socialButtonsContainer}>
+          <TouchableOpacity
+            style={styles.socialButton}
+            onPress={signInWithApple}
+          >
+            <AntDesign name="apple1" size={20} color="black" />
+            <Text style={styles.socialButtonText}>Apple</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.socialButton}
+            onPress={signInWithGoogle}
+          >
+            <AntDesign name="google" size={20} color="#DB4437" />
+            <Text style={styles.socialButtonText}>Google</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
 

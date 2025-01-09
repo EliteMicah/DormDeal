@@ -146,13 +146,13 @@ const styles = StyleSheet.create({
   cardImage: {
     width: "100%",
     height: "80%",
-    backgroundColor: "#C9C9C9",
+    backgroundColor: "#ddd",
     borderRadius: 8,
   },
   cardDetails: {
     width: "100%",
     height: "15%",
-    backgroundColor: "#C9C9C9",
+    backgroundColor: "#ddd",
     borderRadius: 8,
     position: "relative",
     paddingHorizontal: 8,
