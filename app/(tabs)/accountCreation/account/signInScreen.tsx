@@ -23,6 +23,10 @@ export default function SignInScreen() {
 
     setLoading(true);
     try {
+      // First, ensure we're starting with a clean slate
+      await supabase.auth.signOut();
+
+      // Now attempt sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -34,7 +38,10 @@ export default function SignInScreen() {
       }
 
       if (data.session) {
-        // Successfully signed in
+        // Clear any local state if needed
+        // If you have any global state management, reset it here
+
+        // Navigate to home screen
         router.replace("/(tabs)/home");
       }
     } catch (error) {

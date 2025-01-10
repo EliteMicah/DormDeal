@@ -20,38 +20,89 @@ export default function ProfileScreen() {
     // Add more items as needed
   ];
 
+  // Include both effects
   useEffect(() => {
     fetchUserProfile();
   }, []);
 
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        setUsername("");
+        setUniversity("Biola University");
+      } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        fetchUserProfile();
+      }
+    });
+
+    // Initial fetch
+    fetchUserProfile();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const fetchUserProfile = async () => {
     try {
-      // Get the current user's session
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (userError || !user) {
         router.replace("/(tabs)/accountCreation/account/signInScreen");
         return;
       }
 
-      // Get the user's metadata which includes username
+      // First set username from user metadata
       if (user.user_metadata?.username) {
         setUsername(user.user_metadata.username);
+      } else {
+        // If no username in metadata, try to get it from profiles table
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profileData?.username) {
+          setUsername(profileData.username);
+        }
       }
 
-      // Fetch user data from profiles table
-      const { data: profileData, error } = await supabase
+      // Fetch university data
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("university")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching profile:", error.message);
-      } else if (profileData?.university) {
+      if (profileError) {
+        console.error("Error fetching profile:", profileError.message);
+        return;
+      }
+
+      if (profileData) {
         setUniversity(profileData.university);
+      } else {
+        const { error: upsertError } = await supabase.from("profiles").upsert(
+          {
+            id: user.id,
+            username: user.user_metadata?.username,
+            university: "Biola University",
+          },
+          {
+            onConflict: "id",
+            ignoreDuplicates: false,
+          }
+        );
+
+        if (upsertError) {
+          console.error("Error upserting profile:", upsertError.message);
+        }
       }
     } catch (error) {
       console.error("Error:", (error as Error).message);
@@ -64,7 +115,16 @@ export default function ProfileScreen() {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+
+      // Clear local state
+      setUsername("");
+      setUniversity("Biola University");
+
+      // Force reload the page to clear any cached state
       router.replace("/(tabs)/accountCreation/account/signInScreen");
+
+      // Optional: You might want to clear any persisted storage
+      // await AsyncStorage.clear(); // If you're using AsyncStorage
     } catch (error) {
       console.error("Error signing out:", (error as Error).message);
     }
