@@ -59,7 +59,7 @@ export default function shopItemsScreen() {
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <Text style={styles.searchText}>Search</Text>
         </TouchableOpacity>
-        <View style={styles.separator} />
+        <View style={styles.transparentSeparator} />
 
         <View style={styles.heightForGridContainer}>
           <View style={styles.gridContainer}>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   heightForGridContainer: {
-    height: "87%",
+    height: "89%",
   },
   gridContainer: {
     flex: 1,
@@ -175,7 +175,11 @@ const styles = StyleSheet.create({
     maxWidth: "90%",
     textAlign: "left",
   },
-  separator: {
-    marginVertical: 10,
+  transparentSeparator: {
+    position: "fixed",
+    width: "100%",
+    height: "3%",
+    opacity: 0.5,
+    backgroundColor: "#f2f2f2",
   },
 });

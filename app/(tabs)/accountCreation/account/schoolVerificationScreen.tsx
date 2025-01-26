@@ -151,12 +151,6 @@ export default function SchoolVerificationScreen() {
             <Text style={styles.verifyButtonText}>REGISTER EMAIL</Text>
           )}
         </TouchableOpacity>
-
-        {/* <View style={styles.skipButton}>
-          <TouchableOpacity onPress={() => router.replace("/(tabs)/home")}>
-            <Text style={styles.skipText}>Skip Verification</Text>
-          </TouchableOpacity>
-        </View> */}
       </SafeAreaView>
     </>
   );

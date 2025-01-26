@@ -40,16 +40,16 @@ export default function HomeScreen() {
           onPress={() => router.push("/home/homeScreens/shopBooksScreen")}
         >
           <View style={styles.shopCards}>
-            <Text style={styles.shopCardText}>Textbooks</Text>
             <Text style={styles.emojiIcon}>📚</Text>
+            <Text style={styles.shopCardText}>Textbooks</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push("/home/homeScreens/shopItemsScreen")}
         >
           <View style={styles.shopCards}>
-            <Text style={styles.shopCardText}>Items</Text>
             <Text style={styles.emojiIcon}>🎁</Text>
+            <Text style={styles.shopCardText}>Items</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   emojiIcon: {
-    marginTop: "10%",
+    marginTop: "15%",
     fontSize: 70,
   },
   shopCards: {
@@ -171,10 +171,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   shopCardText: {
-    marginTop: "10%",
-    color: "gray",
+    marginTop: "5%",
+    color: "#024B5C",
     fontWeight: "600",
-    opacity: 0.7,
+    opacity: 0.5,
     fontSize: 15,
   },
   resourcesContainer: {
@@ -193,8 +193,8 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     shadowColor: "#aaa",
     shadowOffset: {
-      width: 5,
-      height: 5,
+      width: 3,
+      height: 3,
     },
     shadowOpacity: 0.75,
     alignItems: "center",
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   resourcesText: {
     fontSize: 25,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: "#F2F7FF",
   },
   separator: {
     marginVertical: "5%",

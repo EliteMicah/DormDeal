@@ -18,8 +18,8 @@ export default function createScreen() {
           }
         >
           <View style={styles.sellCards}>
-            <Text style={styles.cardText}>Textbooks</Text>
             <Text style={styles.emojiIcon}>📚</Text>
+            <Text style={styles.cardText}>Textbooks</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -28,8 +28,8 @@ export default function createScreen() {
           }
         >
           <View style={styles.sellCards}>
-            <Text style={styles.cardText}>Items</Text>
             <Text style={styles.emojiIcon}>🎁</Text>
+            <Text style={styles.cardText}>Items</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -92,9 +92,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cardText: {
-    color: "gray",
+    marginTop: "5%",
+    color: "#024B5C",
     fontWeight: "600",
-    opacity: 0.7,
+    opacity: 0.5,
     fontSize: 15,
   },
   emojiIcon: {

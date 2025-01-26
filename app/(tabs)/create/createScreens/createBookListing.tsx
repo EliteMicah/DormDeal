@@ -1,4 +1,12 @@
-import { StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  Modal,
+  FlatList,
+  Touchable,
+} from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
@@ -9,11 +17,23 @@ import { useState } from "react";
 export default function createBookListing() {
   const router = useRouter();
   const [image, setImage] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [isbn, setIsbn] = useState("");
+  const [condition, setCondition] = useState("Any");
+  const [price, setPrice] = useState("");
+  const [paymentType, setPaymentType] = useState("Any");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Modal visibility states
+  const [isConditionModalVisible, setConditionModalVisible] = useState(false);
+  const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
+
+  // Options
+  const conditionOptions = ["Any", "New", "Used", "Noted"];
+  const paymentTypeOptions = ["Any", "In-App", "Venmo", "Zelle"];
 
   const pickImage = async () => {
-    // Request permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (status !== "granted") {
       alert("Sorry, we need camera roll permissions to make this work!");
       return;
@@ -32,6 +52,63 @@ export default function createBookListing() {
     }
   };
 
+  // Render picker modal
+  const renderPickerModal = (
+    options: string[],
+    isVisible: boolean,
+    setModalVisible: (visible: boolean) => void,
+    currentValue: string,
+    setValue: (value: string) => void
+  ) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Select Option</Text>
+          <FlatList
+            data={options}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.modalOption,
+                  item === currentValue && styles.selectedOption,
+                ]}
+                onPress={() => {
+                  setValue(item);
+                  setModalVisible(false);
+                }}
+              >
+                <Text style={styles.modalOptionText}>{item}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item}
+          />
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const handleSubmit = async () => {
+    console.log("Submitting form...");
+    if (!title || !isbn || !condition || !price || !paymentType || !image) {
+      console.log("Form error: Missing fields");
+      setFormError("Please fill in all the fields along with a picture!");
+      return;
+    } else {
+      console.log("User filled all the fields!");
+    }
+  };
+
   return (
     <>
       <Stack.Screen
@@ -39,7 +116,7 @@ export default function createBookListing() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerBackTitle: "‎",
           headerTintColor: "black",
         }}
       />
@@ -58,18 +135,30 @@ export default function createBookListing() {
             <TextInput
               style={styles.userTextInput}
               placeholder="Name of the Book"
-            ></TextInput>
+              value={title}
+              onChangeText={setTitle}
+            />
           </View>
           <View style={styles.singleIdentifierContainer}>
             <Text style={styles.identifierText}>ISBN</Text>
-            <TextInput style={styles.userTextInput} placeholder="#"></TextInput>
+            <TextInput
+              style={styles.userTextInput}
+              placeholder="#"
+              keyboardType="number-pad"
+              returnKeyType="done"
+              value={isbn}
+              onChangeText={setIsbn}
+              maxLength={13}
+            />
           </View>
           <View style={styles.singleIdentifierContainer}>
             <Text style={styles.identifierText}>Condition</Text>
-            <TextInput
+            <TouchableOpacity
               style={styles.userTextInput}
-              placeholder="New, Used, Noted"
-            ></TextInput>
+              onPress={() => setConditionModalVisible(true)}
+            >
+              <Text style={styles.dropdownButtonText}>{condition}</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.singleIdentifierContainer}>
             <Text style={styles.identifierText}>Price</Text>
@@ -77,31 +166,46 @@ export default function createBookListing() {
               style={styles.userTextInput}
               placeholder="$20"
               keyboardType="number-pad"
+              value={price}
+              onChangeText={setPrice}
               returnKeyType="done"
-            ></TextInput>
+            />
           </View>
           <View style={styles.singleIdentifierContainer}>
             <Text style={styles.identifierText}>Payment Type</Text>
-            <TextInput
+            <TouchableOpacity
               style={styles.userTextInput}
-              placeholder="All, In-App, Venmo, Zelle"
-            ></TextInput>
-          </View>
-        </View>
-        <View style={styles.createButtonContainer}>
-          <View style={styles.createButton}>
-            <TouchableOpacity>
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: "#FFFFFF", fontWeight: "800" },
-                ]}
-              >
-                Create Listing!
-              </Text>
+              onPress={() => setPaymentModalVisible(true)}
+            >
+              <Text style={styles.dropdownButtonText}>{paymentType}</Text>
             </TouchableOpacity>
           </View>
         </View>
+        <View style={styles.createButtonContainer}>
+          <TouchableOpacity style={styles.createButton} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Create Listing!</Text>
+          </TouchableOpacity>
+        </View>
+
+        {formError && <Text style={styles.errorText}>{formError}</Text>}
+
+        {/* Condition Modal */}
+        {renderPickerModal(
+          conditionOptions,
+          isConditionModalVisible,
+          setConditionModalVisible,
+          condition,
+          setCondition
+        )}
+
+        {/* Payment Type Modal */}
+        {renderPickerModal(
+          paymentTypeOptions,
+          isPaymentModalVisible,
+          setPaymentModalVisible,
+          paymentType,
+          setPaymentType
+        )}
       </SafeAreaView>
     </>
   );
@@ -175,6 +279,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
+    justifyContent: "center",
   },
   createButtonContainer: {
     marginTop: "2%",
@@ -193,8 +298,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#38B6FF",
     shadowColor: "#aaa",
     shadowOffset: {
-      width: 5,
-      height: 5,
+      width: 3,
+      height: 3,
     },
     shadowOpacity: 0.75,
     justifyContent: "center",
@@ -202,13 +307,63 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 20,
-    fontWeight: "600",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
+    color: "#F2F7FF",
+    fontWeight: "800",
     marginBottom: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: "50%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  modalOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  selectedOption: {
+    backgroundColor: "#f0f0f0",
+  },
+  modalOptionText: {
+    fontSize: 16,
+  },
+  cancelButton: {
+    marginTop: 15,
+    padding: 15,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "red",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  dropdownButton: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    width: "100%",
+  },
+  dropdownButtonText: {
+    fontSize: 14,
+    color: "black",
+    opacity: 0.55,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
   },
 });
