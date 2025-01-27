@@ -5,7 +5,6 @@ import {
   TextInput,
   Modal,
   FlatList,
-  Touchable,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,23 +12,25 @@ import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
-export default function createBookListing() {
+export default function CreateBookListing() {
   const router = useRouter();
   const [image, setImage] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [isbn, setIsbn] = useState("");
-  const [condition, setCondition] = useState("Any");
+  const [condition, setCondition] = useState("New");
   const [price, setPrice] = useState("");
   const [paymentType, setPaymentType] = useState("Any");
   const [formError, setFormError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Modal visibility states
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
 
   // Options
-  const conditionOptions = ["Any", "New", "Used", "Noted"];
+  const conditionOptions = ["New", "Used", "Noted"];
   const paymentTypeOptions = ["Any", "In-App", "Venmo", "Zelle"];
 
   const pickImage = async () => {
@@ -61,7 +62,7 @@ export default function createBookListing() {
     setValue: (value: string) => void
   ) => (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       visible={isVisible}
       onRequestClose={() => setModalVisible(false)}
@@ -182,11 +183,18 @@ export default function createBookListing() {
           </View>
         </View>
         <View style={styles.createButtonContainer}>
-          <TouchableOpacity style={styles.createButton} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Create Listing!</Text>
+          <TouchableOpacity
+            style={styles.createButton}
+            onPress={handleSubmit}
+            disabled={isUploading}
+          >
+            <Text style={styles.buttonText}>
+              {isUploading ? "Creating Listing..." : "Create Listing!"}
+            </Text>
           </TouchableOpacity>
         </View>
 
+        {/* Error Message Display */}
         {formError && <Text style={styles.errorText}>{formError}</Text>}
 
         {/* Condition Modal */}
@@ -365,5 +373,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 14,
+    marginTop: 10,
   },
 });

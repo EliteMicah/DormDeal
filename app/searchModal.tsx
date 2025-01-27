@@ -36,7 +36,7 @@ export default function ModalScreen() {
     setValue: (value: string) => void
   ) => (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       visible={isVisible}
       onRequestClose={() => setModalVisible(false)}

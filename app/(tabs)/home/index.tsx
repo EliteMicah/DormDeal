@@ -11,49 +11,55 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.maincontainer}>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Rebooked</Text>
+      <View style={{ height: "9%", backgroundColor: "#f2f2f2" }}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Rebooked</Text>
+        </View>
       </View>
-      <View style={styles.mainCardContainer}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push("/(tabs)/home/homeScreens/eventCardScreen")
-          }
-        >
-          <Image
-            source={require("../../../assets/images/image2.png")}
-            style={styles.mainCardImage}
-          />
-        </TouchableOpacity>
+      <View style={{ height: "31%", backgroundColor: "#f2f2f2" }}>
+        <View style={styles.mainCardContainer}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push("/(tabs)/home/homeScreens/eventCardScreen")
+            }
+          >
+            <Image
+              source={require("../../../assets/images/image2.png")}
+              style={styles.mainCardImage}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.cardTitleDescContainer}>
-        <Text style={styles.cardTitle}>{cardTitleText}</Text>
-        <Text style={styles.cardDescription}>{cardDescriptionText}</Text>
+      <View style={{ height: "20%", backgroundColor: "#f2f2f2" }}>
+        <View style={styles.cardTitleDescContainer}>
+          <Text style={styles.cardTitle}>{cardTitleText}</Text>
+          <Text style={styles.cardDescription}>{cardDescriptionText}</Text>
+        </View>
       </View>
-      <View style={styles.shopTitleContainer}>
-        <Text style={styles.shopTitle}>Shop</Text>
+      <View style={{ height: "30%", backgroundColor: "#f2f2f2" }}>
+        <View style={styles.shopTitleContainer}>
+          <Text style={styles.shopTitle}>Shop</Text>
+        </View>
+        <View style={styles.shopCardsContainer}>
+          <TouchableOpacity
+            onPress={() => router.push("/home/homeScreens/shopBooksScreen")}
+          >
+            <View style={styles.shopCards}>
+              <Text style={styles.emojiIcon}>📚</Text>
+              <Text style={styles.shopCardText}>Textbooks</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push("/home/homeScreens/shopItemsScreen")}
+          >
+            <View style={styles.shopCards}>
+              <Text style={styles.emojiIcon}>🎁</Text>
+              <Text style={styles.shopCardText}>Items</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.shopCardsContainer}>
-        <TouchableOpacity
-          onPress={() => router.push("/home/homeScreens/shopBooksScreen")}
-        >
-          <View style={styles.shopCards}>
-            <Text style={styles.emojiIcon}>📚</Text>
-            <Text style={styles.shopCardText}>Textbooks</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push("/home/homeScreens/shopItemsScreen")}
-        >
-          <View style={styles.shopCards}>
-            <Text style={styles.emojiIcon}>🎁</Text>
-            <Text style={styles.shopCardText}>Items</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.separator}></View>
       <View style={styles.resourcesContainer}>
         <TouchableOpacity
           onPress={() => router.push("/home/homeScreens/resourcesScreen")}
@@ -79,7 +85,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     backgroundColor: "#f2f2f2",
-    marginBottom: 20,
+    marginBottom: "5%",
   },
   title: {
     fontSize: 35,
@@ -98,7 +104,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 30,
     overflow: "hidden",
-    marginBottom: 10,
   },
   mainCardImage: {
     height: "100%",
@@ -118,13 +123,12 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.5,
-    marginBottom: 5,
+    marginBottom: "1%",
   },
   cardDescription: {
     fontWeight: "600",
     fontSize: 12,
     marginHorizontal: 10,
-    marginBottom: 25,
   },
   shopTitleContainer: {
     backgroundColor: "#f2f2f2",
@@ -140,7 +144,7 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.5,
-    marginBottom: 10,
+    marginBottom: "3%",
   },
   shopCardsContainer: {
     flexDirection: "row",
@@ -178,9 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   resourcesContainer: {
-    marginHorizontal: 30,
-    width: "85%",
-    height: 75,
+    height: "20%",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f2f2f2",
@@ -198,13 +200,11 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.75,
     alignItems: "center",
+    bottom: 10,
   },
   resourcesText: {
     fontSize: 25,
     fontWeight: "800",
     color: "#F2F7FF",
-  },
-  separator: {
-    marginVertical: "5%",
   },
 });
