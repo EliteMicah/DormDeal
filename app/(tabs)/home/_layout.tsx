@@ -13,6 +13,8 @@ export default function HomeLayout() {
         headerBackTitle: "‎", // Empty whitespace character for back button [U+200E]
         headerTintColor: "black",
       }}
-    ></Stack>
+    >
+      <Stack.Screen name="index" options={{ title: "" }} />
+    </Stack>
   );
 }

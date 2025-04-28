@@ -48,7 +48,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <NavigationContainer>
+    <NavigationContainer independent={true}>
       <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

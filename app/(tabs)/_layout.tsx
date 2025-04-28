@@ -69,7 +69,7 @@ export default function TabLayout() {
         name="index"
         options={{
           href: null,
-          tabBarLabel: "",
+          tabBarLabel: "hello",
         }}
         redirect={true}
       />

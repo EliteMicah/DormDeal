@@ -30,6 +30,7 @@ export default function AccountCreationLayout() {
         name="index"
         options={{
           headerShown: false,
+          title: "",
         }}
       />
     </Stack>
