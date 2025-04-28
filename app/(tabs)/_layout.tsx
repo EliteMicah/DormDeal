@@ -19,23 +19,28 @@ function TabBarIcon({
       style={[
         {
           padding: 8,
-          borderRadius: 50,
-          height: 55,
+          height: 68,
           width: 55,
           alignItems: "center",
           justifyContent: "center",
           marginTop: 40,
           marginBottom: 10,
         },
-        focused && {
-          backgroundColor: "#38B6FF",
-        },
+        // focused && {
+        //   borderTopWidth: 2,
+        //   borderColor: "black",
+        // },
       ]}
     >
       <FontAwesome
         size={28}
-        color={focused ? "#eee" : color}
+        color={focused ? "#38B6FF" : color}
         name={name}
+        style={[
+          focused && {
+            transform: [{ scale: 1.2 }],
+          },
+        ]}
         {...otherProps}
       />
     </View>
