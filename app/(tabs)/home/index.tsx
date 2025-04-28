@@ -14,6 +14,7 @@ export default function HomeScreen() {
       <View style={{ height: "9%", backgroundColor: "#f2f2f2" }}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Rebooked</Text>
+          <Text className=""></Text>
         </View>
       </View>
       <View style={{ height: "31%", backgroundColor: "#f2f2f2" }}>
