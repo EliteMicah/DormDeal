@@ -33,7 +33,7 @@ export default function createItemListing() {
   };
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -106,7 +106,7 @@ export default function createItemListing() {
           </View>
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

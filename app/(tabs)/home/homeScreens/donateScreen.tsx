@@ -7,7 +7,7 @@ export default function donateScreen() {
   const router = useRouter();
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -37,7 +37,7 @@ export default function donateScreen() {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

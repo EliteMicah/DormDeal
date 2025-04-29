@@ -143,56 +143,51 @@ export default function ProfileScreen() {
   }
 
   return (
-    <>
-      <SafeAreaView style={styles.mainContainer}>
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
-          <View style={styles.profileImage}>
-            <Ionicons name="person" size={75} style={styles.imageIcon} />
+    <SafeAreaView style={styles.mainContainer}>
+      {/* Profile Section */}
+      <View style={styles.profileSection}>
+        <View style={styles.profileImage}>
+          <Ionicons name="person" size={75} style={styles.imageIcon} />
+        </View>
+
+        <View style={styles.userInfo}>
+          <Text style={styles.username}>{username || "Username"}</Text>
+          <View style={styles.locationContainer}>
+            <MaterialIcons name="location-on" size={16} color="gray" />
+            <Text style={styles.location}>{university}</Text>
           </View>
+        </View>
 
-          <View style={styles.userInfo}>
-            <Text style={styles.username}>{username || "Username"}</Text>
-            <View style={styles.locationContainer}>
-              <MaterialIcons name="location-on" size={16} color="gray" />
-              <Text style={styles.location}>{university}</Text>
-            </View>
-          </View>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.signOutButton}
-            onPress={handleSignOut}
-          >
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editProfileButton}
+          onPress={handleEditProfile}
+        >
+          <Text style={styles.editProfileText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
 
-          <TouchableOpacity
-            style={styles.editProfileButton}
-            onPress={handleEditProfile}
-          >
-            <Text style={styles.editProfileText}>Edit Profile</Text>
+      {/* Selling Section */}
+      <View style={styles.sellingSection}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Selling</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAll}>See all</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Selling Section */}
-        <View style={styles.sellingSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Selling</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>See all</Text>
+        <View style={styles.itemGrid}>
+          {sellingItems.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.itemCard}>
+              {/* Add item content here */}
             </TouchableOpacity>
-          </View>
-
-          <View style={styles.itemGrid}>
-            {sellingItems.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.itemCard}>
-                {/* Add item content here */}
-              </TouchableOpacity>
-            ))}
-          </View>
+          ))}
         </View>
-      </SafeAreaView>
-    </>
+      </View>
+    </SafeAreaView>
   );
 }
 

@@ -43,7 +43,7 @@ const BookSection = ({
   }>;
   router: any;
 }) => (
-  <>
+  <div>
     <View style={styles.conditionTextContainer}>
       <Text style={styles.conditionText}>{title}</Text>
       <TouchableOpacity style={styles.seeAllTextContainer}>
@@ -79,14 +79,14 @@ const BookSection = ({
         ))}
       </ScrollView>
     </View>
-  </>
+  </div>
 );
 
 export default function shopBooksScreen() {
   const router = useRouter();
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -112,7 +112,7 @@ export default function shopBooksScreen() {
         <BookSection title="Used" books={BOOKS_DATA.used} router={router} />
         <BookSection title="Noted" books={BOOKS_DATA.noted} router={router} />
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

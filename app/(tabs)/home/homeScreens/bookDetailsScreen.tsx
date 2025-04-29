@@ -36,7 +36,7 @@ export default function BookDetailsScreen() {
   );
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -112,7 +112,7 @@ export default function BookDetailsScreen() {
           <DetailRow label="Amazon's Price" value={bookDetails.amazonPrice} />
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

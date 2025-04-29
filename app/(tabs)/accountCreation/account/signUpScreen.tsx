@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
-import { Feather, AntDesign } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { supabase } from "../../../../lib/supabase";
 
 AppState.addEventListener("change", (state) => {
@@ -40,7 +40,6 @@ export default function SignUpScreen() {
       email.trim() !== "" &&
       password.trim() !== "" &&
       confirmPassword.trim() !== "" &&
-      !email.toLowerCase().endsWith(".edu") &&
       password === confirmPassword
     );
   };
@@ -69,229 +68,209 @@ export default function SignUpScreen() {
     }
   }
 
+  async function isSupportedSchool(email: string): Promise<boolean> {
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (!domain) return false;
+
+    const { data, error } = await supabase
+      .from("supported_schools")
+      .select("id")
+      .eq("domain", domain)
+      .single();
+
+    if (error) {
+      console.error("Error checking supported school:", error.message);
+      return false;
+    }
+
+    return !!data; // Converts to boolean
+  }
+
   async function signUpWithEmail() {
     if (!areAllFieldsFilled()) return;
+    console.log("Starting sign-up process - all fields validated");
 
     setLoading(true);
     try {
-      // Check username existence
+      // Check if email domain is from a supported school
+      console.log("Checking if school is supported:", email);
+      const validSchool = await isSupportedSchool(email);
+      console.log("School validation result:", validSchool);
+
+      if (!validSchool) {
+        console.log("School not supported, showing alert");
+        Alert.alert(
+          "Unsupported School",
+          "Your school is not yet supported. Please reach out to @RebookedOfficial on Instagram to have your school added!"
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Check if username exists
+      console.log("Checking if username exists:", username);
       const userExistsCheck = await checkIfUserExists(username);
+      console.log("Username check result:", userExistsCheck);
 
       if (userExistsCheck.exists) {
+        console.log("Username already exists, showing alert");
         Alert.alert("Sign Up Failed", userExistsCheck.message);
+        setLoading(false);
         return;
       }
 
-      // Sign up without email verification
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            username: username,
+      // Sign up the user with authentication and include the username in the metadata
+      console.log("Attempting to create auth user with email:", email);
+      const { data: authData, error: signUpError } = await supabase.auth.signUp(
+        {
+          email: email,
+          password: password,
+          options: {
+            data: {
+              username: username,
+            },
           },
-          emailRedirectTo: undefined,
-        },
-      });
+        }
+      );
 
       if (signUpError) {
-        if (signUpError.message.includes("User already registered")) {
-          Alert.alert(
-            "Sign Up Failed",
-            "An account with this email already exists"
-          );
-          return;
-        }
+        console.log("Auth signup failed with error:", signUpError.message);
         Alert.alert("Error", signUpError.message);
+        setLoading(false);
         return;
       }
 
-      // On successful signup, proceed to school verification
-      router.replace(
-        "/(tabs)/accountCreation/account/schoolVerificationScreen"
-      );
+      // Success - navigate to the next screen
+      console.log("Sign-up process completed successfully!");
+      router.replace("/(tabs)/accountCreation/account/verifyEmail");
     } catch (error) {
+      console.error("Signup process failed with unexpected error:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
     } finally {
+      console.log("Sign-up process finished, setting loading to false");
       setLoading(false);
     }
   }
 
-  async function signUpWithGoogle() {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      Alert.alert("Error", "An error occurred during Google sign in");
-    }
-  }
-
-  async function signUpWithApple() {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "apple",
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      Alert.alert("Error", "An error occurred during Apple sign in");
-    }
-  }
-
   return (
-    <>
-      <SafeAreaView style={styles.mainContainer}>
-        <Text style={styles.title}>Sign Up</Text>
-        <Text style={styles.subtitle}>Create your account</Text>
+    <SafeAreaView style={styles.mainContainer}>
+      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.subtitle}>Create your account</Text>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            placeholderTextColor="#999"
-            maxLength={20}
-            value={username}
-            onChangeText={(text) => {
-              const noSpaces = text.replace(/\s/g, "");
-              setUsername(noSpaces);
-            }}
-            onKeyPress={({ nativeEvent }) => {
-              if (nativeEvent.key === " ") {
-                return;
-              }
-            }}
-          />
-          <TextInput
-            style={[styles.input, emailError ? { borderColor: "red" } : null]}
-            placeholder="Email"
-            placeholderTextColor="#999"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              if (text.toLowerCase().endsWith(".edu")) {
-                setEmailError("Please do not use a school email address");
-              } else {
-                setEmailError("");
-              }
-            }}
-          />
-          {emailError ? (
-            <Text style={{ color: "red", marginTop: 5, marginLeft: 10 }}>
-              {emailError}
-            </Text>
-          ) : null}
-
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Password"
-              placeholderTextColor="#999"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Feather
-                name={showPassword ? "eye" : "eye-off"}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={[
-                styles.passwordInput,
-                passwordError ? { borderColor: "red" } : null,
-              ]}
-              placeholder="Confirm your password"
-              placeholderTextColor="#999"
-              secureTextEntry={!showConfirmPassword}
-              value={confirmPassword}
-              onChangeText={(text) => {
-                setConfirmPassword(text);
-                if (text !== password) {
-                  setPasswordError("Passwords do not match");
-                } else {
-                  setPasswordError("");
-                }
-              }}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              <Feather
-                name={showConfirmPassword ? "eye" : "eye-off"}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-          {passwordError ? (
-            <Text style={{ color: "red", marginTop: 5, marginLeft: 10 }}>
-              {passwordError}
-            </Text>
-          ) : null}
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.signUpButton,
-            (!areAllFieldsFilled() || loading) && { opacity: 0.5 },
-          ]}
-          disabled={!areAllFieldsFilled() || loading}
-          onPress={signUpWithEmail}
-        >
-          <Text style={styles.signUpButtonText}>
-            {loading ? "SIGNING UP..." : "SIGN UP"}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity
-            onPress={() =>
-              router.replace("/(tabs)/accountCreation/account/signInScreen")
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          placeholderTextColor="#999"
+          maxLength={20}
+          value={username}
+          onChangeText={(text) => {
+            const noSpaces = text.replace(/\s/g, "");
+            setUsername(noSpaces);
+          }}
+          onKeyPress={({ nativeEvent }) => {
+            if (nativeEvent.key === " ") {
+              return;
             }
+          }}
+        />
+        <TextInput
+          style={[styles.input, emailError ? { borderColor: "red" } : null]}
+          placeholder="School Email"
+          placeholderTextColor="#999"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+        {emailError ? (
+          <Text style={{ color: "red", marginTop: 5, marginLeft: 10 }}>
+            {emailError}
+          </Text>
+        ) : null}
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
           >
-            <Text style={styles.loginLink}>Login</Text>
+            <Feather
+              name={showPassword ? "eye" : "eye-off"}
+              size={20}
+              color="#999"
+            />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>Or Sign Up with</Text>
-          <View style={styles.dividerLine} />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={[
+              styles.passwordInput,
+              passwordError ? { borderColor: "red" } : null,
+            ]}
+            placeholder="Confirm your password"
+            placeholderTextColor="#999"
+            secureTextEntry={!showConfirmPassword}
+            value={confirmPassword}
+            onChangeText={(text) => {
+              setConfirmPassword(text);
+              if (text !== password) {
+                setPasswordError("Passwords do not match");
+              } else {
+                setPasswordError("");
+              }
+            }}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <Feather
+              name={showConfirmPassword ? "eye" : "eye-off"}
+              size={20}
+              color="#999"
+            />
+          </TouchableOpacity>
         </View>
+        {passwordError ? (
+          <Text style={{ color: "red", marginTop: 5, marginLeft: 10 }}>
+            {passwordError}
+          </Text>
+        ) : null}
+      </View>
 
-        <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={signUpWithApple}
-          >
-            <AntDesign name="apple1" size={20} color="black" />
-            <Text style={styles.socialButtonText}>Apple</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={signUpWithGoogle}
-          >
-            <AntDesign name="google" size={20} color="#DB4437" />
-            <Text style={styles.socialButtonText}>Google</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </>
+      <TouchableOpacity
+        style={[
+          styles.signUpButton,
+          (!areAllFieldsFilled() || loading) && { opacity: 0.5 },
+        ]}
+        disabled={!areAllFieldsFilled() || loading}
+        onPress={signUpWithEmail}
+      >
+        <Text style={styles.signUpButtonText}>
+          {loading ? "SIGNING UP..." : "SIGN UP"}
+        </Text>
+      </TouchableOpacity>
+
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account? </Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.replace("/(tabs)/accountCreation/account/signInScreen")
+          }
+        >
+          <Text style={styles.loginLink}>Login</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 

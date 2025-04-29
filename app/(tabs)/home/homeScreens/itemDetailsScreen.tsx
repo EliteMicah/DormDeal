@@ -30,7 +30,7 @@ export default function ItemDetailsScreen() {
   );
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -101,7 +101,7 @@ export default function ItemDetailsScreen() {
           <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

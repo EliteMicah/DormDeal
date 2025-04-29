@@ -7,7 +7,7 @@ export default function eventCardScreen() {
   const router = useRouter();
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -23,7 +23,7 @@ export default function eventCardScreen() {
           <Text>Coming Soon!</Text>
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 
