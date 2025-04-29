@@ -40,7 +40,7 @@ const ItemCard = ({
 export default function shopItemsScreen() {
   const router = useRouter();
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -80,7 +80,7 @@ export default function shopItemsScreen() {
           </View>
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

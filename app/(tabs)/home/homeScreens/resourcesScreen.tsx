@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 export default function ResourcesScreen() {
   const router = useRouter();
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -101,7 +101,7 @@ export default function ResourcesScreen() {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 

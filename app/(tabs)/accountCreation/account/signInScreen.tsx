@@ -51,6 +51,8 @@ export default function SignInScreen() {
     }
   }
 
+  {
+    /*
   async function signInWithGoogle() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -64,6 +66,7 @@ export default function SignInScreen() {
     }
   }
 
+  
   async function signInWithApple() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -77,93 +80,91 @@ export default function SignInScreen() {
     }
   }
 
+  */
+  }
+
   return (
-    <>
-      <SafeAreaView style={styles.mainContainer}>
-        <Text style={styles.title}>Sign In</Text>
-        <Text style={styles.subtitle}>Enter your Email and Password</Text>
-        <View style={styles.separator}></View>
+    <SafeAreaView style={styles.mainContainer}>
+      <Text style={styles.title}>Sign In</Text>
+      <Text style={styles.subtitle}>Enter your Email and Password</Text>
+      <View style={styles.separator}></View>
 
-        <View style={styles.inputContainer}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="School Email"
+          placeholderTextColor="#999"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.input}
-            placeholder="Email"
+            style={styles.passwordInput}
+            placeholder="Password"
             placeholderTextColor="#999"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
           />
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Password"
-              placeholderTextColor="#999"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Feather
+              name={showPassword ? "eye" : "eye-off"}
+              size={20}
+              color="#999"
             />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Feather
-                name={showPassword ? "eye" : "eye-off"}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </View>
+      </View>
 
+      <TouchableOpacity
+        style={[
+          styles.signUpButton,
+          (!areAllFieldsFilled() || loading) && { opacity: 0.5 },
+        ]}
+        disabled={!areAllFieldsFilled() || loading}
+        onPress={signInWithEmail}
+      >
+        <Text style={styles.signUpButtonText}>
+          {loading ? "SIGNING IN..." : "LOGIN"}
+        </Text>
+      </TouchableOpacity>
+
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Don't have an account? </Text>
         <TouchableOpacity
-          style={[
-            styles.signUpButton,
-            (!areAllFieldsFilled() || loading) && { opacity: 0.5 },
-          ]}
-          disabled={!areAllFieldsFilled() || loading}
-          onPress={signInWithEmail}
+          onPress={() =>
+            router.replace("/(tabs)/accountCreation/account/signUpScreen")
+          }
         >
-          <Text style={styles.signUpButtonText}>
-            {loading ? "SIGNING IN..." : "LOGIN"}
-          </Text>
+          <Text style={styles.loginLink}>Sign Up</Text>
         </TouchableOpacity>
+      </View>
+      {/*
+      <View style={styles.dividerContainer}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>Or Sign In with</Text>
+        <View style={styles.dividerLine} />
+      </View>
 
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Don't have an account? </Text>
-          <TouchableOpacity
-            onPress={() =>
-              router.replace("/(tabs)/accountCreation/account/signUpScreen")
-            }
-          >
-            <Text style={styles.loginLink}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>Or Sign In with</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={signInWithApple}
-          >
-            <AntDesign name="apple1" size={20} color="black" />
-            <Text style={styles.socialButtonText}>Apple</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={signInWithGoogle}
-          >
-            <AntDesign name="google" size={20} color="#DB4437" />
-            <Text style={styles.socialButtonText}>Google</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </>
+       <View style={styles.socialButtonsContainer}>
+        <TouchableOpacity style={styles.socialButton} onPress={signInWithApple}>
+          <AntDesign name="apple1" size={20} color="black" />
+          <Text style={styles.socialButtonText}>Apple</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.socialButton}
+          onPress={signInWithGoogle}
+        >
+          <AntDesign name="google" size={20} color="#DB4437" />
+          <Text style={styles.socialButtonText}>Google</Text>
+        </TouchableOpacity>
+      </View> */}
+    </SafeAreaView>
   );
 }
 

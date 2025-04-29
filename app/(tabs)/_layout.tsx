@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
-import { View } from "react-native";
+import { View, Animated } from "react-native";
 
 function TabBarIcon({
   name,
@@ -14,35 +14,45 @@ function TabBarIcon({
   color: string;
   focused: boolean;
 }) {
+  // Create an animated value for scale
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  // Run animation when the focused state changes
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: focused ? 1.3 : 1,
+      friction: 8, // Makes the animation smooth
+      tension: 40, // Controls the bounce effect
+      useNativeDriver: true, // Better performance
+    }).start();
+  }, [focused, scaleAnim]);
+
   return (
     <View
       style={[
         {
           padding: 8,
-          height: 68,
+          height: 55,
           width: 55,
           alignItems: "center",
           justifyContent: "center",
           marginTop: 40,
           marginBottom: 10,
         },
-        // focused && {
-        //   borderTopWidth: 2,
-        //   borderColor: "black",
-        // },
       ]}
     >
-      <FontAwesome
-        size={28}
-        color={focused ? "#38B6FF" : color}
-        name={name}
-        style={[
-          focused && {
-            transform: [{ scale: 1.2 }],
-          },
-        ]}
-        {...otherProps}
-      />
+      <Animated.View
+        style={{
+          transform: [{ scale: scaleAnim }],
+        }}
+      >
+        <FontAwesome
+          size={28}
+          color={focused ? "#38B6FF" : color}
+          name={name}
+          {...otherProps}
+        />
+      </Animated.View>
     </View>
   );
 }

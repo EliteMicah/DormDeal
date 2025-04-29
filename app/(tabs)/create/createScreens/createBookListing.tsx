@@ -111,7 +111,7 @@ export default function CreateBookListing() {
   };
 
   return (
-    <>
+    <div>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -215,7 +215,7 @@ export default function CreateBookListing() {
           setPaymentType
         )}
       </SafeAreaView>
-    </>
+    </div>
   );
 }
 
