@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View } from "@/components/Themed";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../lib/supabase";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -28,7 +27,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((event: string, session: any) => {
       if (event === "SIGNED_OUT") {
         setUsername("");
         setUniversity("Biola University");

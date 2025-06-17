@@ -1,5 +1,4 @@
-import { StyleSheet } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 
@@ -7,7 +6,7 @@ export default function eventCardScreen() {
   const router = useRouter();
 
   return (
-    <div>
+    <View>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -23,7 +22,7 @@ export default function eventCardScreen() {
           <Text>Coming Soon!</Text>
         </View>
       </SafeAreaView>
-    </div>
+    </View>
   );
 }
 

@@ -6,6 +6,8 @@ node_modules/
 # Api & Keys
 lib/
 
+.env
+
 # Expo
 .expo/
 dist/

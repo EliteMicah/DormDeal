@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import Colors from "@/constants/Colors";
+//import Colors from "@/constants/Colors";
 import { View, Animated } from "react-native";
 
 function TabBarIcon({
@@ -61,7 +61,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors["light"].tint,
+        tabBarActiveTintColor: "#2f95dc",
         headerShown: false,
         tabBarStyle: {
           display: "flex",
@@ -75,9 +75,13 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarLabel: "",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name="home" color={color} focused={focused} />
-          ),
+          tabBarIcon: ({
+            color,
+            focused,
+          }: {
+            color: string;
+            focused: boolean;
+          }) => <TabBarIcon name="home" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -93,9 +97,13 @@ export default function TabLayout() {
         options={{
           title: "Create",
           tabBarLabel: "",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name="plus" color={color} focused={focused} />
-          ),
+          tabBarIcon: ({
+            color,
+            focused,
+          }: {
+            color: string;
+            focused: boolean;
+          }) => <TabBarIcon name="plus" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -103,9 +111,13 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarLabel: "",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name="user" color={color} focused={focused} />
-          ),
+          tabBarIcon: ({
+            color,
+            focused,
+          }: {
+            color: string;
+            focused: boolean;
+          }) => <TabBarIcon name="user" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen

@@ -1,6 +1,5 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
 
@@ -36,7 +35,7 @@ export default function BookDetailsScreen() {
   );
 
   return (
-    <div>
+    <View>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -112,7 +111,7 @@ export default function BookDetailsScreen() {
           <DetailRow label="Amazon's Price" value={bookDetails.amazonPrice} />
         </View>
       </SafeAreaView>
-    </div>
+    </View>
   );
 }
 

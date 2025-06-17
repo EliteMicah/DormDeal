@@ -1,5 +1,11 @@
-import { StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
-import { Text, View } from "@/components/Themed";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Linking,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 
@@ -7,7 +13,7 @@ export default function donateScreen() {
   const router = useRouter();
 
   return (
-    <div>
+    <View>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -37,7 +43,7 @@ export default function donateScreen() {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </div>
+    </View>
   );
 }
 

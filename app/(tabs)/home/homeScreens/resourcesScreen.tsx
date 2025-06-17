@@ -1,5 +1,10 @@
-import { StyleSheet, TouchableOpacity, Linking } from "react-native";
-import { Text, View } from "@/components/Themed";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 export default function ResourcesScreen() {
   const router = useRouter();
   return (
-    <div>
+    <SafeAreaView style={styles.mainContainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -18,90 +23,65 @@ export default function ResourcesScreen() {
         }}
       />
 
-      <SafeAreaView style={styles.mainContainer}>
-        <Text style={styles.mainTitle}>Resources</Text>
+      <Text style={styles.mainTitle}>Resources</Text>
 
-        {/* First Column */}
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>School</Text>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="happy-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Clubs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="sparkles-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Events</Text>
-          </TouchableOpacity>
-        </View>
+      {/* First Column */}
+      <View style={styles.columnContainer}>
+        <Text style={styles.columnTitle}>School</Text>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="happy-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Clubs</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="sparkles-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Events</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Second Column */}
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>Church</Text>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="flame-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Churches near you</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="journal-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Bible Studies</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="people-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Get Connected</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Second Column */}
+      <View style={styles.columnContainer}>
+        <Text style={styles.columnTitle}>Church</Text>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="flame-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Churches near you</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="journal-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Bible Studies</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="people-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Get Connected</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Third Column */}
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>About Us</Text>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="leaf-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Mission Statement</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            //onPress={() => router.push("/searchModal")}
-          >
-            <Ionicons name="download-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Updates · What's new</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() => router.push("/home/homeScreens/donateScreen")}
-          >
-            <Ionicons name="heart-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Donate</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() =>
-              Linking.openURL("https://forms.gle/6C28tioZvK54M6CG6")
-            }
-          >
-            <Ionicons name="hammer-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Give Feedback</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </div>
+      {/* Third Column */}
+      <View style={styles.columnContainer}>
+        <Text style={styles.columnTitle}>About Us</Text>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="leaf-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Mission Statement</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonContainer}>
+          <Ionicons name="download-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Updates · What's new</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonContainer}
+          onPress={() => router.push("/home/homeScreens/donateScreen")}
+        >
+          <Ionicons name="heart-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Donate</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonContainer}
+          onPress={() => Linking.openURL("https://forms.gle/6C28tioZvK54M6CG6")}
+        >
+          <Ionicons name="hammer-outline" size={23} style={styles.icon} />
+          <Text style={styles.buttonTitle}>Give Feedback</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -126,12 +106,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   columnContainer: {
-    flex: 0, // Adjustable height depending on items inside
+    flex: 0,
     width: "85%",
     flexDirection: "column",
     marginHorizontal: 30,
     backgroundColor: "#f2f2f2",
-    marginBottom: 5,
+    paddingVertical: 10,
   },
   columnTitle: {
     fontSize: 20,

@@ -1,6 +1,11 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
 
@@ -30,7 +35,7 @@ export default function ItemDetailsScreen() {
   );
 
   return (
-    <div>
+    <SafeAreaView>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -41,7 +46,7 @@ export default function ItemDetailsScreen() {
         }}
       />
 
-      <SafeAreaView style={styles.mainContainer}>
+      <ScrollView style={styles.mainContainer}>
         <View style={styles.imageContainer}>
           <View>
             <MaterialIcons
@@ -100,8 +105,8 @@ export default function ItemDetailsScreen() {
           <Text style={styles.sectionTitle}>Details</Text>
           <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
         </View>
-      </SafeAreaView>
-    </div>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

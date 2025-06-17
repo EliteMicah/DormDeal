@@ -7,7 +7,7 @@
     "icon": "./assets/images/RebookedIcon2copy.png",
     "scheme": "myapp",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",

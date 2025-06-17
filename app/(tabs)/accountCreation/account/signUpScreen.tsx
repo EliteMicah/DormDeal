@@ -5,9 +5,10 @@ import {
   TouchableOpacity,
   AppState,
   Alert,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { supabase } from "../../../../lib/supabase";
@@ -128,6 +129,7 @@ export default function SignUpScreen() {
           options: {
             data: {
               username: username,
+              emailRedirectTo: "https://tryrebooked.net/confirm",
             },
           },
         }
@@ -137,6 +139,13 @@ export default function SignUpScreen() {
         console.log("Auth signup failed with error:", signUpError.message);
         Alert.alert("Error", signUpError.message);
         setLoading(false);
+        return;
+      }
+
+      // Check if the user needs to verify their email
+      if (authData.user && !authData.user.email_confirmed_at) {
+        console.log("Email not confirmed, redirecting to verify email screen");
+        router.replace("/(tabs)/accountCreation/account/verifyEmail");
         return;
       }
 

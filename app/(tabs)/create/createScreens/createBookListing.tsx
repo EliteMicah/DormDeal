@@ -5,14 +5,15 @@ import {
   TextInput,
   Modal,
   FlatList,
+  Text,
+  View,
 } from "react-native";
-import { Text, View } from "@/components/Themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../../../lib/supabase";
 
 export default function CreateBookListing() {
   const router = useRouter();
@@ -111,7 +112,7 @@ export default function CreateBookListing() {
   };
 
   return (
-    <div>
+    <View>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -215,7 +216,7 @@ export default function CreateBookListing() {
           setPaymentType
         )}
       </SafeAreaView>
-    </div>
+    </View>
   );
 }
 

@@ -1,6 +1,5 @@
-import { StyleSheet, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, Image, TouchableOpacity, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View } from "@/components/Themed";
 import { useRouter, Stack } from "expo-router";
 
 export default function HomeScreen() {

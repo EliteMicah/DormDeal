@@ -9,8 +9,8 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import { useColorScheme } from "@/components/useColorScheme";
 import { NavigationContainer } from "@react-navigation/native";
+import { useColorScheme } from "react-native";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -48,7 +48,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <NavigationContainer independent={true}>
+    <NavigationContainer>
       <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import { StyleSheet, View, Alert } from "react-native";
-import { Button, Input } from "@rneui/themed";
+import {
+  StyleSheet,
+  View,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import { Session } from "@supabase/supabase-js";
 
 export default function Account({ session }: { session: Session }) {
@@ -75,26 +81,41 @@ export default function Account({ session }: { session: Session }) {
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
+        <TextInput
+          style={styles.input}
+          value={session?.user?.email || ""}
+          editable={false}
+          placeholder="Email"
+        />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input
-          label="Username"
+        <TextInput
+          style={styles.input}
           value={username || ""}
-          onChangeText={(text) => setUsername(text)}
+          onChangeText={(text: string) => setUsername(text)}
+          placeholder="Username"
         />
       </View>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          title={loading ? "Loading ..." : "Update"}
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
           onPress={() => updateProfile({ username, avatar_url: avatarUrl })}
           disabled={loading}
-        />
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Loading ..." : "Update"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => supabase.auth.signOut()}
+        >
+          <Text style={styles.buttonText}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -112,5 +133,26 @@ const styles = StyleSheet.create({
   },
   mt20: {
     marginTop: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 4,
+    padding: 10,
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

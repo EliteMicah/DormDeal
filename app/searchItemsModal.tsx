@@ -6,8 +6,9 @@ import {
   Modal,
   TouchableOpacity,
   FlatList,
+  Text,
+  View,
 } from "react-native";
-import { Text, View } from "@/components/Themed";
 import { useState } from "react";
 
 export default function itemModalScreen() {

@@ -1,5 +1,11 @@
-import { StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
-import { Text, View } from "@/components/Themed";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,7 +39,7 @@ export default function createItemListing() {
   };
 
   return (
-    <div>
+    <View>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -106,7 +112,7 @@ export default function createItemListing() {
           </View>
         </View>
       </SafeAreaView>
-    </div>
+    </View>
   );
 }
 

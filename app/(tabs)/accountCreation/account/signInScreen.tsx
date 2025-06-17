@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
-import { Feather, AntDesign } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { supabase } from "../../../../lib/supabase";
 
 export default function SignInScreen() {

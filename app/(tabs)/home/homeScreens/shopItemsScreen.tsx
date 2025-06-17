@@ -1,5 +1,10 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { Text, View } from "@/components/Themed";
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,7 +45,7 @@ const ItemCard = ({
 export default function shopItemsScreen() {
   const router = useRouter();
   return (
-    <div>
+    <View>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -80,7 +85,7 @@ export default function shopItemsScreen() {
           </View>
         </View>
       </SafeAreaView>
-    </div>
+    </View>
   );
 }
 

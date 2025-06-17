@@ -1,5 +1,10 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { Text, View } from "@/components/Themed";
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -43,7 +48,7 @@ const BookSection = ({
   }>;
   router: any;
 }) => (
-  <div>
+  <View style={styles.mainConditionContainer}>
     <View style={styles.conditionTextContainer}>
       <Text style={styles.conditionText}>{title}</Text>
       <TouchableOpacity style={styles.seeAllTextContainer}>
@@ -79,14 +84,14 @@ const BookSection = ({
         ))}
       </ScrollView>
     </View>
-  </div>
+  </View>
 );
 
 export default function shopBooksScreen() {
   const router = useRouter();
 
   return (
-    <div>
+    <SafeAreaView style={styles.maincontainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -97,22 +102,20 @@ export default function shopBooksScreen() {
         }}
       />
 
-      <SafeAreaView style={styles.maincontainer}>
-        <Text style={styles.mainTitle}>Explore Books</Text>
-        <TouchableOpacity
-          style={styles.searchButtonContainer}
-          onPress={() => router.push("/searchModal")}
-        >
-          <Ionicons name="search" size={20} style={styles.searchIcon} />
-          <Text style={styles.searchText}>Search</Text>
-        </TouchableOpacity>
-        <View style={styles.separator} />
+      <Text style={styles.mainTitle}>Explore Books</Text>
+      <TouchableOpacity
+        style={styles.searchButtonContainer}
+        onPress={() => router.push("/searchModal")}
+      >
+        <Ionicons name="search" size={20} style={styles.searchIcon} />
+        <Text style={styles.searchText}>Search</Text>
+      </TouchableOpacity>
+      <View style={styles.separator} />
 
-        <BookSection title="New" books={BOOKS_DATA.new} router={router} />
-        <BookSection title="Used" books={BOOKS_DATA.used} router={router} />
-        <BookSection title="Noted" books={BOOKS_DATA.noted} router={router} />
-      </SafeAreaView>
-    </div>
+      <BookSection title="New" books={BOOKS_DATA.new} router={router} />
+      <BookSection title="Used" books={BOOKS_DATA.used} router={router} />
+      <BookSection title="Noted" books={BOOKS_DATA.noted} router={router} />
+    </SafeAreaView>
   );
 }
 
@@ -122,6 +125,10 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#f2f2f2",
     justifyContent: "flex-start",
+  },
+  mainConditionContainer: {
+    flex: 0,
+    backgroundColor: "#f2f2f2",
   },
   mainTitle: {
     alignSelf: "center",
@@ -138,7 +145,7 @@ const styles = StyleSheet.create({
   },
   searchButtonContainer: {
     width: "85%",
-    height: "6%",
+    height: 40,
     alignSelf: "center",
     borderRadius: 10,
     backgroundColor: "#e3e2e7",
@@ -189,8 +196,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   conditionContainer: {
-    height: "25%",
-    width: "85%",
+    flex: 0,
     marginHorizontal: 30,
     backgroundColor: "#f2f2f2",
   },
