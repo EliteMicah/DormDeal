@@ -26,7 +26,7 @@ export default function itemModalScreen() {
   const conditionOptions = ["Any", "New", "Used", "Noted"];
 
   // Payment Type options
-  const paymentTypeOptions = ["Any", "In-App", "Venmo", "Zelle"];
+  const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
   // Render picker modal
   const renderPickerModal = (

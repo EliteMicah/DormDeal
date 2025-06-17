@@ -13,7 +13,7 @@ export default function donateScreen() {
   const router = useRouter();
 
   return (
-    <View>
+    <SafeAreaView style={styles.mainContainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -23,27 +23,25 @@ export default function donateScreen() {
           headerTintColor: "black",
         }}
       />
-      <SafeAreaView style={styles.mainContainer}>
-        <Text style={styles.mainTitle}>Donate</Text>
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>
-            Donating helps pay for the app to stay running and motivates me to
-            keep working on this app! Every donation helps tremendously and I
-            appreciate any help I can get!
-          </Text>
-        </View>
-        <View style={styles.mainCardContainer}>
-          <TouchableOpacity
-            onPress={() => Linking.openURL("https://venmo.com/u/EliteMicah")}
-          >
-            <Image
-              source={require("../../../../assets/images/myVenmo.png")}
-              style={styles.mainCardImage}
-            />
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </View>
+      <Text style={styles.mainTitle}>Donate</Text>
+      <View style={styles.columnContainer}>
+        <Text style={styles.columnTitle}>
+          Donating helps pay for the app to stay running and motivates me to
+          keep working on it! Every donation helps tremendously and I appreciate
+          any help I can get!
+        </Text>
+      </View>
+      <View style={styles.mainCardContainer}>
+        <TouchableOpacity
+          onPress={() => Linking.openURL("https://venmo.com/u/EliteMicah")}
+        >
+          <Image
+            source={require("../../../../assets/images/myVenmo.png")}
+            style={styles.mainCardImage}
+          />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 

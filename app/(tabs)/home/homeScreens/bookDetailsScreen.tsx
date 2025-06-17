@@ -14,7 +14,7 @@ export default function BookDetailsScreen() {
     professor: "Dr. John Williams",
     isbn: "#0123456789123",
     edition: "13th",
-    paymentTypes: ["In-App", "Cash", "Venmo", "Zelle"],
+    paymentTypes: ["Any", "Cash", "Venmo", "Zelle"],
     amazonPrice: "$19.99",
     negotiable: false,
   };
@@ -35,7 +35,7 @@ export default function BookDetailsScreen() {
   );
 
   return (
-    <View>
+    <SafeAreaView style={styles.mainContainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -46,72 +46,68 @@ export default function BookDetailsScreen() {
         }}
       />
 
-      <SafeAreaView style={styles.mainContainer}>
-        <View style={styles.imageContainer}>
-          <View>
-            <MaterialIcons
-              name="photo"
-              size={70}
-              color="gray"
-              backgroundColor="#ddd"
-            />
+      <View style={styles.imageContainer}>
+        <View>
+          <MaterialIcons
+            name="photo"
+            size={70}
+            color="gray"
+            backgroundColor="#ddd"
+          />
+        </View>
+      </View>
+
+      {/* Title and Price Section */}
+      <View style={styles.headerSection}>
+        <Text style={styles.title}>{bookDetails.title}</Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.price}>{bookDetails.price}</Text>
+          <Text style={styles.condition}> · {bookDetails.condition}</Text>
+        </View>
+        <Text style={styles.postedInfo}>
+          Posted {bookDetails.postedTime} · {bookDetails.institution}
+        </Text>
+      </View>
+
+      {/* Interested in buying section */}
+      <View style={styles.buyingSection}>
+        <Text style={styles.buyingTitle}>Interested in buying?</Text>
+        <View style={styles.offerButtons}>
+          <TouchableOpacity style={styles.offerButton}>
+            <Text style={styles.offerButtonText}>Place an offer for $10?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.offerButton, styles.sendOfferButton]}
+          >
+            <Text style={styles.sendOfferText}>Send Message?</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Seller Section */}
+      <View style={styles.sellerSection}>
+        <Text style={styles.sectionTitle}>Seller</Text>
+        <View style={styles.sellerInfo}>
+          <Text style={styles.username}>Username</Text>
+          <View style={styles.ratingContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <MaterialIcons key={star} name="star" size={20} color="gray" />
+            ))}
           </View>
         </View>
+      </View>
 
-        {/* Title and Price Section */}
-        <View style={styles.headerSection}>
-          <Text style={styles.title}>{bookDetails.title}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{bookDetails.price}</Text>
-            <Text style={styles.condition}> · {bookDetails.condition}</Text>
-          </View>
-          <Text style={styles.postedInfo}>
-            Posted {bookDetails.postedTime} · {bookDetails.institution}
-          </Text>
-        </View>
-
-        {/* Interested in buying section */}
-        <View style={styles.buyingSection}>
-          <Text style={styles.buyingTitle}>Interested in buying?</Text>
-          <View style={styles.offerButtons}>
-            <TouchableOpacity style={styles.offerButton}>
-              <Text style={styles.offerButtonText}>
-                Place an offer for $10?
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.offerButton, styles.sendOfferButton]}
-            >
-              <Text style={styles.sendOfferText}>Send Message?</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Seller Section */}
-        <View style={styles.sellerSection}>
-          <Text style={styles.sectionTitle}>Seller</Text>
-          <View style={styles.sellerInfo}>
-            <Text style={styles.username}>Username</Text>
-            <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <MaterialIcons key={star} name="star" size={20} color="gray" />
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Details Section */}
-        <View style={styles.detailsSection}>
-          <Text style={styles.sectionTitle}>Details</Text>
-          <DetailRow label="Class" value={bookDetails.class} />
-          <DetailRow label="Professor" value={bookDetails.professor} />
-          <DetailRow label="ISBN" value={bookDetails.isbn} />
-          <DetailRow label="Edition" value={bookDetails.edition} />
-          <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
-          <DetailRow label="Amazon's Price" value={bookDetails.amazonPrice} />
-        </View>
-      </SafeAreaView>
-    </View>
+      {/* Details Section */}
+      <View style={styles.detailsSection}>
+        <Text style={styles.sectionTitle}>Details</Text>
+        <DetailRow label="Class" value={bookDetails.class} />
+        <DetailRow label="Professor" value={bookDetails.professor} />
+        <DetailRow label="ISBN" value={bookDetails.isbn} />
+        <DetailRow label="Edition" value={bookDetails.edition} />
+        <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
+        <DetailRow label="Amazon's Price" value={bookDetails.amazonPrice} />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -124,7 +120,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     marginTop: "10%",
     width: "85%",
-    height: "30%",
+    height: 200,
     alignSelf: "center",
     alignContent: "center",
     justifyContent: "center",
