@@ -45,7 +45,7 @@ const ItemCard = ({
 export default function shopItemsScreen() {
   const router = useRouter();
   return (
-    <View>
+    <SafeAreaView style={styles.maincontainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -55,37 +55,36 @@ export default function shopItemsScreen() {
           headerTintColor: "black",
         }}
       />
-      <SafeAreaView style={styles.maincontainer}>
-        <Text style={styles.title}>Explore Items</Text>
-        <TouchableOpacity
-          style={styles.searchContainer}
-          onPress={() => router.push("/searchModal")}
-        >
-          <Ionicons name="search" size={20} style={styles.searchIcon} />
-          <Text style={styles.searchText}>Search</Text>
-        </TouchableOpacity>
-        <View style={styles.transparentSeparator} />
 
-        <View style={styles.heightForGridContainer}>
-          <View style={styles.gridContainer}>
-            <ScrollView
-              contentContainerStyle={styles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-            >
-              {ITEMS_DATA.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  onPress={() =>
-                    router.push("/(tabs)/home/homeScreens/itemDetailsScreen")
-                  }
-                />
-              ))}
-            </ScrollView>
-          </View>
+      <Text style={styles.title}>Explore Items</Text>
+      <TouchableOpacity
+        style={styles.searchContainer}
+        onPress={() => router.push("/searchModal")}
+      >
+        <Ionicons name="search" size={20} style={styles.searchIcon} />
+        <Text style={styles.searchText}>Search</Text>
+      </TouchableOpacity>
+      <View style={styles.transparentSeparator} />
+
+      <View style={styles.heightForGridContainer}>
+        <View style={styles.gridContainer}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            {ITEMS_DATA.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                onPress={() =>
+                  router.push("/(tabs)/home/homeScreens/itemDetailsScreen")
+                }
+              />
+            ))}
+          </ScrollView>
         </View>
-      </SafeAreaView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 

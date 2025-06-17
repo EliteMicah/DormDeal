@@ -39,7 +39,7 @@ export default function createItemListing() {
   };
 
   return (
-    <View>
+    <SafeAreaView style={styles.maincontainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -49,70 +49,68 @@ export default function createItemListing() {
           headerTintColor: "black",
         }}
       />
-      <SafeAreaView style={styles.maincontainer}>
-        <Text style={styles.mainTitle}>Create Listing</Text>
-        <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.image} />
-          ) : (
-            <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
-          )}
-        </TouchableOpacity>
-        <View style={styles.identifierContainer}>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Title</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="Name of the Item"
-            ></TextInput>
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Category</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="Ex. Furniture"
-            ></TextInput>
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Condition</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="New, Like New, Used, Trash"
-            ></TextInput>
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Price</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="$20"
-              keyboardType="number-pad"
-              returnKeyType="done"
-            ></TextInput>
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Payment Type</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="All, In-App, Venmo, Zelle"
-            ></TextInput>
-          </View>
+      <Text style={styles.mainTitle}>Create Listing</Text>
+      <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
+        {image ? (
+          <Image source={{ uri: image }} style={styles.image} />
+        ) : (
+          <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
+        )}
+      </TouchableOpacity>
+      <View style={styles.identifierContainer}>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Title</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="Name of the Item"
+          ></TextInput>
         </View>
-        <View style={styles.createButtonContainer}>
-          <View style={styles.createButton}>
-            <TouchableOpacity>
-              <Text
-                style={[
-                  styles.buttonText,
-                  { color: "#FFFFFF", fontWeight: "800" },
-                ]}
-              >
-                Create Listing!
-              </Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Category</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="Ex. Furniture"
+          ></TextInput>
         </View>
-      </SafeAreaView>
-    </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Condition</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="New, Like New, Used, Trash"
+          ></TextInput>
+        </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Price</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="$20"
+            keyboardType="number-pad"
+            returnKeyType="done"
+          ></TextInput>
+        </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Payment Type</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="All, Venmo, Zelle, Cash"
+          ></TextInput>
+        </View>
+      </View>
+      <View style={styles.createButtonContainer}>
+        <View style={styles.createButton}>
+          <TouchableOpacity>
+            <Text
+              style={[
+                styles.buttonText,
+                { color: "#FFFFFF", fontWeight: "800" },
+              ]}
+            >
+              Create Listing!
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 

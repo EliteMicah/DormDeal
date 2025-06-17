@@ -32,7 +32,7 @@ export default function CreateBookListing() {
 
   // Options
   const conditionOptions = ["New", "Used", "Noted"];
-  const paymentTypeOptions = ["Any", "In-App", "Venmo", "Zelle"];
+  const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -112,7 +112,7 @@ export default function CreateBookListing() {
   };
 
   return (
-    <View>
+    <SafeAreaView style={styles.maincontainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -122,101 +122,99 @@ export default function CreateBookListing() {
           headerTintColor: "black",
         }}
       />
-      <SafeAreaView style={styles.maincontainer}>
-        <Text style={styles.mainTitle}>Create Listing</Text>
-        <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.image} />
-          ) : (
-            <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
-          )}
-        </TouchableOpacity>
-        <View style={styles.identifierContainer}>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Title</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="Name of the Book"
-              value={title}
-              onChangeText={setTitle}
-            />
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>ISBN</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="#"
-              keyboardType="number-pad"
-              returnKeyType="done"
-              value={isbn}
-              onChangeText={setIsbn}
-              maxLength={13}
-            />
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Condition</Text>
-            <TouchableOpacity
-              style={styles.userTextInput}
-              onPress={() => setConditionModalVisible(true)}
-            >
-              <Text style={styles.dropdownButtonText}>{condition}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Price</Text>
-            <TextInput
-              style={styles.userTextInput}
-              placeholder="$20"
-              keyboardType="number-pad"
-              value={price}
-              onChangeText={setPrice}
-              returnKeyType="done"
-            />
-          </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Payment Type</Text>
-            <TouchableOpacity
-              style={styles.userTextInput}
-              onPress={() => setPaymentModalVisible(true)}
-            >
-              <Text style={styles.dropdownButtonText}>{paymentType}</Text>
-            </TouchableOpacity>
-          </View>
+      <Text style={styles.mainTitle}>Create Listing</Text>
+      <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
+        {image ? (
+          <Image source={{ uri: image }} style={styles.image} />
+        ) : (
+          <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
+        )}
+      </TouchableOpacity>
+      <View style={styles.identifierContainer}>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Title</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="Name of the Book"
+            value={title}
+            onChangeText={setTitle}
+          />
         </View>
-        <View style={styles.createButtonContainer}>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>ISBN</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="#"
+            keyboardType="number-pad"
+            returnKeyType="done"
+            value={isbn}
+            onChangeText={setIsbn}
+            maxLength={13}
+          />
+        </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Condition</Text>
           <TouchableOpacity
-            style={styles.createButton}
-            onPress={handleSubmit}
-            disabled={isUploading}
+            style={styles.userTextInput}
+            onPress={() => setConditionModalVisible(true)}
           >
-            <Text style={styles.buttonText}>
-              {isUploading ? "Creating Listing..." : "Create Listing!"}
-            </Text>
+            <Text style={styles.dropdownButtonText}>{condition}</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Price</Text>
+          <TextInput
+            style={styles.userTextInput}
+            placeholder="$20"
+            keyboardType="number-pad"
+            value={price}
+            onChangeText={setPrice}
+            returnKeyType="done"
+          />
+        </View>
+        <View style={styles.singleIdentifierContainer}>
+          <Text style={styles.identifierText}>Payment Type</Text>
+          <TouchableOpacity
+            style={styles.userTextInput}
+            onPress={() => setPaymentModalVisible(true)}
+          >
+            <Text style={styles.dropdownButtonText}>{paymentType}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.createButtonContainer}>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={handleSubmit}
+          disabled={isUploading}
+        >
+          <Text style={styles.buttonText}>
+            {isUploading ? "Creating Listing..." : "Create Listing!"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Error Message Display */}
-        {formError && <Text style={styles.errorText}>{formError}</Text>}
+      {/* Error Message Display */}
+      {formError && <Text style={styles.errorText}>{formError}</Text>}
 
-        {/* Condition Modal */}
-        {renderPickerModal(
-          conditionOptions,
-          isConditionModalVisible,
-          setConditionModalVisible,
-          condition,
-          setCondition
-        )}
+      {/* Condition Modal */}
+      {renderPickerModal(
+        conditionOptions,
+        isConditionModalVisible,
+        setConditionModalVisible,
+        condition,
+        setCondition
+      )}
 
-        {/* Payment Type Modal */}
-        {renderPickerModal(
-          paymentTypeOptions,
-          isPaymentModalVisible,
-          setPaymentModalVisible,
-          paymentType,
-          setPaymentType
-        )}
-      </SafeAreaView>
-    </View>
+      {/* Payment Type Modal */}
+      {renderPickerModal(
+        paymentTypeOptions,
+        isPaymentModalVisible,
+        setPaymentModalVisible,
+        paymentType,
+        setPaymentType
+      )}
+    </SafeAreaView>
   );
 }
 

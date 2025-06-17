@@ -6,7 +6,7 @@ export default function eventCardScreen() {
   const router = useRouter();
 
   return (
-    <View>
+    <SafeAreaView style={styles.mainContainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -16,13 +16,12 @@ export default function eventCardScreen() {
           headerTintColor: "black",
         }}
       />
-      <SafeAreaView style={styles.mainContainer}>
-        <Text style={styles.mainTitle}>Event</Text>
-        <View style={styles.textContainer}>
-          <Text>Coming Soon!</Text>
-        </View>
-      </SafeAreaView>
-    </View>
+
+      <Text style={styles.mainTitle}>Event</Text>
+      <View style={styles.textContainer}>
+        <Text>Coming Soon!</Text>
+      </View>
+    </SafeAreaView>
   );
 }
 

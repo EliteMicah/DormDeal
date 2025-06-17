@@ -16,7 +16,7 @@ export default function ItemDetailsScreen() {
     condition: "New",
     postedTime: "one day ago",
     institution: "Biola University",
-    paymentTypes: ["In-App", "Cash", "Venmo", "Zelle"],
+    paymentTypes: ["Any", "Cash", "Venmo", "Zelle"],
   };
 
   const DetailRow = ({
@@ -35,7 +35,7 @@ export default function ItemDetailsScreen() {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.mainContainer}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -46,7 +46,7 @@ export default function ItemDetailsScreen() {
         }}
       />
 
-      <ScrollView style={styles.mainContainer}>
+      <ScrollView style={styles.scrollContainer}>
         <View style={styles.imageContainer}>
           <View>
             <MaterialIcons
@@ -116,10 +116,15 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#f2f2f2",
   },
+  scrollContainer: {
+    flex: 0,
+    backgroundColor: "#f2f2f2",
+  },
   imageContainer: {
     marginTop: "10%",
+    marginHorizontal: 30,
+    height: 200,
     width: "85%",
-    height: "30%",
     alignSelf: "center",
     alignContent: "center",
     justifyContent: "center",

@@ -26,7 +26,7 @@ export default function ModalScreen() {
   const conditionOptions = ["Any", "New", "Used", "Noted"];
 
   // Payment Type options
-  const paymentTypeOptions = ["Any", "Venmo", "Zelle"];
+  const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
   // Render picker modal
   const renderPickerModal = (
