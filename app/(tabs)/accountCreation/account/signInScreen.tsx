@@ -57,38 +57,6 @@ export default function SignInScreen() {
     }
   }
 
-  {
-    /*
-  async function signInWithGoogle() {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-      });
-
-      if (error) throw error;
-      // Successful OAuth sign-in will automatically redirect
-    } catch (error) {
-      Alert.alert("Error", "An error occurred during Google sign in");
-    }
-  }
-
-  
-  async function signInWithApple() {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "apple",
-      });
-
-      if (error) throw error;
-      // Successful OAuth sign-in will automatically redirect
-    } catch (error) {
-      Alert.alert("Error", "An error occurred during Apple sign in");
-    }
-  }
-
-  */
-  }
-
   return (
     <SafeAreaView style={styles.mainContainer}>
       <Text style={styles.title}>Sign In</Text>
@@ -150,26 +118,6 @@ export default function SignInScreen() {
           <Text style={styles.loginLink}>Sign Up</Text>
         </TouchableOpacity>
       </View>
-      {/*
-      <View style={styles.dividerContainer}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>Or Sign In with</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-       <View style={styles.socialButtonsContainer}>
-        <TouchableOpacity style={styles.socialButton} onPress={signInWithApple}>
-          <AntDesign name="apple1" size={20} color="black" />
-          <Text style={styles.socialButtonText}>Apple</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.socialButton}
-          onPress={signInWithGoogle}
-        >
-          <AntDesign name="google" size={20} color="#DB4437" />
-          <Text style={styles.socialButtonText}>Google</Text>
-        </TouchableOpacity>
-      </View> */}
     </SafeAreaView>
   );
 }

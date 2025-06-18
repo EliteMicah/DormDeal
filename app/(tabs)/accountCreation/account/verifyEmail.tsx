@@ -18,9 +18,9 @@ export default function verifyEmail() {
           Please verify your email and reload the app!
         </Text>
         <Text style={styles.secondText}>
-          (If you have any issues, please contact
+          If you have any issues, please contact
         </Text>
-        <Text style={styles.secondText}>@RebookedOfficial on instagram)</Text>
+        <Text style={styles.secondText}>@RebookedOfficial on instagram</Text>
       </View>
     </SafeAreaView>
   );
