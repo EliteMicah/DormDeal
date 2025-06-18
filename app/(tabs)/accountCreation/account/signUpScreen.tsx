@@ -102,7 +102,7 @@ export default function SignUpScreen() {
         console.log("School not supported, showing alert");
         Alert.alert(
           "Unsupported School",
-          "Your school is not yet supported. Please reach out to @RebookedOfficial on Instagram to have your school added!"
+          "Your university is not yet supported. Please reach out to @RebookedOfficial on Instagram to have your school added!"
         );
         setLoading(false);
         return;
@@ -120,17 +120,22 @@ export default function SignUpScreen() {
         return;
       }
 
+      // Get university name first
+      const university = await getUniversityFromEmail(email);
+
       // Sign up the user with authentication and include the username in the metadata
       console.log("Attempting to create auth user with email:", email);
       const { data: authData, error: signUpError } = await supabase.auth.signUp(
         {
-          email: email,
-          password: password,
+          email,
+          password,
           options: {
             data: {
-              username: username,
-              emailRedirectTo: "https://tryrebooked.net/confirm",
+              username,
+              avatar_url: "",
+              university,
             },
+            emailRedirectTo: "https://tryrebooked.net/verify-email",
           },
         }
       );
@@ -159,6 +164,23 @@ export default function SignUpScreen() {
       console.log("Sign-up process finished, setting loading to false");
       setLoading(false);
     }
+  }
+
+  // Move this function outside of signUpWithEmail
+  async function getUniversityFromEmail(email: string): Promise<string | null> {
+    const domain = email.split("@")[1]?.toLowerCase();
+    const { data, error } = await supabase
+      .from("supported_schools")
+      .select("name")
+      .eq("domain", domain)
+      .single();
+
+    if (error) {
+      console.error("Error fetching university:", error);
+      return null;
+    }
+
+    return data?.name ?? null;
   }
 
   return (

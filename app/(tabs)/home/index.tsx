@@ -1,12 +1,84 @@
 import { StyleSheet, Image, TouchableOpacity, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const cardTitleText = "Event 1";
   const cardDescriptionText =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+
+        // Look for Supabase auth token (keys that start with "sb-" and end with "-auth-token")
+        const supabaseAuthKey = keys.find(
+          (key) => key.startsWith("sb-") && key.endsWith("-auth-token")
+        );
+
+        if (!supabaseAuthKey) {
+          console.log("No Supabase auth key found, redirecting to sign in");
+          router.replace("/(tabs)/accountCreation/account/signInScreen");
+          return;
+        }
+
+        const authData = await AsyncStorage.getItem(supabaseAuthKey);
+
+        if (!authData) {
+          console.log("No auth data found, redirecting to sign in");
+          router.replace("/(tabs)/accountCreation/account/signInScreen");
+          return;
+        }
+
+        // Parse the auth data to check if it's valid
+        try {
+          const parsedAuthData = JSON.parse(authData);
+
+          // Check if we have an access token and user data
+          if (!parsedAuthData.access_token || !parsedAuthData.user) {
+            console.log("Invalid auth data structure, redirecting to sign in");
+            router.replace("/(tabs)/accountCreation/account/signInScreen");
+            return;
+          }
+
+          // Optional: Check if token is expired
+          const expiresAt = parsedAuthData.expires_at;
+          if (expiresAt && expiresAt < Math.floor(Date.now() / 1000)) {
+            console.log("Auth token expired, redirecting to sign in");
+            router.replace("/(tabs)/accountCreation/account/signInScreen");
+            return;
+          }
+
+          console.log("User is authenticated, proceeding to home screen");
+          setIsLoading(false);
+        } catch (parseError) {
+          console.error("Error parsing auth data:", parseError);
+          router.replace("/(tabs)/accountCreation/account/signInScreen");
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error);
+        router.replace("/(tabs)/accountCreation/account/signInScreen");
+      }
+    };
+
+    checkAuthStatus();
+  }, [router]);
+
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.maincontainer, styles.loadingContainer]}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.maincontainer}>
@@ -74,6 +146,14 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 18,
+    color: "#666",
+  },
   maincontainer: {
     flex: 1,
     height: "100%",
