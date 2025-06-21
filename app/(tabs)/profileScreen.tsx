@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
+import EditProfileModal from "../editProfileModal"; // Adjust the path as necessary
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [university, setUniversity] = useState("Biola University");
+  const [profilePicture, setProfilePicture] = useState(""); // Add state for profile picture
+  const [isModalVisible, setModalVisible] = useState(false); // State to control modal visibility
 
   const sellingItems = [
     { id: 1 },
@@ -130,7 +133,7 @@ export default function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
-    // router.push("/(tabs)/profile/editProfileScreen"); // Adjust this route as needed
+    setModalVisible(true); // Show the modal when the button is pressed
   };
 
   if (loading) {
@@ -186,6 +189,14 @@ export default function ProfileScreen() {
           ))}
         </View>
       </View>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)} // Close the modal
+        currentUsername={username}
+        currentProfilePicture={profilePicture}
+      />
     </SafeAreaView>
   );
 }
