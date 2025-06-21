@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, Text, View, Modal } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -10,7 +10,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
-  const [university, setUniversity] = useState("Biola University");
+  const [university, setUniversity] = useState("");
   const [profilePicture, setProfilePicture] = useState(""); // Add state for profile picture
   const [isModalVisible, setModalVisible] = useState(false); // State to control modal visibility
 
@@ -22,25 +22,21 @@ export default function ProfileScreen() {
     // Add more items as needed
   ];
 
-  // Include both effects
   useEffect(() => {
     fetchUserProfile();
-  }, []);
 
-  useEffect(() => {
+    // Set up auth state listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event: string, session: any) => {
       if (event === "SIGNED_OUT") {
         setUsername("");
         setUniversity("Biola University");
-      } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        setProfilePicture("");
+      } else if (event === "SIGNED_IN") {
         fetchUserProfile();
       }
     });
-
-    // Initial fetch
-    fetchUserProfile();
 
     return () => {
       subscription.unsubscribe();
@@ -59,26 +55,10 @@ export default function ProfileScreen() {
         return;
       }
 
-      // First set username from user metadata
-      if (user.user_metadata?.username) {
-        setUsername(user.user_metadata.username);
-      } else {
-        // If no username in metadata, try to get it from profiles table
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("username")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (profileData?.username) {
-          setUsername(profileData.username);
-        }
-      }
-
-      // Fetch university data
+      // Fetch profile data from the profiles table
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("university")
+        .select("username, university, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -88,22 +68,27 @@ export default function ProfileScreen() {
       }
 
       if (profileData) {
-        setUniversity(profileData.university);
+        // Set the data from the database
+        setUsername(profileData.username || "");
+        setUniversity(profileData.university || "Biola University");
+        setProfilePicture(profileData.profile_picture || "");
       } else {
-        const { error: upsertError } = await supabase.from("profiles").upsert(
-          {
-            id: user.id,
-            username: user.user_metadata?.username,
-            university: "Biola University",
-          },
-          {
-            onConflict: "id",
-            ignoreDuplicates: false,
-          }
-        );
+        // If no profile exists, create one with default username from user metadata
+        const defaultUsername = user.user_metadata?.username || "";
 
-        if (upsertError) {
-          console.error("Error upserting profile:", upsertError.message);
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: user.id,
+          username: defaultUsername,
+          university: "Biola University",
+        });
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError.message);
+        } else {
+          // Set the local state after successful insert
+          setUsername(defaultUsername);
+          setUniversity("Biola University");
+          setProfilePicture("");
         }
       }
     } catch (error) {
@@ -113,27 +98,14 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      // Clear local state
-      setUsername("");
-      setUniversity("Biola University");
-
-      // Force reload the page to clear any cached state
-      router.replace("/(tabs)/accountCreation/account/signInScreen");
-
-      // Optional: You might want to clear any persisted storage
-      // await AsyncStorage.clear(); // If you're using AsyncStorage
-    } catch (error) {
-      console.error("Error signing out:", (error as Error).message);
-    }
+  const handleEditProfile = () => {
+    setModalVisible(true);
   };
 
-  const handleEditProfile = () => {
-    setModalVisible(true); // Show the modal when the button is pressed
+  const handleModalClose = () => {
+    setModalVisible(false);
+    // Refresh the profile data when modal closes to reflect any changes
+    fetchUserProfile();
   };
 
   if (loading) {
@@ -146,6 +118,14 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      {/* Modal component */}
+      <EditProfileModal
+        visible={isModalVisible}
+        onClose={handleModalClose} // This refers to the onClose prop of EditProfileModal
+        currentUsername={username}
+        currentProfilePicture={profilePicture}
+      />
+
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View style={styles.profileImage}>
@@ -159,10 +139,6 @@ export default function ProfileScreen() {
             <Text style={styles.location}>{university}</Text>
           </View>
         </View>
-
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.editProfileButton}
@@ -250,20 +226,11 @@ const styles = StyleSheet.create({
   editProfileButton: {
     position: "absolute",
     right: 20,
-    top: 40,
+    top: 20,
   },
   editProfileText: {
     fontSize: 14,
     color: "gray",
-  },
-  signOutButton: {
-    position: "absolute",
-    right: 20,
-    top: 10,
-  },
-  signOutText: {
-    color: "#ff6b00",
-    fontWeight: "500",
   },
   sellingSection: {
     backgroundColor: "#f2f2f2",

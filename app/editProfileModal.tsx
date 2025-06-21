@@ -33,6 +33,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [username, setUsername] = useState(currentUsername);
   const [profilePicture, setProfilePicture] = useState(currentProfilePicture);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [university, setUniversity] = useState("");
 
   // Animation values for delete button
   const deleteProgress = useRef(new Animated.Value(0)).current;
@@ -44,25 +45,33 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       return;
     }
 
-    // Check if username exists
-    console.log("Checking if username exists:", username);
-    const userExistsCheck = await checkIfUserExists(username);
-    console.log("Username check result:", userExistsCheck);
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    if (userExistsCheck.exists) {
-      Alert.alert("Sign Up Failed", userExistsCheck.message);
+    if (userError || !user) {
+      Alert.alert("Error", "User not authenticated");
       return;
     }
 
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ username: username.trim(), profile_picture: profilePicture })
-        .eq("id", supabase.auth.user()?.id);
+        .update({ username: username.trim() })
+        .eq("id", user.id);
 
       if (error) {
-        Alert.alert("Error", "Failed to update profile");
-        console.error("Error updating profile:", error.message);
+        // Check if it's a unique constraint violation
+        if (
+          error.code === "23505" &&
+          error.message.includes("profiles_username_key")
+        ) {
+          Alert.alert("Error", "This username is already taken");
+        } else {
+          Alert.alert("Error", "Failed to update profile");
+          console.error("Error updating profile:", error.message);
+        }
       } else {
         Alert.alert("Success", "Profile updated successfully");
         onClose();
@@ -72,30 +81,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       console.error("Unexpected error:", error);
     }
   };
-
-  async function checkIfUserExists(username: string) {
-    try {
-      // Only check username existence in profiles
-      const { data: usernameData, error: usernameError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .single();
-
-      if (usernameError && usernameError.code !== "PGRST116") {
-        throw usernameError;
-      }
-
-      if (usernameData) {
-        return { exists: true, message: "This username is already taken" };
-      }
-
-      return { exists: false, message: "" };
-    } catch (error) {
-      console.error("Error checking user existence:", error);
-      return { exists: false, message: "" };
-    }
-  }
 
   const startDeleteProcess = () => {
     setIsDeleting(true);
@@ -177,6 +162,23 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // Clear local state
+      setUsername("");
+      setUniversity("");
+      setProfilePicture("");
+
+      // Navigate to sign in screen
+      router.replace("/(tabs)/accountCreation/account/signInScreen");
+    } catch (error) {
+      console.error("Error signing out:", (error as Error).message);
+    }
+  };
+
   const progressWidth = deleteProgress.interpolate({
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
@@ -236,6 +238,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               autoCapitalize="none"
               autoCorrect={false}
             />
+            <TouchableOpacity
+              style={styles.signOutButton}
+              onPress={handleSignOut}
+            >
+              <Text style={styles.signOutText}>Sign Out</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Danger Zone */}
@@ -291,6 +299,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e9ecef",
+  },
+  signOutButton: {
+    position: "absolute",
+    right: 30,
+    top: 20,
+  },
+  signOutText: {
+    color: "#ff6b00",
+    fontWeight: "500",
   },
   cancelButton: {
     padding: 8,
