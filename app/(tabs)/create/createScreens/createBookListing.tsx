@@ -150,6 +150,7 @@ export default function CreateBookListing() {
             value={isbn}
             onChangeText={setIsbn}
             maxLength={13}
+            enterKeyHint="enter"
           />
         </View>
         <View style={styles.singleIdentifierContainer}>

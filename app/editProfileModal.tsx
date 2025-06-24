@@ -189,6 +189,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
+      onRequestClose={onClose}
     >
       <View style={styles.container}>
         {/* Header */}

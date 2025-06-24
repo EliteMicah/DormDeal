@@ -131,7 +131,7 @@ export default function ModalScreen() {
                   { color: "#FFFFFF", fontWeight: "800" },
                 ]}
               >
-                Apply Search!
+                Apply Filters
               </Text>
             </TouchableOpacity>
           </View>
