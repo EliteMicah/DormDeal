@@ -17,6 +17,8 @@ export default function ItemDetailsScreen() {
     postedTime: "one day ago",
     institution: "Biola University",
     paymentTypes: ["Any", "Cash", "Venmo", "Zelle"],
+    description:
+      "This item is in excellent condition with no scratches. Used for one semester. All wheels are intact and the binding is tight. Perfect for students. Smoke-free home.",
   };
 
   const DetailRow = ({
@@ -35,7 +37,7 @@ export default function ItemDetailsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -46,7 +48,11 @@ export default function ItemDetailsScreen() {
         }}
       />
 
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+      >
         <View style={styles.imageContainer}>
           <View>
             <MaterialIcons
@@ -87,6 +93,18 @@ export default function ItemDetailsScreen() {
           </View>
         </View>
 
+        {/* Desc Section */}
+        <View style={styles.descSection}>
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.descriptionText}>{bookDetails.description}</Text>
+        </View>
+
+        {/* Details Section */}
+        <View style={styles.detailsSection}>
+          <Text style={styles.sectionTitle}>Details</Text>
+          <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
+        </View>
+
         {/* Seller Section */}
         <View style={styles.sellerSection}>
           <Text style={styles.sectionTitle}>Seller</Text>
@@ -98,12 +116,6 @@ export default function ItemDetailsScreen() {
               ))}
             </View>
           </View>
-        </View>
-
-        {/* Details Section */}
-        <View style={styles.detailsSection}>
-          <Text style={styles.sectionTitle}>Details</Text>
-          <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -117,11 +129,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
   },
   scrollContainer: {
-    flex: 0,
-    backgroundColor: "#f2f2f2",
+    flex: 1,
   },
   imageContainer: {
-    marginTop: "10%",
     marginHorizontal: 30,
     height: 200,
     width: "85%",
@@ -135,6 +145,7 @@ const styles = StyleSheet.create({
   headerSection: {
     padding: 16,
     borderBottomWidth: 1,
+    borderColor: "grey",
     backgroundColor: "#f2f2f2",
   },
   title: {
@@ -165,6 +176,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 14,
     borderBottomWidth: 1,
+    borderColor: "grey",
     backgroundColor: "#f2f2f2",
   },
   buyingTitle: {
@@ -195,11 +207,23 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
+  descSection: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    backgroundColor: "#f2f2f2",
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderColor: "grey",
+  },
+  descriptionText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#333",
+  },
   sellerSection: {
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 14,
-    borderBottomWidth: 1,
     backgroundColor: "#f2f2f2",
   },
   sectionTitle: {
@@ -227,6 +251,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderColor: "grey",
     backgroundColor: "#f2f2f2",
   },
   detailRow: {

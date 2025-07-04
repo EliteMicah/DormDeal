@@ -229,7 +229,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: "#333",
-    marginTop: 4,
   },
   sellerSection: {
     paddingHorizontal: 16,
