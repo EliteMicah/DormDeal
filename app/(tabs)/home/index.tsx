@@ -7,9 +7,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function HomeScreen() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const cardTitleText = "Event 1";
+  const cardTitleText = "Event";
   const cardDescriptionText =
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor fugiat.";
+    "Cats move with a grace that defies explanation, each step measured and deliberate, as if choreographed by nature itself. Their silky fur and silent paws belie the sharp intellect behind their steady gaze. They leap effortlessly to high perches, they exude a quiet confidence that captivates.";
 
   // Check if user is logged in
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function HomeScreen() {
             }
           >
             <Image
-              source={require("../../../assets/images/image2.png")}
+              source={require("../../../assets/images/cat_sleeping.png")}
               style={styles.mainCardImage}
             />
           </TouchableOpacity>
