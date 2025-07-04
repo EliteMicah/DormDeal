@@ -84,7 +84,7 @@ export default function SignUpScreen() {
       return false;
     }
 
-    return !!data; // Converts to boolean
+    return !!data;
   }
 
   async function signUpWithEmail() {
