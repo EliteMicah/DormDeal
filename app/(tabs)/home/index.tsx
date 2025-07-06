@@ -1,290 +1,500 @@
-import { StyleSheet, Image, TouchableOpacity, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Text,
+  View,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "../../../lib/supabase"; // Adjust path as needed
+
+// Define a type for the routes
+type RouteType =
+  | "/home/homeScreens/shopBooksScreen"
+  | "/home/homeScreens/shopItemsScreen"
+  | "/home/homeScreens/eventCardScreen"
+  | "/home/homeScreens/resourcesScreen";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const cardTitleText = "Event";
-  const cardDescriptionText =
-    "Cats move with a grace that defies explanation, each step measured and deliberate, as if choreographed by nature itself. Their silky fur and silent paws belie the sharp intellect behind their steady gaze. They leap effortlessly to high perches, they exude a quiet confidence that captivates.";
+  const [username, setUsername] = useState("");
+  const [hasNotifications, setHasNotifications] = useState(true);
 
-  // Check if user is logged in
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const keys = await AsyncStorage.getAllKeys();
+  const featuredEvent = {
+    title: "Spring Book Exchange",
+    description:
+      "Join the biggest textbook exchange event this semester! Trade, sell, or buy books from fellow students.",
+    image: require("../../../assets/images/cat_sleeping.png"),
+    date: "March 15",
+    location: "Student Center",
+  };
 
-        // Look for Supabase auth token (keys that start with "sb-" and end with "-auth-token")
-        const supabaseAuthKey = keys.find(
-          (key) => key.startsWith("sb-") && key.endsWith("-auth-token")
-        );
+  const quickActions: {
+    id: number;
+    title: string;
+    icon: string;
+    color: string;
+    route: RouteType; // Use the defined type here
+  }[] = [
+    {
+      id: 1,
+      title: "Textbooks",
+      icon: "📚",
+      color: "#4A90E2",
+      route: "/home/homeScreens/shopBooksScreen",
+    },
+    {
+      id: 2,
+      title: "Electronics",
+      icon: "💻",
+      color: "#7B68EE",
+      route: "/home/homeScreens/shopItemsScreen",
+    },
+    {
+      id: 3,
+      title: "Furniture",
+      icon: "🪑",
+      color: "#50C878",
+      route: "/home/homeScreens/shopItemsScreen",
+    },
+    {
+      id: 4,
+      title: "Clothing",
+      icon: "👕",
+      color: "#FF6B6B",
+      route: "/home/homeScreens/shopItemsScreen",
+    },
+  ];
 
-        if (!supabaseAuthKey) {
-          console.log("No Supabase auth key found, redirecting to sign in");
-          router.replace("/(tabs)/accountCreation/account/signInScreen");
-          return;
-        }
+  // Fetch username for personalized greeting
+  const fetchUsername = async () => {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-        const authData = await AsyncStorage.getItem(supabaseAuthKey);
-
-        if (!authData) {
-          console.log("No auth data found, redirecting to sign in");
-          router.replace("/(tabs)/accountCreation/account/signInScreen");
-          return;
-        }
-
-        // Parse the auth data to check if it's valid
-        try {
-          const parsedAuthData = JSON.parse(authData);
-
-          // Check if we have an access token and user data
-          if (!parsedAuthData.access_token || !parsedAuthData.user) {
-            console.log("Invalid auth data structure, redirecting to sign in");
-            router.replace("/(tabs)/accountCreation/account/signInScreen");
-            return;
-          }
-
-          // Optional: Check if token is expired
-          const expiresAt = parsedAuthData.expires_at;
-          if (expiresAt && expiresAt < Math.floor(Date.now() / 1000)) {
-            console.log("Auth token expired, redirecting to sign in");
-            router.replace("/(tabs)/accountCreation/account/signInScreen");
-            return;
-          }
-
-          console.log("User is authenticated, proceeding to home screen");
-          setIsLoading(false);
-        } catch (parseError) {
-          console.error("Error parsing auth data:", parseError);
-          router.replace("/(tabs)/accountCreation/account/signInScreen");
-          return;
-        }
-      } catch (error) {
-        console.error("Error checking auth status:", error);
+      if (userError || !user) {
         router.replace("/(tabs)/accountCreation/account/signInScreen");
+        return;
       }
-    };
 
-    checkAuthStatus();
-  }, [router]);
+      // Fetch profile data from the profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
 
-  // Show loading screen while checking authentication
+      if (profileError) {
+        console.error("Error fetching profile:", profileError.message);
+        setUsername("Student");
+        return;
+      }
+
+      if (profileData) {
+        setUsername(profileData.username || "Student");
+      } else {
+        setUsername("Student");
+      }
+    } catch (error) {
+      console.error("Error:", (error as Error).message);
+      router.replace("/(tabs)/accountCreation/account/signInScreen");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsername();
+  }, []);
+
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.maincontainer, styles.loadingContainer]}>
-        <Text style={styles.loadingText}>Loading...</Text>
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+        <View style={styles.loadingContent}>
+          <Text style={styles.loadingText}>Welcome to Rebooked</Text>
+          <View style={styles.loadingDots}>
+            <View style={[styles.dot, styles.dot1]} />
+            <View style={[styles.dot, styles.dot2]} />
+            <View style={[styles.dot, styles.dot3]} />
+          </View>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.maincontainer}>
-      <View style={{ height: "9%", backgroundColor: "#f2f2f2" }}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Rebooked</Text>
-          <Text className=""></Text>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.greeting}>
+            Hello, {username || "Student"}! 👋
+          </Text>
+          <Text style={styles.subtitle}>What are you looking for today?</Text>
         </View>
-      </View>
-      <View style={{ height: "31%", backgroundColor: "#f2f2f2" }}>
-        <View style={styles.mainCardContainer}>
+        <View style={styles.headerRight}>
           <TouchableOpacity
-            onPress={() =>
-              router.push("/(tabs)/home/homeScreens/eventCardScreen")
-            }
+            style={styles.iconButton}
+            //onPress={() => router.push("/messages")}
           >
-            <Image
-              source={require("../../../assets/images/cat_sleeping.png")}
-              style={styles.mainCardImage}
-            />
+            <Ionicons name="notifications-outline" size={24} color="#333" />
+            {hasNotifications && <View style={styles.notificationDot} />}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.iconButton}
+            //onPress={() => router.push("/notifications")}
+          >
+            <Ionicons name="chatbubble-outline" size={24} color="#333" />
+            {hasNotifications && <View style={styles.notificationDot} />}
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={{ height: "20%", backgroundColor: "#f2f2f2" }}>
-        <View style={styles.cardTitleDescContainer}>
-          <Text style={styles.cardTitle}>{cardTitleText}</Text>
-          <Text style={styles.cardDescription}>{cardDescriptionText}</Text>
-        </View>
-      </View>
-      <View style={{ height: "30%", backgroundColor: "#f2f2f2" }}>
-        <View style={styles.shopTitleContainer}>
-          <Text style={styles.shopTitle}>Shop</Text>
-        </View>
-        <View style={styles.shopCardsContainer}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Featured Event Card */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Featured Event</Text>
           <TouchableOpacity
-            onPress={() => router.push("/home/homeScreens/shopBooksScreen")}
+            style={styles.featuredCard}
+            onPress={() =>
+              router.push("/(tabs)/home/homeScreens/eventCardScreen")
+            }
+            activeOpacity={0.9}
           >
-            <View style={styles.shopCards}>
-              <Text style={styles.emojiIcon}>📚</Text>
-              <Text style={styles.shopCardText}>Textbooks</Text>
+            <View style={styles.featuredImageContainer}>
+              <Image
+                source={featuredEvent.image}
+                style={styles.featuredImage}
+                resizeMode="cover"
+              />
+              <View style={styles.featuredOverlay}>
+                <View style={styles.eventBadge}>
+                  <Text style={styles.eventBadgeText}>
+                    {featuredEvent.date}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.featuredContent}>
+              <Text style={styles.featuredTitle}>{featuredEvent.title}</Text>
+              <Text style={styles.featuredDescription} numberOfLines={2}>
+                {featuredEvent.description}
+              </Text>
+              <View style={styles.featuredFooter}>
+                <View style={styles.locationContainer}>
+                  <Ionicons name="location-outline" size={14} color="#666" />
+                  <Text style={styles.locationText}>
+                    {featuredEvent.location}
+                  </Text>
+                </View>
+                <Text style={styles.learnMore}>Learn more →</Text>
+              </View>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push("/home/homeScreens/shopItemsScreen")}
-          >
-            <View style={styles.shopCards}>
-              <Text style={styles.emojiIcon}>🎁</Text>
-              <Text style={styles.shopCardText}>Items</Text>
-            </View>
-          </TouchableOpacity>
         </View>
-      </View>
-      <View style={styles.resourcesContainer}>
-        <TouchableOpacity
-          onPress={() => router.push("/home/homeScreens/resourcesScreen")}
-        >
-          <View style={styles.resourcesTextContainer}>
-            <Text style={styles.resourcesText}>Resources</Text>
+
+        {/* Quick Actions */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Shop by Category</Text>
+          <View style={styles.quickActionsGrid}>
+            {quickActions.map((action) => (
+              <TouchableOpacity
+                key={action.id}
+                style={[
+                  styles.quickActionCard,
+                  { backgroundColor: action.color },
+                ]}
+                onPress={() => router.push(action.route)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.quickActionIcon}>{action.icon}</Text>
+                <Text style={styles.quickActionTitle}>{action.title}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        </TouchableOpacity>
-      </View>
+        </View>
+
+        {/* Resources Section */}
+        <View
+          style={[styles.sectionContainer, styles.resourcesSectionContainer]}
+        >
+          <TouchableOpacity
+            style={styles.resourcesCard}
+            onPress={() => router.push("/home/homeScreens/resourcesScreen")}
+            activeOpacity={0.9}
+          >
+            <View style={styles.resourcesContent}>
+              <View style={styles.resourcesIcon}>
+                <Ionicons name="library-outline" size={24} color="#4A90E2" />
+              </View>
+              <View style={styles.resourcesText}>
+                <Text style={styles.resourcesTitle}>Campus Resources</Text>
+                <Text style={styles.resourcesSubtitle}>
+                  Study guides, tutoring, and academic support
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#666" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Bottom spacing */}
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   loadingContainer: {
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    fontSize: 18,
-    color: "#666",
-  },
-  maincontainer: {
-    flex: 1,
-    height: "100%",
-    backgroundColor: "#f2f2f2",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-  },
-  titleContainer: {
+  loadingContent: {
     alignItems: "center",
-    width: "100%",
-    backgroundColor: "#f2f2f2",
-    marginBottom: "5%",
   },
-  title: {
-    fontSize: 35,
-    fontWeight: "800",
-    color: "#38b6ff",
-    shadowColor: "#aaa",
+  loadingText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#4A90E2",
+    marginBottom: 20,
+  },
+  loadingDots: {
+    flexDirection: "row",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#4A90E2",
+    marginHorizontal: 3,
+  },
+  dot1: {
+    opacity: 0.3,
+  },
+  dot2: {
+    opacity: 0.6,
+  },
+  dot3: {
+    opacity: 1,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+    backgroundColor: "#FFFFFF",
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "400",
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconButton: {
+    padding: 8,
+    marginLeft: 8,
+    position: "relative",
+  },
+  notificationDot: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FF4757",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  sectionContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 5,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 16,
+  },
+  featuredCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    shadowColor: "#000",
     shadowOffset: {
-      width: 2,
-      height: 2,
+      width: 0,
+      height: 4,
     },
-    shadowOpacity: 0.5,
-  },
-  mainCardContainer: {
-    width: "85%",
-    height: 200,
-    borderRadius: 10,
-    marginHorizontal: 30,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
     overflow: "hidden",
   },
-  mainCardImage: {
-    height: "100%",
+  featuredImageContainer: {
+    height: 180,
+    position: "relative",
+  },
+  featuredImage: {
     width: "100%",
+    height: "100%",
   },
-  cardTitleDescContainer: {
-    backgroundColor: "#f2f2f2",
-    alignItems: "flex-start",
-    marginHorizontal: 30,
+  featuredOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+    padding: 16,
   },
-  cardTitle: {
-    fontWeight: "800",
-    fontSize: 20,
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginBottom: "1%",
+  eventBadge: {
+    backgroundColor: "#4A90E2",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  cardDescription: {
-    fontWeight: "600",
+  eventBadgeText: {
+    color: "#FFFFFF",
     fontSize: 12,
-    marginHorizontal: 10,
+    fontWeight: "600",
   },
-  shopTitleContainer: {
-    backgroundColor: "#f2f2f2",
-    alignItems: "flex-start",
-    marginHorizontal: 30,
+  featuredContent: {
+    padding: 20,
   },
-  shopTitle: {
-    fontWeight: "800",
-    fontSize: 20,
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginBottom: "3%",
+  featuredTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 8,
   },
-  shopCardsContainer: {
+  featuredDescription: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  featuredFooter: {
     flexDirection: "row",
-    alignSelf: "center",
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
-    marginHorizontal: 30,
-    width: "85%",
-    height: 155,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  locationText: {
+    fontSize: 12,
+    color: "#666",
+    marginLeft: 4,
+  },
+  learnMore: {
+    fontSize: 14,
+    color: "#4A90E2",
+    fontWeight: "600",
+  },
+  quickActionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  emojiIcon: {
-    marginTop: "15%",
-    fontSize: 70,
-  },
-  shopCards: {
-    width: 150,
-    height: "100%",
-    borderRadius: 10,
-    backgroundColor: "#C4DFFF",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 5,
-      height: 5,
-    },
-    shadowOpacity: 0.75,
+  quickActionCard: {
+    width: "47%",
+    aspectRatio: 1.2,
+    borderRadius: 16,
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "flex-start",
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  shopCardText: {
-    marginTop: "5%",
-    color: "#024B5C",
+  quickActionIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  quickActionTitle: {
+    fontSize: 16,
     fontWeight: "600",
-    opacity: 0.5,
-    fontSize: 15,
+    color: "#FFFFFF",
+    textAlign: "center",
   },
-  resourcesContainer: {
-    height: "20%",
+  resourcesCard: {
+    backgroundColor: "#F8FAFE",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E3F2FD",
+  },
+  resourcesContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+  },
+  resourcesSectionContainer: {
+    marginTop: -45,
+    marginBottom: 5,
+  },
+  resourcesIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#E3F2FD",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
-  },
-  resourcesTextContainer: {
-    justifyContent: "center",
-    width: 250,
-    height: 45,
-    backgroundColor: "#38B6FF",
-    borderRadius: 7,
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 3,
-      height: 3,
-    },
-    shadowOpacity: 0.75,
-    alignItems: "center",
-    bottom: 10,
+    marginRight: 16,
   },
   resourcesText: {
-    fontSize: 25,
-    fontWeight: "800",
-    color: "#F2F7FF",
+    flex: 1,
+  },
+  resourcesTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  resourcesSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+  bottomSpacing: {
+    height: 20,
   },
 });

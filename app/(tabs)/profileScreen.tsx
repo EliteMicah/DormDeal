@@ -72,7 +72,7 @@ export default function ProfileScreen() {
         setUsername(profileData.username || "");
         setUniversity(profileData.university || "Biola University");
         const avatarUrl = profileData.avatar_url || "";
-        console.log("Fetched avatar URL from database:", avatarUrl);
+        // console.log("Fetched avatar URL from database:", avatarUrl);
         setProfilePicture(avatarUrl);
       } else {
         // If no profile exists, create one with default username from user metadata
