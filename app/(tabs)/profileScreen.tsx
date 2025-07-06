@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -71,7 +71,9 @@ export default function ProfileScreen() {
         // Set the data from the database
         setUsername(profileData.username || "");
         setUniversity(profileData.university || "Biola University");
-        setProfilePicture(profileData.profile_picture || "");
+        const avatarUrl = profileData.avatar_url || "";
+        console.log("Fetched avatar URL from database:", avatarUrl);
+        setProfilePicture(avatarUrl);
       } else {
         // If no profile exists, create one with default username from user metadata
         const defaultUsername = user.user_metadata?.username || "";
@@ -80,6 +82,7 @@ export default function ProfileScreen() {
           id: user.id,
           username: defaultUsername,
           university: "Biola University",
+          avatar_url: "", // Initialize with empty avatar_url
         });
 
         if (insertError) {
@@ -118,10 +121,10 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      {/* Modal component */}
+      {/* Edit Profile Modal */}
       <EditProfileModal
         visible={isModalVisible}
-        onClose={handleModalClose} // This refers to the onClose prop of EditProfileModal
+        onClose={handleModalClose}
         currentUsername={username}
         currentProfilePicture={profilePicture}
       />
@@ -129,7 +132,18 @@ export default function ProfileScreen() {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View style={styles.profileImage}>
-          <Ionicons name="person" size={75} style={styles.imageIcon} />
+          {profilePicture ? (
+            <Image
+              source={{ uri: profilePicture }}
+              style={styles.profileImageActual}
+              onLoad={() => console.log("Image loaded successfully")}
+              onError={(error) =>
+                console.log("Image load error:", error.nativeEvent.error)
+              }
+            />
+          ) : (
+            <Ionicons name="person" size={75} style={styles.imageIcon} />
+          )}
         </View>
 
         <View style={styles.userInfo}>
@@ -165,14 +179,6 @@ export default function ProfileScreen() {
           ))}
         </View>
       </View>
-
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)} // Close the modal
-        currentUsername={username}
-        currentProfilePicture={profilePicture}
-      />
     </SafeAreaView>
   );
 }
@@ -196,6 +202,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden", // Ensure the image stays within the circular bounds
+  },
+  profileImageActual: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   imageIcon: {
     marginBottom: 10,

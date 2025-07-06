@@ -34,6 +34,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [profilePicture, setProfilePicture] = useState(currentProfilePicture);
   const [isDeleting, setIsDeleting] = useState(false);
   const [university, setUniversity] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   // Animation values for delete button
   const deleteProgress = useRef(new Animated.Value(0)).current;
@@ -58,7 +59,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ username: username.trim() })
+        .update({
+          username: username.trim(),
+          avatar_url: profilePicture, // Save the profile picture URL
+        })
         .eq("id", user.id);
 
       if (error) {
@@ -111,23 +115,183 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   };
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
-      return;
+  const uploadImageToSupabase = async (imageUri: string) => {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("User not authenticated");
+      }
+
+      // For React Native, we need to use FormData or different blob conversion
+      const fileExt = imageUri.split(".").pop() || "jpg";
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+
+      console.log("Uploading to path:", filePath);
+      console.log("Original image URI:", imageUri);
+
+      // Create FormData for proper file upload in React Native
+      const formData = new FormData();
+      formData.append("file", {
+        uri: imageUri,
+        type: `image/${fileExt}`,
+        name: fileName,
+      } as any);
+
+      // Alternative method: Use the file directly without FormData
+      // Convert URI to blob properly for React Native
+      let fileToUpload;
+
+      if (imageUri.startsWith("file://")) {
+        // For React Native file URIs, we need to handle them differently
+        fileToUpload = {
+          uri: imageUri,
+          type: `image/${fileExt}`,
+          name: fileName,
+        };
+      } else {
+        // For other URIs, try the fetch approach but with better error handling
+        try {
+          const response = await fetch(imageUri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status}`);
+          }
+          const blob = await response.blob();
+          console.log("Blob size:", blob.size, "type:", blob.type);
+
+          if (blob.size === 0) {
+            throw new Error("Image blob is empty");
+          }
+
+          fileToUpload = blob;
+        } catch (fetchError) {
+          console.error("Error converting to blob:", fetchError);
+          // Fallback to direct URI approach
+          fileToUpload = {
+            uri: imageUri,
+            type: `image/${fileExt}`,
+            name: fileName,
+          };
+        }
+      }
+
+      console.log("File to upload:", fileToUpload);
+
+      // Upload to Supabase Storage
+      const { data, error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, fileToUpload, {
+          contentType: `image/${fileExt}`,
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError as Error;
+      }
+
+      console.log("Upload successful:", data);
+
+      // Verify the file was uploaded with content
+      const { data: fileInfo, error: infoError } = await supabase.storage
+        .from("avatars")
+        .list("", { search: fileName });
+
+      if (!infoError && fileInfo && fileInfo.length > 0) {
+        console.log("Uploaded file info:", fileInfo[0]);
+        if (fileInfo[0].metadata?.size === 0) {
+          console.warn("Warning: Uploaded file has 0 size!");
+        }
+      }
+
+      // Try using a signed URL instead of public URL (more reliable for React Native)
+      const { data: signedUrlData, error: signedUrlError } =
+        await supabase.storage
+          .from("avatars")
+          .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
+
+      if (signedUrlError) {
+        console.error("Signed URL error:", signedUrlError);
+        // Fallback to public URL if signed URL fails
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        console.log("Fallback to public URL:", publicUrl);
+        return publicUrl;
+      }
+
+      console.log("Generated signed URL:", signedUrlData.signedUrl);
+      return signedUrlData.signedUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error as Error;
     }
+  };
 
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  const pickImage = async () => {
+    try {
+      // Request permissions
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Sorry, we need camera roll permissions to make this work!"
+        );
+        return;
+      }
 
-    if (!result.canceled) {
-      setProfilePicture(result.assets[0].uri);
+      setIsUploading(true);
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [1, 1], // Square aspect ratio for profile pictures
+        quality: 0.8, // Reduce quality for faster upload
+      });
+
+      console.log("Image picker result:", result);
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = result.assets[0].uri;
+        console.log("Selected image URI:", imageUri);
+
+        // Keep showing the local image during upload
+        setProfilePicture(imageUri);
+
+        try {
+          // Upload to Supabase
+          const publicUrl = await uploadImageToSupabase(imageUri);
+          console.log("Upload completed, public URL:", publicUrl);
+
+          // Only update to Supabase URL after successful upload and verification
+          setProfilePicture(publicUrl);
+
+          console.log("Success", "Profile picture uploaded successfully!");
+        } catch (uploadError) {
+          console.error("Upload failed:", (uploadError as Error).message);
+          setProfilePicture(currentProfilePicture);
+          Alert.alert(
+            "Upload Error",
+            `Failed to upload: ${(uploadError as Error).message}`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert(
+        "Error",
+        `Failed to select image: ${(error as Error).message}`
+      );
+      // Reset to previous state on error
+      setProfilePicture(currentProfilePicture);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -219,11 +383,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               )}
             </View>
             <TouchableOpacity
-              style={styles.changePictureButton}
+              style={[
+                styles.changePictureButton,
+                isUploading && styles.changePictureButtonDisabled,
+              ]}
               onPress={pickImage}
+              disabled={isUploading}
             >
               <Text style={styles.changePictureText}>
-                Change Profile Picture
+                {isUploading ? "Uploading..." : "Change Profile Picture"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -384,6 +552,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#007BFF",
+  },
+  changePictureButtonDisabled: {
+    opacity: 0.6,
+    borderColor: "#6c757d",
   },
   changePictureText: {
     color: "#007BFF",
