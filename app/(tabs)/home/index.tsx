@@ -5,13 +5,12 @@ import {
   Text,
   View,
   ScrollView,
-  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../../lib/supabase"; // Adjust path as needed
+import { supabase } from "../../../lib/supabase";
 
 // Define a type for the routes
 type RouteType =
@@ -131,39 +130,37 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.greeting}>
-            Hello, {username || "Student"}! 👋
-          </Text>
-          <Text style={styles.subtitle}>What are you looking for today?</Text>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            //onPress={() => router.push("/messages")}
-          >
-            <Ionicons name="notifications-outline" size={24} color="#333" />
-            {hasNotifications && <View style={styles.notificationDot} />}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.iconButton}
-            //onPress={() => router.push("/notifications")}
-          >
-            <Ionicons name="chatbubble-outline" size={24} color="#333" />
-            {hasNotifications && <View style={styles.notificationDot} />}
-          </TouchableOpacity>
-        </View>
-      </View>
-
+    <SafeAreaView style={[styles.container]} edges={["top"]}>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greeting}>
+              Hello, {username || "Student"}! 👋
+            </Text>
+            <Text style={styles.subtitle}>What are you looking for today?</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              //onPress={() => router.push("/notifs")}
+            >
+              <Ionicons name="notifications-outline" size={24} color="#333" />
+              {hasNotifications && <View style={styles.notificationDot} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => router.push("/home/homeScreens/messagingScreen")}
+            >
+              <Ionicons name="chatbubble-outline" size={24} color="#333" />
+              {hasNotifications && <View style={styles.notificationDot} />}
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Featured Event Card */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Featured Event</Text>
@@ -300,12 +297,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingHorizontal: 20,
-    paddingTop: 10,
+    marginTop: 20,
     paddingBottom: 20,
     backgroundColor: "#FFFFFF",
+    overflow: "visible",
   },
   headerLeft: {
     flex: 1,
+    zIndex: 1,
   },
   greeting: {
     fontSize: 24,
@@ -326,6 +325,7 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 8,
     position: "relative",
+    marginTop: 5,
   },
   notificationDot: {
     position: "absolute",
