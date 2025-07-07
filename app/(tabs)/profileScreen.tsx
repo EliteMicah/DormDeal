@@ -136,7 +136,7 @@ export default function ProfileScreen() {
             <Image
               source={{ uri: profilePicture }}
               style={styles.profileImageActual}
-              onLoad={() => console.log("Image loaded successfully")}
+              // onLoad={() => console.log("Image loaded successfully")}
               onError={(error) =>
                 console.log("Image load error:", error.nativeEvent.error)
               }
