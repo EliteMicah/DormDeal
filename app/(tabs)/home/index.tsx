@@ -146,7 +146,7 @@ export default function HomeScreen() {
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={styles.iconButton}
-              //onPress={() => router.push("/notifs")}
+              onPress={() => console.log("Notifs Pressed")}
             >
               <Ionicons name="notifications-outline" size={24} color="#333" />
               {hasNotifications && <View style={styles.notificationDot} />}
@@ -258,7 +258,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#f2f2f2",
   },
   loadingContainer: {
     justifyContent: "center",
@@ -297,14 +297,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingHorizontal: 20,
-    marginTop: 20,
     paddingBottom: 20,
-    backgroundColor: "#FFFFFF",
-    overflow: "visible",
+    backgroundColor: "#f2f2f2",
   },
   headerLeft: {
     flex: 1,
-    zIndex: 1,
   },
   greeting: {
     fontSize: 24,
@@ -320,12 +317,14 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 10,
   },
   iconButton: {
-    padding: 8,
-    marginLeft: 8,
-    position: "relative",
-    marginTop: 5,
+    padding: 12,
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   notificationDot: {
     position: "absolute",
@@ -333,7 +332,7 @@ const styles = StyleSheet.create({
     right: 6,
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: 6,
     backgroundColor: "#FF4757",
   },
   scrollView: {
@@ -496,5 +495,15 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
+  },
+  testTextButton: {
+    position: "absolute",
+    right: 20,
+    top: 50,
+    zIndex: 10,
+  },
+  testText: {
+    fontSize: 14,
+    color: "gray",
   },
 });
