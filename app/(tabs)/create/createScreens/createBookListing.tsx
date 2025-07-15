@@ -8,13 +8,16 @@ import {
   Text,
   View,
   ScrollView,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../../../lib/supabase";
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
 
 export default function CreateBookListing() {
   const router = useRouter();
@@ -23,10 +26,12 @@ export default function CreateBookListing() {
   const [isbn, setIsbn] = useState("");
   const [condition, setCondition] = useState("New");
   const [price, setPrice] = useState("");
-  const [paymentType, setPaymentType] = useState("Any");
-  const [description, setDescription] = useState(""); // Added description state
+  const [paymentType, setPaymentType] = useState("Venmo");
+  const [description, setDescription] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [username, setUsername] = useState<string>("");
 
   // Modal visibility states
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
@@ -34,7 +39,29 @@ export default function CreateBookListing() {
 
   // Options
   const conditionOptions = ["New", "Used", "Noted"];
-  const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
+  const paymentTypeOptions = ["Venmo", "Zelle", "Cash"];
+
+  // Get current user on component mount
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setCurrentUser(user);
+
+      // Also get the username from profiles table
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+
+        setUsername(profile?.username || "");
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -104,12 +131,109 @@ export default function CreateBookListing() {
 
   const handleSubmit = async () => {
     console.log("Submitting form...");
+    setFormError(null);
+
+    // Check if user is authenticated
+    if (!currentUser) {
+      setFormError("You must be logged in to create a listing.");
+      return;
+    }
+
+    // Check if username is available
+    if (!username) {
+      setFormError("Username not found. Please make sure your profile is set up.");
+      return;
+    }
+
+    // Validate required fields
     if (!title || !isbn || !condition || !price || !paymentType || !image) {
-      console.log("Form error: Missing fields");
       setFormError("Please fill in all the fields along with a picture!");
       return;
-    } else {
-      console.log("User filled all the fields!");
+    }
+
+    // Validate price is a number
+    const numericPrice = parseFloat(price);
+    if (isNaN(numericPrice) || numericPrice <= 0) {
+      setFormError("Please enter a valid price.");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Upload image first if present
+      let imageUrl = null;
+      if (image) {
+        const tempImageFileName = `book_images/${currentUser.id}_${Date.now()}.jpg`;
+
+        // Convert image to base64
+        const base64 = await FileSystem.readAsStringAsync(image, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("book-images")
+          .upload(tempImageFileName, decode(base64), {
+            contentType: "image/jpeg",
+          });
+
+        if (uploadError) {
+          console.error("Image upload error:", uploadError);
+          setFormError("Failed to upload image. Please try again.");
+          return;
+        }
+
+        // Get public URL for the uploaded image
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("book-images").getPublicUrl(tempImageFileName);
+
+        imageUrl = publicUrl;
+      }
+
+      // Create book listing in database WITH image URL
+      const { data, error } = await supabase
+        .from("book_listing")
+        .insert([
+          {
+            title: title.trim(),
+            isbn: isbn.trim(),
+            condition: condition,
+            price: numericPrice,
+            payment_type: paymentType,
+            description: description.trim() || null,
+            image_url: imageUrl,
+            user_id: currentUser.id,
+            username: username,
+          },
+        ])
+        .select();
+
+      if (error) {
+        console.error("Database insert error:", error);
+        setFormError("Failed to create listing. Please try again.");
+        return;
+      }
+
+      // Success - show alert and navigate back
+      Alert.alert(
+        "Success!",
+        "Your book listing has been created successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.back();
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      setFormError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -207,6 +331,9 @@ export default function CreateBookListing() {
             />
           </View>
 
+          {/* Error Message Display */}
+          {formError && <Text style={styles.errorText}>{formError}</Text>}
+
           <View style={styles.createButtonContainer}>
             <View style={styles.createButton}>
               <TouchableOpacity onPress={handleSubmit} disabled={isUploading}>
@@ -217,9 +344,6 @@ export default function CreateBookListing() {
             </View>
           </View>
         </View>
-
-        {/* Error Message Display */}
-        {formError && <Text style={styles.errorText}>{formError}</Text>}
       </ScrollView>
 
       {/* Condition Modal */}

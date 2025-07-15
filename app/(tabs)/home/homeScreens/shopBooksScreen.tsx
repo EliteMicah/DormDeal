@@ -4,49 +4,40 @@ import {
   TouchableOpacity,
   Text,
   View,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../../lib/supabase";
 
-// Book data structure
-const BOOKS_DATA = {
-  new: [
-    { id: "new-1", price: 10, seller: "Username1", image: null },
-    { id: "new-2", price: 15, seller: "Username2", image: null },
-    { id: "new-3", price: 12, seller: "Username3", image: null },
-    { id: "new-4", price: 20, seller: "Username4", image: null },
-    { id: "new-5", price: 18, seller: "Username5", image: null },
-  ],
-  used: [
-    { id: "used-1", price: 8, seller: "Username6", image: null },
-    { id: "used-2", price: 6, seller: "Username7", image: null },
-    { id: "used-3", price: 7, seller: "Username8", image: null },
-    { id: "used-4", price: 5, seller: "Username9", image: null },
-    { id: "used-5", price: 9, seller: "Username10", image: null },
-  ],
-  noted: [
-    { id: "noted-1", price: 5, seller: "Username11", image: null },
-    { id: "noted-2", price: 4, seller: "Username12", image: null },
-    { id: "noted-3", price: 6, seller: "Username13", image: null },
-    { id: "noted-4", price: 3, seller: "Username14", image: null },
-    { id: "noted-5", price: 7, seller: "Username15", image: null },
-  ],
-};
+// Book listing interface
+interface BookListing {
+  id: number;
+  title: string;
+  price: number;
+  condition: string;
+  image_url?: string;
+  user_id: string;
+  created_at: string;
+  isbn?: string;
+  payment_type: string;
+  description?: string;
+  username?: string;
+}
 
 const BookSection = ({
   title,
   books,
   router,
+  isLoading,
 }: {
   title: string;
-  books: Array<{
-    id: string;
-    price: number;
-    seller: string;
-    image: string | null;
-  }>;
+  books: BookListing[];
   router: any;
+  isLoading: boolean;
 }) => (
   <View style={styles.mainConditionContainer}>
     <View style={styles.conditionTextContainer}>
@@ -61,27 +52,49 @@ const BookSection = ({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {books.map((book) => (
-          <TouchableOpacity
-            key={book.id}
-            style={styles.cardContainer}
-            onPress={() =>
-              router.push("/(tabs)/home/homeScreens/bookDetailsScreen")
-            }
-          >
-            <View style={styles.cardImage} />
-            <View style={styles.cardDetails}>
-              <Text style={styles.cardPrice}>${book.price}</Text>
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={styles.cardSeller}
-              >
-                {book.seller}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#38b6ff" />
+          </View>
+        ) : books.length > 0 ? (
+          books.map((book) => (
+            <TouchableOpacity
+              key={book.id}
+              style={styles.cardContainer}
+              onPress={() =>
+                router.push({
+                  pathname: "/(tabs)/home/homeScreens/bookDetailsScreen",
+                  params: { bookId: book.id },
+                })
+              }
+            >
+              {book.image_url ? (
+                <Image
+                  source={{ uri: book.image_url }}
+                  style={styles.cardImage}
+                />
+              ) : (
+                <View style={[styles.cardImage, styles.placeholderImage]}>
+                  <Ionicons name="book-outline" size={40} color="#999" />
+                </View>
+              )}
+              <View style={styles.cardDetails}>
+                <Text style={styles.cardPrice}>${book.price}</Text>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={styles.cardSeller}
+                >
+                  {book.username || "Anonymous"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>
+            No {title.toLowerCase()} books available
+          </Text>
+        )}
       </ScrollView>
     </View>
   </View>
@@ -89,6 +102,44 @@ const BookSection = ({
 
 export default function shopBooksScreen() {
   const router = useRouter();
+  const [booksData, setBooksData] = useState<{
+    new: BookListing[];
+    used: BookListing[];
+    noted: BookListing[];
+  }>({ new: [], used: [], noted: [] });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch books from database
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const fetchBooks = async () => {
+    try {
+      const { data: allBooks, error } = await supabase
+        .from("book_listing")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching books:", error);
+        return;
+      }
+
+      // Group books by condition
+      const groupedBooks = {
+        new: allBooks?.filter((book) => book.condition === "New") || [],
+        used: allBooks?.filter((book) => book.condition === "Used") || [],
+        noted: allBooks?.filter((book) => book.condition === "Noted") || [],
+      };
+
+      setBooksData(groupedBooks);
+    } catch (error) {
+      console.error("Unexpected error fetching books:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.maincontainer}>
@@ -112,9 +163,24 @@ export default function shopBooksScreen() {
       </TouchableOpacity>
       <View style={styles.separator} />
 
-      <BookSection title="New" books={BOOKS_DATA.new} router={router} />
-      <BookSection title="Used" books={BOOKS_DATA.used} router={router} />
-      <BookSection title="Noted" books={BOOKS_DATA.noted} router={router} />
+      <BookSection
+        title="New"
+        books={booksData.new}
+        router={router}
+        isLoading={isLoading}
+      />
+      <BookSection
+        title="Used"
+        books={booksData.used}
+        router={router}
+        isLoading={isLoading}
+      />
+      <BookSection
+        title="Noted"
+        books={booksData.noted}
+        router={router}
+        isLoading={isLoading}
+      />
     </SafeAreaView>
   );
 }
@@ -234,6 +300,27 @@ const styles = StyleSheet.create({
     maxWidth: "65%",
     fontWeight: "600",
     color: "blue",
+  },
+  cardTitle: {
+    flexShrink: 1,
+    maxWidth: "65%",
+    fontWeight: "600",
+    color: "#333",
+    fontSize: 12,
+  },
+  placeholderImage: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  emptyText: {
+    padding: 20,
+    textAlign: "center",
+    color: "#666",
+    fontStyle: "italic",
   },
   separator: {
     marginVertical: 4,

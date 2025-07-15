@@ -1,10 +1,28 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, Text, View, Image } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
 import EditProfileModal from "../editProfileModal"; // Adjust the path as necessary
+
+// Book listing interface
+interface BookListing {
+  id: number;
+  title: string;
+  price: number;
+  condition: string;
+  image_url?: string;
+  created_at: string;
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -13,17 +31,12 @@ export default function ProfileScreen() {
   const [university, setUniversity] = useState("");
   const [profilePicture, setProfilePicture] = useState(""); // Add state for profile picture
   const [isModalVisible, setModalVisible] = useState(false); // State to control modal visibility
-
-  const sellingItems = [
-    { id: 1 },
-    { id: 2 },
-    { id: 3 },
-    { id: 4 },
-    // Add more items as needed
-  ];
+  const [userListings, setUserListings] = useState<BookListing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
 
   useEffect(() => {
     fetchUserProfile();
+    fetchUserListings();
 
     // Set up auth state listener
     const {
@@ -33,8 +46,10 @@ export default function ProfileScreen() {
         setUsername("");
         setUniversity("Biola University");
         setProfilePicture("");
+        setUserListings([]);
       } else if (event === "SIGNED_IN") {
         fetchUserProfile();
+        fetchUserListings();
       }
     });
 
@@ -111,6 +126,43 @@ export default function ProfileScreen() {
     fetchUserProfile();
   };
 
+  const fetchUserListings = async () => {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setListingsLoading(false);
+        return;
+      }
+
+      const { data: listings, error } = await supabase
+        .from("book_listing")
+        .select("id, title, price, condition, image_url, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching user listings:", error);
+      } else {
+        setUserListings(listings || []);
+      }
+    } catch (error) {
+      console.error("Unexpected error fetching listings:", error);
+    } finally {
+      setListingsLoading(false);
+    }
+  };
+
+  const handleListingPress = (listingId: number) => {
+    router.push({
+      pathname: "/(tabs)/home/homeScreens/bookDetailsScreen",
+      params: { bookId: listingId },
+    });
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.mainContainer}>
@@ -120,7 +172,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       {/* Edit Profile Modal */}
       <EditProfileModal
         visible={isModalVisible}
@@ -163,22 +215,67 @@ export default function ProfileScreen() {
       </View>
 
       {/* Selling Section */}
-      <View style={styles.sellingSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Selling</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAll}>See all</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.itemGrid}>
-          {sellingItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.itemCard}>
-              {/* Add item content here */}
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.sellingSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              My Listings ({userListings.length})
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/create/createScreen")}
+            >
+              <Text style={styles.addNew}>+ Add New</Text>
             </TouchableOpacity>
-          ))}
+          </View>
+
+          {listingsLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#38b6ff" />
+              <Text style={styles.loadingText}>Loading your listings...</Text>
+            </View>
+          ) : userListings.length > 0 ? (
+            <View style={styles.itemGrid}>
+              {userListings.map((listing) => (
+                <TouchableOpacity
+                  key={listing.id}
+                  style={styles.itemCard}
+                  onPress={() => handleListingPress(listing.id)}
+                >
+                  {listing.image_url ? (
+                    <Image
+                      source={{ uri: listing.image_url }}
+                      style={styles.listingImage}
+                    />
+                  ) : (
+                    <View style={styles.placeholderImage}>
+                      <Ionicons name="book-outline" size={40} color="#999" />
+                    </View>
+                  )}
+                  <View style={styles.listingInfo}>
+                    <Text style={styles.listingTitle} numberOfLines={1}>
+                      {listing.title}
+                    </Text>
+                    <Text style={styles.listingPrice}>${listing.price}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyStateContainer}>
+              <Ionicons name="book-outline" size={60} color="#ccc" />
+              <Text style={styles.emptyStateText}>No listings yet</Text>
+              <TouchableOpacity
+                style={styles.createListingButton}
+                onPress={() => router.push("/(tabs)/create/createScreen")}
+              >
+                <Text style={styles.createListingButtonText}>
+                  Create Your First Listing
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -222,7 +319,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 22,
     fontWeight: "600",
-    color: "#4169e1", // Royal blue color
+    color: "#4169e1",
     marginBottom: 5,
   },
   locationContainer: {
@@ -238,7 +335,7 @@ const styles = StyleSheet.create({
   editProfileButton: {
     position: "absolute",
     right: 20,
-    top: 20,
+    top: 10,
   },
   editProfileText: {
     fontSize: 14,
@@ -271,9 +368,88 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     width: "48%",
-    height: 150,
-    backgroundColor: "#ddd",
+    height: 175,
+    backgroundColor: "white",
     marginBottom: 15,
     borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    overflow: "hidden",
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  listingImage: {
+    width: "100%",
+    height: 120,
+    resizeMode: "cover",
+  },
+  placeholderImage: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  listingInfo: {
+    padding: 8,
+    flex: 1,
+  },
+  listingTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  listingPrice: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#38b6ff",
+    marginBottom: 2,
+  },
+  listingCondition: {
+    fontSize: 12,
+    color: "#666",
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#666",
+  },
+  emptyStateContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  createListingButton: {
+    backgroundColor: "#38b6ff",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  createListingButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  addNew: {
+    fontSize: 14,
+    color: "#38b6ff",
+    fontWeight: "600",
   },
 });
