@@ -113,7 +113,14 @@ export default function CreateBookListing() {
                   setModalVisible(false);
                 }}
               >
-                <Text style={styles.modalOptionText}>{item}</Text>
+                <Text
+                  style={[
+                    styles.modalOptionText,
+                    item === currentValue && styles.selectedOptionText,
+                  ]}
+                >
+                  {item}
+                </Text>
               </TouchableOpacity>
             )}
             keyExtractor={(item) => item}
@@ -141,7 +148,9 @@ export default function CreateBookListing() {
 
     // Check if username is available
     if (!username) {
-      setFormError("Username not found. Please make sure your profile is set up.");
+      setFormError(
+        "Username not found. Please make sure your profile is set up."
+      );
       return;
     }
 
@@ -164,7 +173,9 @@ export default function CreateBookListing() {
       // Upload image first if present
       let imageUrl = null;
       if (image) {
-        const tempImageFileName = `book_images/${currentUser.id}_${Date.now()}.jpg`;
+        const tempImageFileName = `book_images/${
+          currentUser.id
+        }_${Date.now()}.jpg`;
 
         // Convert image to base64
         const base64 = await FileSystem.readAsStringAsync(image, {
@@ -187,7 +198,9 @@ export default function CreateBookListing() {
         // Get public URL for the uploaded image
         const {
           data: { publicUrl },
-        } = supabase.storage.from("book-images").getPublicUrl(tempImageFileName);
+        } = supabase.storage
+          .from("book-images")
+          .getPublicUrl(tempImageFileName);
 
         imageUrl = publicUrl;
       }
@@ -256,71 +269,96 @@ export default function CreateBookListing() {
         contentContainerStyle={styles.scrollContent}
       >
         <Text style={styles.mainTitle}>Create Listing</Text>
+
         <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
           {image ? (
             <Image source={{ uri: image }} style={styles.image} />
           ) : (
-            <Ionicons name="image-outline" size={85} style={styles.imageIcon} />
+            <View style={{ alignItems: "center" }}>
+              <Ionicons
+                name="camera-outline"
+                size={40}
+                style={styles.imageIcon}
+              />
+              <Text style={styles.imageText}>Add Photo</Text>
+            </View>
           )}
         </TouchableOpacity>
-        <View style={styles.identifierContainer}>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Title</Text>
+
+        <View style={styles.formContainer}>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Title</Text>
             <TextInput
-              style={styles.userTextInput}
+              style={styles.inputField}
               placeholder="Name of the Book"
               value={title}
               onChangeText={setTitle}
+              placeholderTextColor="#6c757d"
             />
           </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>ISBN</Text>
+
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>ISBN</Text>
             <TextInput
-              style={styles.userTextInput}
-              placeholder="#"
+              style={styles.inputField}
+              placeholder="Enter ISBN number"
               keyboardType="number-pad"
               returnKeyType="done"
               value={isbn}
               onChangeText={setIsbn}
               maxLength={13}
-              enterKeyHint="enter"
+              placeholderTextColor="#6c757d"
             />
           </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Condition</Text>
+
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Condition</Text>
             <TouchableOpacity
-              style={styles.userTextInput}
+              style={styles.dropdownField}
               onPress={() => setConditionModalVisible(true)}
             >
-              <Text style={styles.dropdownButtonText}>{condition}</Text>
+              <Text style={styles.dropdownText}>{condition}</Text>
+              <Ionicons
+                name="chevron-down"
+                size={20}
+                style={styles.dropdownIcon}
+              />
             </TouchableOpacity>
           </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Price</Text>
+
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Price</Text>
             <TextInput
-              style={styles.userTextInput}
+              style={styles.inputField}
               placeholder="$20"
               keyboardType="number-pad"
               value={price}
               onChangeText={setPrice}
               returnKeyType="done"
+              placeholderTextColor="#6c757d"
             />
           </View>
-          <View style={styles.singleIdentifierContainer}>
-            <Text style={styles.identifierText}>Payment Type</Text>
+
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Payment Type</Text>
             <TouchableOpacity
-              style={styles.userTextInput}
+              style={styles.dropdownField}
               onPress={() => setPaymentModalVisible(true)}
             >
-              <Text style={styles.dropdownButtonText}>{paymentType}</Text>
+              <Text style={styles.dropdownText}>{paymentType}</Text>
+              <Ionicons
+                name="chevron-down"
+                size={20}
+                style={styles.dropdownIcon}
+              />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.identifierText}>Description</Text>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Description</Text>
             <TextInput
-              style={styles.descriptionInput}
-              placeholder="Describe your book in detail... (condition, features, etc.)"
+              style={styles.descriptionField}
+              placeholder="Describe your book in detail..."
               multiline={true}
               numberOfLines={4}
               textAlignVertical="top"
@@ -328,21 +366,24 @@ export default function CreateBookListing() {
               maxLength={300}
               value={description}
               onChangeText={setDescription}
+              placeholderTextColor="#6c757d"
             />
           </View>
 
-          {/* Error Message Display */}
           {formError && <Text style={styles.errorText}>{formError}</Text>}
 
-          <View style={styles.createButtonContainer}>
-            <View style={styles.createButton}>
-              <TouchableOpacity onPress={handleSubmit} disabled={isUploading}>
-                <Text style={styles.buttonText}>
-                  {isUploading ? "Creating Listing..." : "Create Listing!"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              isUploading && styles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={isUploading}
+          >
+            <Text style={styles.submitButtonText}>
+              {isUploading ? "Creating Listing..." : "Create Listing"}
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -370,179 +411,177 @@ export default function CreateBookListing() {
 const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#FFFFFF",
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80,
-    alignItems: "center",
+    paddingBottom: 40,
+    paddingHorizontal: 24,
   },
   mainTitle: {
-    fontSize: 35,
-    fontWeight: "800",
-    color: "#38b6ff",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginTop: -40,
-    marginBottom: 10,
-    alignSelf: "center",
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 32,
+    textAlign: "center",
   },
   imageContainer: {
-    width: 200,
-    height: 200,
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#d4d4d4",
+    width: 160,
+    height: 160,
+    borderRadius: 16,
+    backgroundColor: "#f8f9fa",
+    borderWidth: 2,
+    borderColor: "#e9ecef",
+    borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
+    marginBottom: 32,
   },
   image: {
-    height: "100%",
     width: "100%",
+    height: "100%",
+    borderRadius: 14,
   },
   imageIcon: {
-    opacity: 1,
-    color: "#878787",
+    color: "#6c757d",
+    marginBottom: 8,
   },
-  identifierContainer: {
-    marginTop: "5%",
-    height: "50%",
-    width: "85%",
-    backgroundColor: "#f2f2f2",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignSelf: "center",
+  imageText: {
+    fontSize: 14,
+    color: "#6c757d",
+    textAlign: "center",
   },
-  singleIdentifierContainer: {
-    height: "18%",
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
-    marginBottom: "2%",
+  formContainer: {
+    gap: 24,
   },
-  identifierText: {
-    fontSize: 20,
+  fieldContainer: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontSize: 16,
     fontWeight: "600",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginBottom: 5,
+    color: "#495057",
+    marginLeft: 4,
   },
-  userTextInput: {
-    height: 35,
-    borderColor: "#ccc",
+  inputField: {
+    height: 52,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    justifyContent: "center",
+    borderColor: "#dee2e6",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    backgroundColor: "#ffffff",
+    color: "#212529",
   },
-  descriptionContainer: {
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
-    marginBottom: 15,
-  },
-  descriptionInput: {
-    height: 100,
-    borderColor: "#ccc",
+  dropdownField: {
+    height: 52,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  createButtonContainer: {
-    marginTop: 15,
-    height: "14%",
-    width: "75%",
-    flexDirection: "column",
-    marginHorizontal: 30,
-    backgroundColor: "#f2f2f2",
+    borderColor: "#dee2e6",
+    borderRadius: 12,
+    paddingHorizontal: 16,
     justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-  },
-  createButton: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 8,
-    backgroundColor: "#38B6FF",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 5,
-      height: 5,
-    },
-    shadowOpacity: 0.75,
-    justifyContent: "center",
+    backgroundColor: "#ffffff",
+    flexDirection: "row",
     alignItems: "center",
   },
-  buttonText: {
-    fontSize: 20,
-    color: "#FFFFFF",
-    fontWeight: "800",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginBottom: 5,
+  dropdownText: {
+    fontSize: 16,
+    color: "#212529",
+    flex: 1,
+  },
+  dropdownPlaceholder: {
+    fontSize: 16,
+    color: "#6c757d",
+    flex: 1,
+  },
+  dropdownIcon: {
+    color: "#6c757d",
+    marginLeft: 8,
+  },
+  descriptionField: {
+    height: 120,
+    borderWidth: 1,
+    borderColor: "#dee2e6",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    backgroundColor: "#ffffff",
+    color: "#212529",
+    textAlignVertical: "top",
+  },
+  submitButton: {
+    height: 56,
+    backgroundColor: "#007bff",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#6c757d",
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ffffff",
+  },
+  errorText: {
+    fontSize: 14,
+    color: "#dc3545",
+    marginTop: 8,
+    marginLeft: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
   },
   modalContainer: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: "50%",
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxHeight: "70%",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
+    fontWeight: "600",
+    color: "#212529",
+    marginBottom: 20,
     textAlign: "center",
   },
   modalOption: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   selectedOption: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#e3f2fd",
   },
   modalOptionText: {
     fontSize: 16,
+    color: "#212529",
+    textAlign: "center",
+  },
+  selectedOptionText: {
+    color: "#1976d2",
+    fontWeight: "500",
   },
   cancelButton: {
-    marginTop: 15,
-    padding: 15,
+    marginTop: 16,
+    paddingVertical: 12,
     alignItems: "center",
   },
   cancelButtonText: {
-    color: "red",
     fontSize: 16,
-    fontWeight: "bold",
-  },
-  dropdownButtonText: {
-    fontSize: 14,
-    color: "black",
-    opacity: 0.55,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 14,
-    marginTop: 10,
+    color: "#6c757d",
+    fontWeight: "500",
   },
 });

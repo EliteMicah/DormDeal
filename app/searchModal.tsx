@@ -46,7 +46,8 @@ export default function SearchModal() {
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
 
   // Options
-  const conditionOptions = ["Any", "New", "Used", "Noted"];
+  const bookConditionOptions = ["Any", "New", "Used", "Noted"];
+  const itemConditionOptions = ["Any", "New", "Like New", "Used"];
   const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
   // Search function
@@ -113,6 +114,7 @@ export default function SearchModal() {
   // Handle search type change
   const handleSearchTypeChange = (type: 'books' | 'items') => {
     setSearchType(type);
+    setCondition("Any"); // Reset condition to "Any" when switching types
     clearSearch();
   };
 
@@ -303,7 +305,7 @@ export default function SearchModal() {
 
       {/* Condition Modal */}
       {renderPickerModal(
-        conditionOptions,
+        searchType === 'books' ? bookConditionOptions : itemConditionOptions,
         isConditionModalVisible,
         setConditionModalVisible,
         condition,

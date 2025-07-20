@@ -1,46 +1,47 @@
-import { StyleSheet, TouchableOpacity, Text, View, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CreateScreen() {
   const router = useRouter();
+  
   return (
-    <SafeAreaView style={styles.mainContainer}>
-      <Text style={styles.mainTitle}>Create Listing</Text>
-      <View style={styles.textContainer}>
-        <Text style={styles.text}>Choose a Category</Text>
-      </View>
-      <View style={styles.cardsContainer}>
-        <View style={styles.cardWrapper}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Create Listing</Text>
+        <Text style={styles.subtitle}>Choose what you'd like to sell</Text>
+        
+        <View style={styles.optionsContainer}>
           <TouchableOpacity
+            style={styles.optionCard}
             onPress={() =>
               router.push("/(tabs)/create/createScreens/createBookListing")
             }
           >
-            <View style={styles.sellCards}>
-              <Image
-                source={require("../../../assets/images/books-squared_no_bg.png")}
-                style={styles.imageContainer}
-              />
+            <View style={styles.iconContainer}>
+              <Ionicons name="book-outline" size={32} color="#007bff" />
             </View>
+            <Text style={styles.optionTitle}>Textbooks</Text>
+            <Text style={styles.optionDescription}>
+              Sell your textbooks and academic materials
+            </Text>
           </TouchableOpacity>
-          <Text style={styles.cardText}>Textbooks</Text>
-        </View>
 
-        <View style={styles.cardWrapper}>
           <TouchableOpacity
+            style={styles.optionCard}
             onPress={() =>
               router.push("/(tabs)/create/createScreens/createItemListing")
             }
           >
-            <View style={styles.sellCards}>
-              <Image
-                source={require("../../../assets/images/items_no_bg2.png")}
-                style={styles.imageContainer}
-              />
+            <View style={styles.iconContainer}>
+              <Ionicons name="cube-outline" size={32} color="#007bff" />
             </View>
+            <Text style={styles.optionTitle}>Items</Text>
+            <Text style={styles.optionDescription}>
+              Sell furniture, electronics, and other items
+            </Text>
           </TouchableOpacity>
-          <Text style={styles.cardText}>Items</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -48,85 +49,66 @@ export default function CreateScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  container: {
     flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    height: "100%",
+    backgroundColor: "#FFFFFF",
   },
-  mainTitle: {
-    fontSize: 35,
-    fontWeight: "800",
-    color: "#38b6ff",
-    shadowColor: "#aaa",
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#6c757d",
+    textAlign: "center",
+    marginBottom: 48,
+  },
+  optionsContainer: {
+    gap: 20,
+  },
+  optionCard: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#dee2e6",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
-      width: 2,
+      width: 0,
       height: 2,
     },
-    shadowOpacity: 0.5,
-    marginBottom: 10,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  textContainer: {
-    marginTop: "30%",
-    backgroundColor: "#f2f2f2",
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  cardsContainer: {
-    flexWrap: "wrap",
-    marginTop: "20%",
-    flexDirection: "row",
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
-    marginHorizontal: 30,
-    width: "85%",
-    height: 200,
-    justifyContent: "space-between",
-  },
-  cardWrapper: {
-    alignItems: "center",
-    justifyContent: "flex-start",
-  },
-  imageContainer: {
-    flex: 0,
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-    padding: 3,
-  },
-  sellCards: {
-    width: 150,
-    height: 160,
-    borderRadius: 10,
-    backgroundColor: "#C4DFFF",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 5,
-      height: 5,
-    },
-    shadowOpacity: 0.75,
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#f8f9fa",
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 16,
   },
-  cardText: {
-    color: "#024B5C",
+  optionTitle: {
+    fontSize: 20,
     fontWeight: "600",
-    opacity: 0.5,
-    fontSize: 15,
-    marginTop: 10,
+    color: "#212529",
+    marginBottom: 8,
+  },
+  optionDescription: {
+    fontSize: 14,
+    color: "#6c757d",
     textAlign: "center",
-  },
-  emojiIcon: {
-    marginTop: "10%",
-    fontSize: 70,
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
+    lineHeight: 20,
   },
 });

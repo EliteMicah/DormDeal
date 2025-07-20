@@ -1,54 +1,72 @@
 import React, { useEffect, useRef } from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-//import Colors from "@/constants/Colors";
 import { View, Animated } from "react-native";
 
 function TabBarIcon({
   name,
   color,
   focused,
+  size = 24,
   ...otherProps
 }: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
+  name: React.ComponentProps<typeof Ionicons>["name"];
   color: string;
   focused: boolean;
+  size?: number;
 }) {
-  // Create an animated value for scale
+  // Create animated values for scale and background
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const backgroundOpacity = useRef(new Animated.Value(0)).current;
 
   // Run animation when the focused state changes
   useEffect(() => {
-    Animated.spring(scaleAnim, {
-      toValue: focused ? 1.3 : 1,
-      friction: 8, // Makes the animation smooth
-      tension: 40, // Controls the bounce effect
-      useNativeDriver: true, // Better performance
-    }).start();
-  }, [focused, scaleAnim]);
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: focused ? 1.1 : 1,
+        friction: 10,
+        tension: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backgroundOpacity, {
+        toValue: focused ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [focused, scaleAnim, backgroundOpacity]);
 
   return (
     <View
-      style={[
-        {
-          padding: 8,
-          height: 55,
-          width: 55,
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: 40,
-          marginBottom: 10,
-        },
-      ]}
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        width: 60,
+        height: 60,
+      }}
     >
       <Animated.View
         style={{
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: "#007bff",
+          opacity: backgroundOpacity,
+          position: "absolute",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      />
+      <Animated.View
+        style={{
           transform: [{ scale: scaleAnim }],
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <FontAwesome
-          size={28}
-          color={focused ? "#38B6FF" : color}
+        <Ionicons
+          size={size}
+          color={focused ? "#ffffff" : color}
           name={name}
           {...otherProps}
         />
@@ -61,12 +79,24 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#2f95dc",
+        tabBarActiveTintColor: "#007bff",
+        tabBarInactiveTintColor: "#6c757d",
         headerShown: false,
         tabBarStyle: {
-          display: "flex",
-          height: 80,
-          paddingBottom: 5,
+          backgroundColor: "#ffffff",
+          borderTopWidth: 1,
+          borderTopColor: "#f1f3f4",
+          height: 75,
+          paddingTop: 10,
+          paddingBottom: 30,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 10,
         },
       }}
     >
@@ -81,7 +111,9 @@ export default function TabLayout() {
           }: {
             color: string;
             focused: boolean;
-          }) => <TabBarIcon name="home" color={color} focused={focused} />,
+          }) => (
+            <TabBarIcon name="home-outline" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -103,7 +135,14 @@ export default function TabLayout() {
           }: {
             color: string;
             focused: boolean;
-          }) => <TabBarIcon name="plus" color={color} focused={focused} />,
+          }) => (
+            <TabBarIcon
+              name="add-outline"
+              color={color}
+              focused={focused}
+              size={33}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -117,7 +156,9 @@ export default function TabLayout() {
           }: {
             color: string;
             focused: boolean;
-          }) => <TabBarIcon name="user" color={color} focused={focused} />,
+          }) => (
+            <TabBarIcon name="person-outline" color={color} focused={focused} />
+          ),
         }}
       />
       <Tabs.Screen
