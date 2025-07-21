@@ -114,21 +114,6 @@ export default function BookDetailsScreen() {
     );
   }
 
-  const DetailRow = ({
-    label,
-    value,
-  }: {
-    label: string;
-    value: string | string[];
-  }) => (
-    <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>
-        {Array.isArray(value) ? value.join(", ") : value}
-      </Text>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       <Stack.Screen
@@ -159,66 +144,58 @@ export default function BookDetailsScreen() {
           )}
         </View>
 
-        {/* Title and Price Section */}
-        <View style={styles.headerSection}>
+        {/* Content */}
+        <View style={styles.content}>
           <Text style={styles.title}>{bookDetails.title}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>${bookDetails.price}</Text>
-          </View>
-          <Text style={styles.postedInfo}>
-            Posted {formatDate(bookDetails.created_at)}
+          <Text style={styles.price}>${bookDetails.price}</Text>
+          <Text style={styles.metadata}>
+            {bookDetails.condition} · Posted{" "}
+            {formatDate(bookDetails.created_at)}
           </Text>
-        </View>
 
-        {/* Interested in buying section */}
-        <View style={styles.buyingSection}>
-          <Text style={styles.buyingTitle}>Interested in buying?</Text>
-          <View style={styles.offerButtons}>
-            <TouchableOpacity style={styles.offerButton}>
-              <Text style={styles.offerButtonText}>
-                Place an offer for ${bookDetails.price}?
-              </Text>
+          {/* Action Buttons */}
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Message Seller</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.offerButton, styles.sendOfferButton]}
-            >
-              <Text style={styles.sendOfferText}>Send Message</Text>
+            <TouchableOpacity style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>Make Offer</Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Description Section */}
-        {bookDetails.description && (
-          <View style={styles.descSection}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.descriptionText}>
-              {bookDetails.description}
-            </Text>
-          </View>
-        )}
-
-        {/* Details Section */}
-        <View style={styles.detailsSection}>
-          <Text style={styles.sectionTitle}>Details</Text>
-          {bookDetails.isbn && (
-            <DetailRow label="ISBN" value={bookDetails.isbn} />
-          )}
-          <DetailRow label="Payment Type" value={bookDetails.payment_type} />
-          <DetailRow label="Condition" value={bookDetails.condition} />
-        </View>
-
-        {/* Seller Section */}
-        <View style={styles.sellerSection}>
-          <Text style={styles.sectionTitle}>Seller</Text>
-          <View style={styles.sellerInfo}>
-            <Text style={styles.username}>
-              {sellerInfo?.username || "Anonymous User"}
-            </Text>
-            <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <MaterialIcons key={star} name="star" size={20} color="gray" />
-              ))}
+          {/* Description */}
+          {bookDetails.description && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionText}>{bookDetails.description}</Text>
             </View>
+          )}
+
+          {/* Details */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Details</Text>
+            <View style={styles.details}>
+              {bookDetails.isbn && (
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>ISBN</Text>
+                  <Text style={styles.detailValue}>{bookDetails.isbn}</Text>
+                </View>
+              )}
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Payment</Text>
+                <Text style={styles.detailValue}>
+                  {bookDetails.payment_type}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Seller */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seller</Text>
+            <Text style={styles.sellerName}>
+              {sellerInfo?.username || "Error Fetching Username"}
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -229,157 +206,105 @@ export default function BookDetailsScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "white",
   },
   scroll: {
     flex: 1,
   },
   imageContainer: {
-    width: "85%",
-    height: 200,
-    alignSelf: "center",
-    alignContent: "center",
+    width: "100%",
+    height: 280,
+    backgroundColor: "#f8f8f8",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#ddd",
-    borderRadius: 8,
-  },
-  headerSection: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-    backgroundColor: "#f2f2f2",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-  },
-  priceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: "2%",
-    backgroundColor: "#f2f2f2",
-  },
-  price: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  condition: {
-    fontSize: 18,
-    color: "gray",
-  },
-  postedInfo: {
-    fontSize: 14,
-    color: "gray",
-    marginTop: "2%",
-  },
-  buyingSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-    backgroundColor: "#f2f2f2",
-  },
-  buyingTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 12,
-  },
-  offerButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#f2f2f2",
-    gap: 12,
-  },
-  offerButton: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: "#C9C9C9",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  sendOfferButton: {
-    backgroundColor: "#4169e1",
-  },
-  offerButtonText: {
-    color: "#000",
-  },
-  sendOfferText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  descSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    backgroundColor: "#f2f2f2",
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-  },
-  descriptionText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#333",
-  },
-  sellerSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 14,
-    backgroundColor: "#f2f2f2",
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  sellerInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#f2f2f2",
-  },
-  username: {
-    fontSize: 16,
-    color: "#4169e1",
-    fontWeight: "500",
-    backgroundColor: "#f2f2f2",
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    backgroundColor: "#f2f2f2",
-  },
-  detailsSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    backgroundColor: "#f2f2f2",
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 4,
-    backgroundColor: "#f2f2f2",
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: "gray",
-  },
-  detailValue: {
-    fontSize: 14,
   },
   bookImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-    borderRadius: 8,
   },
   placeholderContainer: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  content: {
+    padding: 24,
+    gap: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    lineHeight: 34,
+  },
+  price: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#4169e1",
+  },
+  metadata: {
+    fontSize: 16,
+    color: "#666",
+  },
+  actions: {
+    gap: 12,
+  },
+  primaryButton: {
+    backgroundColor: "#4169e1",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  secondaryButton: {
+    backgroundColor: "#f8f8f8",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  secondaryButtonText: {
+    color: "#4169e1",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1a1a1a",
+  },
+  sectionText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#333",
+  },
+  details: {
+    gap: 12,
+  },
+  detailItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  detailLabel: {
+    fontSize: 16,
+    color: "#666",
+  },
+  detailValue: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#1a1a1a",
+  },
+  sellerName: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#4169e1",
   },
   loadingContainer: {
     flex: 1,
@@ -403,7 +328,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   backButton: {
-    backgroundColor: "#38b6ff",
+    backgroundColor: "#4169e1",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

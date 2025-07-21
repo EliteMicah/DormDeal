@@ -205,7 +205,9 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Shop by Category</Text>
+          <Text style={[styles.sectionTitle, { marginTop: 10 }]}>
+            Shop by Category
+          </Text>
           <View style={styles.quickActionsGrid}>
             {quickActions.map((action) => (
               <TouchableOpacity
@@ -469,7 +471,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   resourcesSectionContainer: {
-    marginTop: -45,
+    marginTop: -60,
     marginBottom: 5,
   },
   resourcesIcon: {
@@ -496,15 +498,5 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 20,
-  },
-  testTextButton: {
-    position: "absolute",
-    right: 20,
-    top: 50,
-    zIndex: 10,
-  },
-  testText: {
-    fontSize: 14,
-    color: "gray",
   },
 });

@@ -1,40 +1,116 @@
 import {
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Text,
   View,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../../lib/supabase";
+
+// Item listing interface
+interface ItemListing {
+  id: number;
+  title: string;
+  price: number;
+  condition: string;
+  image_url?: string;
+  user_id: string;
+  created_at: string;
+  description?: string;
+}
 
 export default function ItemDetailsScreen() {
-  const bookDetails = {
-    title: "SkateBoard",
-    price: "$50",
-    condition: "New",
-    postedTime: "one day ago",
-    institution: "Biola University",
-    paymentTypes: ["Any", "Cash", "Venmo", "Zelle"],
-    description:
-      "This item is in excellent condition with no scratches. Used for one semester. All wheels are intact and the binding is tight. Perfect for students. Smoke-free home.",
+  const { itemId } = useLocalSearchParams();
+  const router = useRouter();
+  const [itemDetails, setItemDetails] = useState<ItemListing | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sellerInfo, setSellerInfo] = useState<any>(null);
+
+  useEffect(() => {
+    if (itemId) {
+      fetchItemDetails();
+    }
+  }, [itemId]);
+
+  const fetchItemDetails = async () => {
+    try {
+      const { data: item, error } = await supabase
+        .from("item_listing")
+        .select("*")
+        .eq("id", itemId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching item details:", error);
+        Alert.alert("Error", "Could not load item details.");
+        return;
+      }
+
+      setItemDetails(item);
+
+      // Fetch seller info
+      const { data: seller, error: sellerError } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", item.user_id)
+        .single();
+
+      if (!sellerError && seller) {
+        setSellerInfo(seller);
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      Alert.alert("Error", "Could not load item details.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const DetailRow = ({
-    label,
-    value,
-  }: {
-    label: string;
-    value: string | string[];
-  }) => (
-    <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>
-        {Array.isArray(value) ? value.join(", ") : value}
-      </Text>
-    </View>
-  );
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "one day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+    return `${Math.ceil(diffDays / 30)} months ago`;
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.mainContainer}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#38b6ff" />
+          <Text style={styles.loadingText}>Loading item details...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!itemDetails) {
+    return (
+      <SafeAreaView style={styles.mainContainer}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Item not found</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.mainContainer} edges={["top"]}>
@@ -49,72 +125,56 @@ export default function ItemDetailsScreen() {
       />
 
       <ScrollView
-        style={styles.scrollContainer}
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
       >
         <View style={styles.imageContainer}>
-          <View>
-            <MaterialIcons
-              name="photo"
-              size={70}
-              color="gray"
-              backgroundColor="#ddd"
+          {itemDetails.image_url ? (
+            <Image
+              source={{ uri: itemDetails.image_url }}
+              style={styles.itemImage}
             />
-          </View>
-        </View>
-
-        {/* Title and Price Section */}
-        <View style={styles.headerSection}>
-          <Text style={styles.title}>{bookDetails.title}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{bookDetails.price}</Text>
-            <Text style={styles.condition}> · {bookDetails.condition}</Text>
-          </View>
-          <Text style={styles.postedInfo}>
-            Posted {bookDetails.postedTime} · {bookDetails.institution}
-          </Text>
-        </View>
-
-        {/* Interested in buying section */}
-        <View style={styles.buyingSection}>
-          <Text style={styles.buyingTitle}>Interested in buying?</Text>
-          <View style={styles.offerButtons}>
-            <TouchableOpacity style={styles.offerButton}>
-              <Text style={styles.offerButtonText}>
-                Place an offer for $50?
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.offerButton, styles.sendOfferButton]}
-            >
-              <Text style={styles.sendOfferText}>Send Message?</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Desc Section */}
-        <View style={styles.descSection}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.descriptionText}>{bookDetails.description}</Text>
-        </View>
-
-        {/* Details Section */}
-        <View style={styles.detailsSection}>
-          <Text style={styles.sectionTitle}>Details</Text>
-          <DetailRow label="Payment Type" value={bookDetails.paymentTypes} />
-        </View>
-
-        {/* Seller Section */}
-        <View style={styles.sellerSection}>
-          <Text style={styles.sectionTitle}>Seller</Text>
-          <View style={styles.sellerInfo}>
-            <Text style={styles.username}>Username</Text>
-            <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <MaterialIcons key={star} name="star" size={20} color="gray" />
-              ))}
+          ) : (
+            <View style={styles.placeholderContainer}>
+              <MaterialIcons name="category" size={70} color="gray" />
             </View>
+          )}
+        </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          <Text style={styles.title}>{itemDetails.title}</Text>
+          <Text style={styles.price}>${itemDetails.price}</Text>
+          <Text style={styles.metadata}>
+            {itemDetails.condition} · Posted{" "}
+            {formatDate(itemDetails.created_at)}
+          </Text>
+
+          {/* Action Buttons */}
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Message Seller</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>Make Offer</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Description */}
+          {itemDetails.description && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionText}>{itemDetails.description}</Text>
+            </View>
+          )}
+
+          {/* Seller */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seller</Text>
+            <Text style={styles.sellerName}>
+              {sellerInfo?.username || "Anonymous User"}
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -125,147 +185,119 @@ export default function ItemDetailsScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "white",
   },
-  scrollContainer: {
+  scroll: {
     flex: 1,
   },
   imageContainer: {
-    marginHorizontal: 30,
-    height: 200,
-    width: "85%",
-    alignSelf: "center",
-    alignContent: "center",
+    width: "100%",
+    height: 280,
+    backgroundColor: "#f8f8f8",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#ddd",
-    borderRadius: 8,
   },
-  headerSection: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-    backgroundColor: "#f2f2f2",
+  itemImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  placeholderContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
+    padding: 24,
+    gap: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "600",
-  },
-  priceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: "2%",
-    backgroundColor: "#f2f2f2",
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    lineHeight: 34,
   },
   price: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "600",
+    color: "#4169e1",
   },
-  condition: {
-    fontSize: 18,
-    color: "gray",
-  },
-  postedInfo: {
-    fontSize: 14,
-    color: "gray",
-    marginTop: "2%",
-  },
-  buyingSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-    backgroundColor: "#f2f2f2",
-  },
-  buyingTitle: {
+  metadata: {
     fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 12,
+    color: "#666",
   },
-  offerButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#f2f2f2",
+  actions: {
     gap: 12,
   },
-  offerButton: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: "#C9C9C9",
-    borderRadius: 8,
+  primaryButton: {
+    backgroundColor: "#4169e1",
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: "center",
   },
-  sendOfferButton: {
-    backgroundColor: "#4169e1",
-  },
-  offerButtonText: {
-    color: "#000",
-  },
-  sendOfferText: {
-    color: "#fff",
+  primaryButtonText: {
+    color: "white",
+    fontSize: 16,
     fontWeight: "600",
   },
-  descSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    backgroundColor: "#f2f2f2",
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderColor: "grey",
+  secondaryButton: {
+    backgroundColor: "#f8f8f8",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
   },
-  descriptionText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#333",
+  secondaryButtonText: {
+    color: "#4169e1",
+    fontSize: 16,
+    fontWeight: "600",
   },
-  sellerSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 14,
-    backgroundColor: "#f2f2f2",
+  section: {
+    gap: 12,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
-    marginBottom: 4,
+    color: "#1a1a1a",
   },
-  sellerInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#f2f2f2",
-  },
-  username: {
+  sectionText: {
     fontSize: 16,
-    color: "#4169e1",
+    lineHeight: 24,
+    color: "#333",
+  },
+  sellerName: {
+    fontSize: 18,
     fontWeight: "500",
-    backgroundColor: "#f2f2f2",
+    color: "#4169e1",
   },
-  ratingContainer: {
-    flexDirection: "row",
-    backgroundColor: "#f2f2f2",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  detailsSection: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 6,
-    borderBottomWidth: 1,
-    borderColor: "grey",
-    backgroundColor: "#f2f2f2",
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#666",
   },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 4,
-    backgroundColor: "#f2f2f2",
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 32,
   },
-  detailLabel: {
-    fontSize: 14,
-    color: "gray",
+  errorText: {
+    fontSize: 18,
+    color: "#666",
+    marginBottom: 16,
   },
-  detailValue: {
-    fontSize: 14,
+  backButton: {
+    backgroundColor: "#4169e1",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

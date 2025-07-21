@@ -12,9 +12,9 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
-import EditProfileModal from "../editProfileModal"; // Adjust the path as necessary
+import EditProfileModal from "../editProfileModal";
 
-// Book listing interface
+// Updated book listing interface with type identifier
 interface BookListing {
   id: number;
   title: string;
@@ -22,6 +22,7 @@ interface BookListing {
   condition: string;
   image_url?: string;
   created_at: string;
+  type: "book" | "item"; // Add type identifier
 }
 
 export default function ProfileScreen() {
@@ -29,8 +30,8 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [university, setUniversity] = useState("");
-  const [profilePicture, setProfilePicture] = useState(""); // Add state for profile picture
-  const [isModalVisible, setModalVisible] = useState(false); // State to control modal visibility
+  const [profilePicture, setProfilePicture] = useState("");
+  const [isModalVisible, setModalVisible] = useState(false);
   const [userListings, setUserListings] = useState<BookListing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
 
@@ -83,31 +84,10 @@ export default function ProfileScreen() {
       }
 
       if (profileData) {
-        // Set the data from the database
         setUsername(profileData.username || "");
-        setUniversity(profileData.university || "Biola University");
+        setUniversity(profileData.university || "");
         const avatarUrl = profileData.avatar_url || "";
-        // console.log("Fetched avatar URL from database:", avatarUrl);
         setProfilePicture(avatarUrl);
-      } else {
-        // If no profile exists, create one with default username from user metadata
-        const defaultUsername = user.user_metadata?.username || "";
-
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: user.id,
-          username: defaultUsername,
-          university: "Biola University",
-          avatar_url: "", // Initialize with empty avatar_url
-        });
-
-        if (insertError) {
-          console.error("Error creating profile:", insertError.message);
-        } else {
-          // Set the local state after successful insert
-          setUsername(defaultUsername);
-          setUniversity("Biola University");
-          setProfilePicture("");
-        }
       }
     } catch (error) {
       console.error("Error:", (error as Error).message);
@@ -138,16 +118,40 @@ export default function ProfileScreen() {
         return;
       }
 
-      const { data: listings, error } = await supabase
+      const { data: bookListings, error: bookError } = await supabase
         .from("book_listing")
         .select("id, title, price, condition, image_url, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching user listings:", error);
+      const { data: itemListings, error: itemError } = await supabase
+        .from("item_listing")
+        .select("id, title, price, condition, image_url, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (bookError || itemError) {
+        console.error("Error fetching user listings:", bookError || itemError);
       } else {
-        setUserListings(listings || []);
+        // Add type identifier to each listing
+        const combinedListings = [
+          ...(bookListings?.map((listing) => ({
+            ...listing,
+            type: "book" as const,
+          })) || []),
+          ...(itemListings?.map((listing) => ({
+            ...listing,
+            type: "item" as const,
+          })) || []),
+        ];
+
+        // Sort by created_at to maintain chronological order
+        combinedListings.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
+        setUserListings(combinedListings);
       }
     } catch (error) {
       console.error("Unexpected error fetching listings:", error);
@@ -156,11 +160,29 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleListingPress = (listingId: number) => {
+  // Separate handler for book listings
+  const handleBookListingPress = (bookId: number) => {
     router.push({
       pathname: "/(tabs)/home/homeScreens/bookDetailsScreen",
-      params: { bookId: listingId },
+      params: { bookId },
     });
+  };
+
+  // Separate handler for item listings
+  const handleItemListingPress = (itemId: number) => {
+    router.push({
+      pathname: "/(tabs)/home/homeScreens/itemDetailsScreen",
+      params: { itemId },
+    });
+  };
+
+  // Generic handler that routes based on listing type
+  const handleListingPress = (listing: BookListing) => {
+    if (listing.type === "book") {
+      handleBookListingPress(listing.id);
+    } else if (listing.type === "item") {
+      handleItemListingPress(listing.id);
+    }
   };
 
   if (loading) {
@@ -188,7 +210,6 @@ export default function ProfileScreen() {
             <Image
               source={{ uri: profilePicture }}
               style={styles.profileImageActual}
-              // onLoad={() => console.log("Image loaded successfully")}
               onError={(error) =>
                 console.log("Image load error:", error.nativeEvent.error)
               }
@@ -237,9 +258,9 @@ export default function ProfileScreen() {
             <View style={styles.itemGrid}>
               {userListings.map((listing) => (
                 <TouchableOpacity
-                  key={listing.id}
+                  key={`${listing.type}-${listing.id}`} // Updated key to include type
                   style={styles.itemCard}
-                  onPress={() => handleListingPress(listing.id)}
+                  onPress={() => handleListingPress(listing)} // Pass the entire listing object
                 >
                   {listing.image_url ? (
                     <Image
@@ -248,7 +269,15 @@ export default function ProfileScreen() {
                     />
                   ) : (
                     <View style={styles.placeholderImage}>
-                      <Ionicons name="book-outline" size={40} color="#999" />
+                      <Ionicons
+                        name={
+                          listing.type === "book"
+                            ? "book-outline"
+                            : "cube-outline"
+                        }
+                        size={40}
+                        color="#999"
+                      />
                     </View>
                   )}
                   <View style={styles.listingInfo}>
@@ -256,6 +285,10 @@ export default function ProfileScreen() {
                       {listing.title}
                     </Text>
                     <Text style={styles.listingPrice}>${listing.price}</Text>
+                    {/* Optional: Display listing type */}
+                    <Text style={styles.listingType}>
+                      {listing.type === "book" ? "Book" : "Item"}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -299,7 +332,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
     justifyContent: "center",
     alignItems: "center",
-    overflow: "hidden", // Ensure the image stays within the circular bounds
+    overflow: "hidden",
   },
   profileImageActual: {
     width: 120,
@@ -416,6 +449,11 @@ const styles = StyleSheet.create({
   listingCondition: {
     fontSize: 12,
     color: "#666",
+  },
+  listingType: {
+    fontSize: 11,
+    color: "#999",
+    fontStyle: "italic",
   },
   loadingContainer: {
     padding: 20,
