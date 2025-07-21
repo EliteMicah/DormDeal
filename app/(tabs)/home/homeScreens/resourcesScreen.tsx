@@ -10,16 +10,109 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+interface ResourceItem {
+  icon: string;
+  title: string;
+  onPress?: () => void;
+}
+
+interface ResourceSection {
+  title: string;
+  items: ResourceItem[];
+}
+
 export default function ResourcesScreen() {
   const router = useRouter();
+
+  const resourceSections: ResourceSection[] = [
+    {
+      title: "School",
+      items: [
+        {
+          icon: "flash-outline",
+          title: "Clubs",
+        },
+        {
+          icon: "calendar-outline",
+          title: "Events",
+        },
+      ],
+    },
+    {
+      title: "Church",
+      items: [
+        {
+          icon: "location-outline",
+          title: "Churches near you",
+        },
+        {
+          icon: "book-outline",
+          title: "Bible Studies",
+        },
+        {
+          icon: "people-outline",
+          title: "Get Connected",
+        },
+      ],
+    },
+    {
+      title: "About Us",
+      items: [
+        {
+          icon: "flame-outline",
+          title: "Mission Statement",
+        },
+        {
+          icon: "notifications-outline",
+          title: "Updates · What's new",
+        },
+        {
+          icon: "heart-outline",
+          title: "Donate",
+          onPress: () => router.push("/home/homeScreens/donateScreen"),
+        },
+        {
+          icon: "chatbubble-outline",
+          title: "Give Feedback",
+          onPress: () => Linking.openURL("https://forms.gle/6C28tioZvK54M6CG6"),
+        },
+      ],
+    },
+  ];
+
+  const ResourceCard = ({ item }: { item: ResourceItem }) => (
+    <TouchableOpacity
+      style={styles.resourceCard}
+      onPress={item.onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.iconContainer}>
+        <Ionicons name={item.icon as any} size={24} color="#007bff" />
+      </View>
+      <Text style={styles.resourceTitle}>{item.title}</Text>
+      <Ionicons name="chevron-forward" size={20} color="#6c757d" />
+    </TouchableOpacity>
+  );
+
+  const ResourceSection = ({ section }: { section: ResourceSection }) => (
+    <View style={styles.sectionContainer}>
+      <Text style={styles.sectionTitle}>{section.title}</Text>
+      <View style={styles.cardsContainer}>
+        {section.items.map((item, index) => (
+          <ResourceCard key={index} item={item} />
+        ))}
+      </View>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <Stack.Screen
         options={{
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerBackTitle: "‎",
           headerTintColor: "black",
         }}
       />
@@ -27,138 +120,81 @@ export default function ResourcesScreen() {
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scrollContent}
       >
         <Text style={styles.mainTitle}>Resources</Text>
 
-        {/* First Column */}
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>School</Text>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="happy-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Clubs</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="sparkles-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Events</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Second Column */}
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>Church</Text>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="flame-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Churches near you</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="journal-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Bible Studies</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="people-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Get Connected</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Third Column */}
-        <View style={styles.columnContainer}>
-          <Text style={styles.columnTitle}>About Us</Text>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="leaf-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Mission Statement</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonContainer}>
-            <Ionicons name="download-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Updates · What's new</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() => router.push("/home/homeScreens/donateScreen")}
-          >
-            <Ionicons name="heart-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Donate</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() =>
-              Linking.openURL("https://forms.gle/6C28tioZvK54M6CG6")
-            }
-          >
-            <Ionicons name="hammer-outline" size={23} style={styles.icon} />
-            <Text style={styles.buttonTitle}>Give Feedback</Text>
-          </TouchableOpacity>
-        </View>
+        {resourceSections.map((section, index) => (
+          <ResourceSection key={index} section={section} />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  container: {
     flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#f2f2f2",
-    justifyContent: "flex-start",
+    backgroundColor: "#FFFFFF",
   },
   scroll: {
     flex: 1,
   },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
   mainTitle: {
-    fontSize: 35,
-    fontWeight: "800",
-    color: "#38b6ff",
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginBottom: 10,
-    marginTop: -40,
-    alignSelf: "center",
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    textAlign: "center",
+    marginTop: 20,
+    marginBottom: 32,
   },
-  columnContainer: {
-    flex: 0,
-    width: "85%",
-    flexDirection: "column",
-    marginHorizontal: 30,
-    backgroundColor: "#f2f2f2",
-    paddingVertical: 10,
+  sectionContainer: {
+    marginBottom: 32,
   },
-  columnTitle: {
+  sectionTitle: {
     fontSize: 20,
-    fontWeight: 600,
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 2,
-      height: 2,
-    },
-    shadowOpacity: 0.5,
-    marginBottom: "2%",
+    fontWeight: "600",
+    color: "#212529",
+    marginBottom: 16,
+    marginLeft: 4,
   },
-  buttonContainer: {
-    width: "100%",
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#e3e2e7",
+  cardsContainer: {
+    gap: 12,
+  },
+  resourceCard: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#dee2e6",
+    borderRadius: 12,
+    padding: 16,
     flexDirection: "row",
-    marginBottom: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  icon: {
-    paddingLeft: 10,
-    paddingRight: 5,
-    alignSelf: "center",
-    opacity: 0.7,
-    marginRight: 5,
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f8f9fa",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
   },
-  buttonTitle: {
-    alignSelf: "center",
-    fontSize: 18,
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
+  resourceTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#212529",
   },
 });

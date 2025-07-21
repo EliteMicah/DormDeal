@@ -4,39 +4,56 @@ import {
   TouchableOpacity,
   Text,
   View,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../../lib/supabase";
 
-const ITEMS_DATA = [
-  { id: "1", price: 10, seller: "MediumLengthName1", image: null },
-  { id: "2", price: 15, seller: "Username2", image: null },
-  { id: "3", price: 20, seller: "LongUsername3456", image: null },
-  { id: "4", price: 25, seller: "User4", image: null },
-  { id: "5", price: 30, seller: "VeryLongUsername5", image: null },
-  { id: "6", price: 35, seller: "Username6", image: null },
-  { id: "7", price: 40, seller: "ShortName7", image: null },
-  { id: "8", price: 45, seller: "User8Long", image: null },
-];
+// Item listing interface
+interface ItemListing {
+  id: number;
+  name: string;
+  price: number;
+  condition: string;
+  image_url?: string;
+  user_id: string;
+  created_at: string;
+  category?: string;
+  payment_type: string;
+  description?: string;
+  username?: string;
+}
 
 const ItemCard = ({
   item,
   onPress,
 }: {
-  item: { id: string; price: number; seller: string; image: string | null };
+  item: ItemListing;
   onPress: () => void;
 }) => (
   <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
-    <View style={styles.cardImage} />
+    {item.image_url ? (
+      <Image
+        source={{ uri: item.image_url }}
+        style={styles.cardImage}
+      />
+    ) : (
+      <View style={[styles.cardImage, styles.placeholderImage]}>
+        <Ionicons name="cube-outline" size={40} color="#999" />
+      </View>
+    )}
     <View style={styles.cardDetails}>
       <Text style={styles.cardPrice}>${item.price}</Text>
       <Text
-        numberOfLines={1} // Limit text to a single line
-        ellipsizeMode="tail" // Add ... at the end of truncated text
+        numberOfLines={1}
+        ellipsizeMode="tail"
         style={styles.cardSeller}
       >
-        {item.seller}
+        {item.username || "Anonymous"}
       </Text>
     </View>
   </TouchableOpacity>
@@ -44,6 +61,71 @@ const ItemCard = ({
 
 export default function shopItemsScreen() {
   const router = useRouter();
+  const [items, setItems] = useState<ItemListing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const ITEMS_PER_PAGE = 10;
+
+  // Fetch items from database
+  useEffect(() => {
+    fetchItems(0, true);
+  }, []);
+
+  const fetchItems = async (pageNum: number, isInitial = false) => {
+    try {
+      if (isInitial) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      const { data: newItems, error } = await supabase
+        .from("item_listing")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(pageNum * ITEMS_PER_PAGE, (pageNum + 1) * ITEMS_PER_PAGE - 1);
+
+      if (error) {
+        console.error("Error fetching items:", error);
+        return;
+      }
+
+      if (newItems) {
+        if (isInitial) {
+          setItems(newItems);
+        } else {
+          setItems(prev => [...prev, ...newItems]);
+        }
+        
+        // Check if there are more items to load
+        setHasMore(newItems.length === ITEMS_PER_PAGE);
+        setPage(pageNum);
+      }
+    } catch (error) {
+      console.error("Unexpected error fetching items:", error);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      fetchItems(page + 1);
+    }
+  };
+
+  const handleScroll = (event: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const paddingToBottom = 20;
+    
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+      handleLoadMore();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.maincontainer}>
       <Stack.Screen
@@ -68,20 +150,44 @@ export default function shopItemsScreen() {
 
       <View style={styles.heightForGridContainer}>
         <View style={styles.gridContainer}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {ITEMS_DATA.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                onPress={() =>
-                  router.push("/(tabs)/home/homeScreens/itemDetailsScreen")
-                }
-              />
-            ))}
-          </ScrollView>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#38b6ff" />
+            </View>
+          ) : (
+            <ScrollView
+              contentContainerStyle={styles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={400}
+            >
+              {items.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(tabs)/home/homeScreens/itemDetailsScreen",
+                      params: { itemId: item.id },
+                    })
+                  }
+                />
+              ))}
+              {isLoadingMore && (
+                <View style={styles.loadingMoreContainer}>
+                  <ActivityIndicator size="small" color="#38b6ff" />
+                </View>
+              )}
+              {!hasMore && items.length > 0 && (
+                <View style={styles.endOfListContainer}>
+                  <Text style={styles.endOfListText}>No more items to load</Text>
+                </View>
+              )}
+              {items.length === 0 && (
+                <Text style={styles.emptyText}>No items available</Text>
+              )}
+            </ScrollView>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -139,6 +245,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 15,
+    paddingBottom: 20,
   },
   cardContainer: {
     width: "47%",
@@ -179,8 +286,38 @@ const styles = StyleSheet.create({
     maxWidth: "90%",
     textAlign: "left",
   },
+  placeholderImage: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingMoreContainer: {
+    width: "100%",
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  endOfListContainer: {
+    width: "100%",
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  endOfListText: {
+    color: "#666",
+    fontStyle: "italic",
+    fontSize: 14,
+  },
+  emptyText: {
+    width: "100%",
+    padding: 20,
+    textAlign: "center",
+    color: "#666",
+    fontStyle: "italic",
+  },
   transparentSeparator: {
-    position: "fixed",
     width: "100%",
     height: "3%",
     opacity: 0.5,
