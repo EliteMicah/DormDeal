@@ -1,16 +1,67 @@
-# Rebooked
-Version 1 Homescreen design
+# 📚 Rebooked
 
-<img src="https://github.com/user-attachments/assets/88d7b5ae-1f8a-4c0e-a39e-1e7d7b98e261" alt="HomeScreenImage" width="300" />
+**Rebooked** is a campus-focused marketplace app that allows college students to buy, sell, and exchange textbooks and other campus essentials—directly with each other.
 
-<img src="https://github.com/user-attachments/assets/95ebac46-57a1-42ee-9621-2219351a3335" alt="HomeScreenImage" width="300" />
+---
 
-<img src="https://github.com/user-attachments/assets/bf9678b9-89e1-46ff-8cf6-9cd153367f83" alt="HomeScreenImage" width="300" />
+## 🎯 What is Rebooked?
 
-<img src="https://github.com/user-attachments/assets/3099e625-1691-400f-87cd-e8c5a96db1d8" alt="HomeScreenImage" width="300" />
+Rebooked is designed to streamline the student-to-student exchange of textbooks and campus goods. It provides:
 
-<img src="https://github.com/user-attachments/assets/cdd5b84d-8931-419a-a912-76552c0f1738" alt="HomeScreenImage" width="300" />
+- **Class-based book search** – Find books by university, course, and instructor
+- **Peer-to-peer selling** – Buy and sell directly with other students
+- **Smart pricing** – Compare listings with Amazon and Slingshot
+- **Condition listings** – Mark books as new, used, or annotated
+- **On-campus logistics** – Choose campus meeting spots or message sellers directly
+- **Book alerts** – Subscribe to ISBNs and get notified when books are listed
+- **General marketplace** – Buy/sell items like mini-fridges, furniture, and supplies
+- **Secure transactions** – Support for Venmo and (eventually) in-app payments
+- **Minimal ads** – No invasive data collection; optional student-relevant promotions
 
-<img src="https://github.com/user-attachments/assets/692f256c-63af-43b3-b972-1d359f70d10e" alt="HomeScreenImage" width="300" />
+---
 
-<img src="https://github.com/user-attachments/assets/1e603996-1638-4874-819f-53bf762730cd" alt="HomeScreenImage" width="300" />
+## 💡 Key Features
+
+- Search by course, book title, or ISBN
+- Compare prices from third-party sources
+- View seller profiles and accepted payment methods
+- Send and receive messages to arrange exchanges
+- Subscribe to notifications for specific books or courses
+- List and browse general college-related items
+- Community moderation and content reporting
+
+---
+
+## 🛠️ Built With
+
+- **React Native** (planned for mobile app)
+- **Supabase** (for backend and auth)
+- Additional tools TBD as the project evolves
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the open source community!
+
+If you'd like to contribute:
+
+1. Fork this repo
+2. Create a feature branch
+3. Commit your changes
+4. Submit a pull request
+
+Please check out the [CONTRIBUTING.md](CONTRIBUTING.md) for more details on how to get started.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 📬 Contact
+
+Have ideas, questions, or feedback?  
+Message @RebookedOfficial on Instagram!
