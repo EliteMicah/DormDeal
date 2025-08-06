@@ -189,12 +189,12 @@ const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
     justifyContent: "flex-start",
   },
   mainConditionContainer: {
     flex: 0,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
   },
   mainTitle: {
     alignSelf: "center",
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   conditionTextContainer: {
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 30,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   conditionContainer: {
     flex: 0,
     marginHorizontal: 30,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
   },
   scrollContainer: {
     flexDirection: "row",
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: 130,
     height: 170,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
     gap: 5,
   },
   cardImage: {

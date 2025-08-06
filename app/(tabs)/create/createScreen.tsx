@@ -42,6 +42,28 @@ export default function CreateScreen() {
               Sell furniture, electronics, and other items
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.eventCard}
+            onPress={() =>
+              router.push("/(tabs)/create/createScreens/createEventListing")
+            }
+          >
+            <View style={styles.eventIconContainer}>
+              <Ionicons name="calendar-outline" size={32} color="#FF6B35" />
+            </View>
+            <View style={styles.eventContent}>
+              <Text style={styles.eventTitle}>Events</Text>
+              <Text style={styles.eventDescription}>
+                Create events for the community
+              </Text>
+              <View style={styles.premiumBadge}>
+                <Ionicons name="star" size={14} color="#FFD700" />
+                <Text style={styles.premiumText}>Premium - $10</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#FF6B35" />
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -110,5 +132,60 @@ const styles = StyleSheet.create({
     color: "#6c757d",
     textAlign: "center",
     lineHeight: 20,
+  },
+  eventCard: {
+    backgroundColor: "#ffffff",
+    borderWidth: 2,
+    borderColor: "#FF6B35",
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#FF6B35",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  eventIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FFF5F3",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
+  eventContent: {
+    flex: 1,
+  },
+  eventTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FF6B35",
+    marginBottom: 4,
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: "#6c757d",
+    marginBottom: 8,
+  },
+  premiumBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF9E6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: "flex-start",
+  },
+  premiumText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#B8860B",
+    marginLeft: 4,
   },
 });

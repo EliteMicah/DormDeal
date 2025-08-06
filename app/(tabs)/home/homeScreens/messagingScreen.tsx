@@ -2,105 +2,129 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
   StatusBar,
   TouchableOpacity,
   TextInput,
   Image,
   FlatList,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { SimpleMessagingService as MessagingService, DirectConversation as Conversation, UserProfile } from "../../../../lib/simpleMessaging";
+import { useFocusEffect } from "@react-navigation/native";
 
-// Types
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  message: string;
-  timestamp: Date;
-  isRead: boolean;
-  avatar?: string;
-}
-
-interface ChatUser {
-  id: string;
-  name: string;
-  avatar?: string;
-  lastMessage: string;
-  timestamp: Date;
-  unreadCount: number;
-  isOnline: boolean;
-}
+// Use the types from the messaging service
 
 export default function MessagingScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-  const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+  const [searching, setSearching] = useState(false);
+  
+  const messagingService = MessagingService.getInstance();
 
-  // Mock data - replace with actual data fetching
+  // Load conversations on mount and when screen comes into focus
   useEffect(() => {
-    const mockChats: ChatUser[] = [
-      {
-        id: "1",
-        name: "Sarah Chen",
-        lastMessage: "Is the calculus textbook still available?",
-        timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-        unreadCount: 2,
-        isOnline: true,
-      },
-      {
-        id: "2",
-        name: "Mike Johnson",
-        lastMessage: "Thanks for the study guide! Really helpful 📚",
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        unreadCount: 0,
-        isOnline: false,
-      },
-      {
-        id: "3",
-        name: "Emma Davis",
-        lastMessage: "Can we meet at the library tomorrow?",
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        unreadCount: 1,
-        isOnline: true,
-      },
-      {
-        id: "4",
-        name: "Alex Rodriguez",
-        lastMessage: "The laptop is in great condition!",
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        unreadCount: 0,
-        isOnline: false,
-      },
-      {
-        id: "5",
-        name: "Jessica Lee",
-        lastMessage: "Do you have any chemistry notes for sale?",
-        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-        unreadCount: 3,
-        isOnline: true,
-      },
-    ];
-    setChatUsers(mockChats);
+    loadConversations();
+    subscribeToConversationUpdates();
+    
+    return () => {
+      messagingService.unsubscribeFromAll();
+    };
   }, []);
 
-  // Filter chats based on search and active tab
-  const filteredChats = chatUsers.filter((chat) => {
-    const matchesSearch =
-      chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+  useFocusEffect(
+    useCallback(() => {
+      loadConversations();
+    }, [])
+  );
+
+  const loadConversations = async () => {
+    try {
+      const conversationsData = await messagingService.getConversations();
+      setConversations(conversationsData);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+      Alert.alert('Error', 'Failed to load conversations');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const subscribeToConversationUpdates = () => {
+    messagingService.subscribeToConversations(() => {
+      loadConversations();
+    });
+  };
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (query.trim().length > 2) {
+      setSearching(true);
+      try {
+        const users = await messagingService.searchUsers(query);
+        setSearchResults(users);
+      } catch (error) {
+        console.error('Error searching users:', error);
+      } finally {
+        setSearching(false);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const startNewConversation = async (user: UserProfile) => {
+    try {
+      const conversationId = await messagingService.getOrCreateDirectConversation(user.id);
+      router.push(`/home/homeScreens/chatScreen?conversationId=${conversationId}`);
+      setSearchQuery("");
+      setSearchResults([]);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      Alert.alert('Error', 'Failed to start conversation');
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadConversations();
+  };
+
+  // Filter conversations based on search and active tab
+  const filteredConversations = conversations.filter((conversation) => {
+    if (searchQuery.trim().length > 0 && searchResults.length === 0) {
+      // If searching but no user results, filter by conversation content
+      const otherParticipant = conversation.participants?.find(p => p.user_id !== conversation.participants?.[0]?.user_id);
+      const participantName = otherParticipant?.user?.full_name || otherParticipant?.user?.username || '';
+      const lastMessage = conversation.last_message?.content || '';
+      
+      const matchesSearch = 
+        participantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      if (!matchesSearch) return false;
+    }
+    
     const matchesTab =
-      activeTab === "all" || (activeTab === "unread" && chat.unreadCount > 0);
-    return matchesSearch && matchesTab;
+      activeTab === "all" || (activeTab === "unread" && conversation.unread_count > 0);
+    return matchesTab;
   });
 
-  const formatTimestamp = (timestamp: Date) => {
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
     const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
+    const diff = now.getTime() - date.getTime();
     const hours = diff / (1000 * 60 * 60);
     const days = diff / (1000 * 60 * 60 * 24);
 
@@ -111,7 +135,7 @@ export default function MessagingScreen() {
     } else if (days < 7) {
       return `${Math.floor(days)}d`;
     } else {
-      return timestamp.toLocaleDateString("en-US", {
+      return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       });
@@ -127,55 +151,90 @@ export default function MessagingScreen() {
   };
 
   const getTotalUnreadCount = () => {
-    return chatUsers.reduce((total, chat) => total + chat.unreadCount, 0);
+    return conversations.reduce((total, conversation) => total + conversation.unread_count, 0);
   };
 
-  const renderChatItem = ({ item }: { item: ChatUser }) => (
+  const getConversationTitle = (conversation: Conversation) => {
+    return conversation.other_user?.full_name || 
+           conversation.other_user?.username || 
+           'Unknown User';
+  };
+
+  const getConversationAvatar = (conversation: Conversation) => {
+    return conversation.other_user?.avatar_url;
+  };
+
+  const renderSearchResult = ({ item }: { item: UserProfile }) => (
+    <TouchableOpacity
+      style={styles.searchResultItem}
+      onPress={() => startNewConversation(item)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.avatarContainer}>
+        {item.avatar_url ? (
+          <Image source={{ uri: item.avatar_url }} style={styles.avatar} />
+        ) : (
+          <View style={[styles.avatar, styles.avatarPlaceholder]}>
+            <Text style={styles.avatarText}>
+              {getInitials(item.full_name || item.username || '')}
+            </Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.searchResultContent}>
+        <Text style={styles.searchResultName}>
+          {item.full_name || item.username || 'Unknown User'}
+        </Text>
+        {item.username && item.full_name && (
+          <Text style={styles.searchResultUsername}>@{item.username}</Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderConversationItem = ({ item }: { item: Conversation }) => (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => {
-        // Navigate to individual chat screen
-        // router.push(`/messages/chat/${item.id}`);
-        console.log("Navigate to chat with:", item.name);
+        router.push(`/home/homeScreens/chatScreen?conversationId=${item.id}`);
       }}
       activeOpacity={0.7}
     >
       <View style={styles.avatarContainer}>
-        {item.avatar ? (
-          <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        {getConversationAvatar(item) ? (
+          <Image source={{ uri: getConversationAvatar(item)! }} style={styles.avatar} />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Text style={styles.avatarText}>{getInitials(item.name)}</Text>
+            <Text style={styles.avatarText}>{getInitials(getConversationTitle(item))}</Text>
           </View>
         )}
-        {item.isOnline && <View style={styles.onlineIndicator} />}
       </View>
 
       <View style={styles.chatContent}>
         <View style={styles.chatHeader}>
           <Text
-            style={[styles.chatName, item.unreadCount > 0 && styles.unreadName]}
+            style={[styles.chatName, item.unread_count > 0 && styles.unreadName]}
           >
-            {item.name}
+            {getConversationTitle(item)}
           </Text>
           <Text style={styles.timestamp}>
-            {formatTimestamp(item.timestamp)}
+            {item.last_message ? formatTimestamp(item.last_message.created_at) : ''}
           </Text>
         </View>
         <View style={styles.messageRow}>
           <Text
             style={[
               styles.lastMessage,
-              item.unreadCount > 0 && styles.unreadMessage,
+              item.unread_count > 0 && styles.unreadMessage,
             ]}
             numberOfLines={1}
           >
-            {item.lastMessage}
+            {item.last_message?.content || 'No messages yet'}
           </Text>
-          {item.unreadCount > 0 && (
+          {item.unread_count > 0 && (
             <View style={styles.unreadBadge}>
               <Text style={styles.unreadCount}>
-                {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                {item.unread_count > 99 ? "99+" : item.unread_count}
               </Text>
             </View>
           )}
@@ -210,7 +269,7 @@ export default function MessagingScreen() {
             )}
           </View>
         </View>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/home/homeScreens/newMessageScreen')}>
           <Ionicons name="create-outline" size={24} color="#4A90E2" />
         </TouchableOpacity>
       </View>
@@ -221,15 +280,21 @@ export default function MessagingScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search messages..."
+            placeholder="Search messages or users..."
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearch}
             placeholderTextColor="#999"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <TouchableOpacity onPress={() => {
+              setSearchQuery("");
+              setSearchResults([]);
+            }}>
               <Ionicons name="close-circle" size={20} color="#999" />
             </TouchableOpacity>
+          )}
+          {searching && (
+            <ActivityIndicator size="small" color="#4A90E2" style={{ marginLeft: 8 }} />
           )}
         </View>
       </View>
@@ -269,21 +334,40 @@ export default function MessagingScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Chat List */}
-      {filteredChats.length > 0 ? (
+      {/* Search Results or Chat List */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={styles.loadingText}>Loading conversations...</Text>
+        </View>
+      ) : searchQuery.length > 0 && searchResults.length > 0 ? (
+        <View style={styles.searchResultsContainer}>
+          <Text style={styles.searchResultsHeader}>Users</Text>
+          <FlatList
+            data={searchResults}
+            renderItem={renderSearchResult}
+            keyExtractor={(item) => item.id}
+            style={styles.searchResultsList}
+            showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          />
+        </View>
+      ) : filteredConversations.length > 0 ? (
         <FlatList
-          data={filteredChats}
-          renderItem={renderChatItem}
+          data={filteredConversations}
+          renderItem={renderConversationItem}
           keyExtractor={(item) => item.id}
           style={styles.chatList}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       ) : (
         <View style={styles.emptyState}>
           <Ionicons name="chatbubbles-outline" size={64} color="#CCC" />
           <Text style={styles.emptyTitle}>
-            {searchQuery ? "No messages found" : "No messages yet"}
+            {searchQuery ? "No results found" : "No messages yet"}
           </Text>
           <Text style={styles.emptySubtitle}>
             {searchQuery
@@ -508,5 +592,51 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     lineHeight: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 16,
+  },
+  searchResultsContainer: {
+    flex: 1,
+  },
+  searchResultsHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: "#F8F9FA",
+  },
+  searchResultsList: {
+    backgroundColor: "#FFFFFF",
+  },
+  searchResultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  searchResultContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  searchResultName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 2,
+  },
+  searchResultUsername: {
+    fontSize: 14,
+    color: "#666",
   },
 });
