@@ -37,10 +37,7 @@ const ItemCard = ({
 }) => (
   <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
     {item.image_url ? (
-      <Image
-        source={{ uri: item.image_url }}
-        style={styles.cardImage}
-      />
+      <Image source={{ uri: item.image_url }} style={styles.cardImage} />
     ) : (
       <View style={[styles.cardImage, styles.placeholderImage]}>
         <Ionicons name="cube-outline" size={40} color="#999" />
@@ -48,11 +45,7 @@ const ItemCard = ({
     )}
     <View style={styles.cardDetails}>
       <Text style={styles.cardPrice}>${item.price}</Text>
-      <Text
-        numberOfLines={1}
-        ellipsizeMode="tail"
-        style={styles.cardSeller}
-      >
+      <Text numberOfLines={1} ellipsizeMode="tail" style={styles.cardSeller}>
         {item.username || "Anonymous"}
       </Text>
     </View>
@@ -96,9 +89,9 @@ export default function shopItemsScreen() {
         if (isInitial) {
           setItems(newItems);
         } else {
-          setItems(prev => [...prev, ...newItems]);
+          setItems((prev) => [...prev, ...newItems]);
         }
-        
+
         // Check if there are more items to load
         setHasMore(newItems.length === ITEMS_PER_PAGE);
         setPage(pageNum);
@@ -120,8 +113,11 @@ export default function shopItemsScreen() {
   const handleScroll = (event: any) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
     const paddingToBottom = 20;
-    
-    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+
+    if (
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom
+    ) {
       handleLoadMore();
     }
   };
@@ -180,7 +176,9 @@ export default function shopItemsScreen() {
               )}
               {!hasMore && items.length > 0 && (
                 <View style={styles.endOfListContainer}>
-                  <Text style={styles.endOfListText}>No more items to load</Text>
+                  <Text style={styles.endOfListText}>
+                    No more items to load
+                  </Text>
                 </View>
               )}
               {items.length === 0 && (
@@ -198,7 +196,7 @@ const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "flex-start",
   },
@@ -238,7 +236,7 @@ const styles = StyleSheet.create({
   gridContainer: {
     flex: 1,
     width: "85%",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
   },
   scrollContainer: {
     flexDirection: "row",
@@ -251,7 +249,7 @@ const styles = StyleSheet.create({
     width: "47%",
     height: 200,
     justifyContent: "flex-start",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
     gap: "3%",
   },
   cardImage: {
@@ -284,7 +282,7 @@ const styles = StyleSheet.create({
     color: "blue",
     fontSize: 16,
     maxWidth: "90%",
-    textAlign: "left",
+    textAlign: "center",
   },
   placeholderImage: {
     justifyContent: "center",
@@ -321,6 +319,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "3%",
     opacity: 0.5,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
   },
 });

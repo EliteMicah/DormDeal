@@ -208,24 +208,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         }
       }
 
-      // Try using a signed URL instead of public URL (more reliable for React Native)
-      const { data: signedUrlData, error: signedUrlError } =
-        await supabase.storage
-          .from("avatars")
-          .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
-
-      if (signedUrlError) {
-        console.error("Signed URL error:", signedUrlError);
-        // Fallback to public URL if signed URL fails
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("avatars").getPublicUrl(filePath);
-        console.log("Fallback to public URL:", publicUrl);
-        return publicUrl;
-      }
-
-      console.log("Generated signed URL:", signedUrlData.signedUrl);
-      return signedUrlData.signedUrl;
+      // Use public URL (more reliable and doesn't expire)
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      
+      console.log("Generated public URL:", publicUrl);
+      return publicUrl;
     } catch (error) {
       console.error("Error uploading image:", error);
       throw error as Error;

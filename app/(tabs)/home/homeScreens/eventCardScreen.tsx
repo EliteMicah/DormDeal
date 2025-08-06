@@ -22,22 +22,22 @@ export default function EventCardScreen() {
     title: "Spring Book Exchange",
     description:
       "Join the biggest textbook exchange event this semester! Trade, sell, or buy books from fellow students. This is a great opportunity to save money on textbooks while helping your fellow classmates. We'll have tables set up by subject area, and you can browse through hundreds of books from various courses.",
-    image: require("../../../../assets/images/cat_sleeping.png"),
-    date: "March 15, 2024",
-    time: "10:00 AM - 4:00 PM",
-    location: "Student Center, Main Hall",
-    organizer: "Student Activities Committee",
+    image: require("../../../../assets/images/SpringBookSale.jpg"),
+    date: "September 15, 2026",
+    time: "10:00 AM - 2:30 PM",
+    location: "Biola Library, Main Floor",
+    organizer: "Biola Campus Engagement",
     registeredCount: 247,
     maxCapacity: 500,
     tags: ["Books", "Exchange", "Students", "Textbooks"],
-    contactEmail: "events@university.edu",
+    contactEmail: "events@biola.edu",
     requirements: [
       "Bring valid student ID",
       "Books must be in good condition",
-      "Cash transactions only",
+      "Cash, Venmo, and Zelle transactions only",
     ],
     additionalInfo:
-      "Free pizza and refreshments will be provided from 12:00 PM - 1:00 PM. Parking is available in lots A and B.",
+      "Free pizza and refreshments will be provided from 12:00 PM - 1:00 PM.",
   };
 
   const handleBookmark = () => {

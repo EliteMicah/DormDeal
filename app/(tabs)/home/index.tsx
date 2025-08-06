@@ -29,9 +29,9 @@ export default function HomeScreen() {
     title: "Spring Book Exchange",
     description:
       "Join the biggest textbook exchange event this semester! Trade, sell, or buy books from fellow students.",
-    image: require("../../../assets/images/cat_sleeping.png"),
-    date: "March 15",
-    location: "Student Center",
+    image: require("../../../assets/images/SpringBookSale.jpg"),
+    date: "Sept 15",
+    location: "Biola Library",
   };
 
   const quickActions: {
