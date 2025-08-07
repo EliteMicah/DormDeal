@@ -195,15 +195,14 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.mainContainer}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         <Text>Loading profile...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
-      {/* Edit Profile Modal */}
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <EditProfileModal
         visible={isModalVisible}
         onClose={handleModalClose}
@@ -211,64 +210,78 @@ export default function ProfileScreen() {
         currentProfilePicture={profilePicture}
       />
 
-      {/* Profile Section */}
-      <View style={styles.profileSection}>
-        <View style={styles.profileImage}>
-          {profilePicture ? (
-            <Image
-              source={{ uri: profilePicture }}
-              style={styles.profileImageActual}
-              onError={(error) =>
-                console.log("Image load error:", error.nativeEvent.error)
-              }
-            />
-          ) : (
-            <Ionicons name="person" size={75} style={styles.imageIcon} />
-          )}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Profile Header */}
+        <View style={styles.profileHeader}>
+          <View style={styles.profileImageContainer}>
+            {profilePicture ? (
+              <Image
+                source={{ uri: profilePicture }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <View style={styles.profileImagePlaceholder}>
+                <Ionicons name="person" size={32} color="#9ca3af" />
+              </View>
+            )}
+          </View>
+
+          <View style={styles.profileInfo}>
+            <Text style={styles.username}>{username || "Username"}</Text>
+            <Text style={styles.university}>{university}</Text>
+          </View>
+
+          <TouchableOpacity onPress={handleEditProfile}>
+            <Ionicons name="create-outline" size={20} color="#6b7280" />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.userInfo}>
-          <Text style={styles.username}>{username || "Username"}</Text>
-          <View style={styles.locationContainer}>
-            <MaterialIcons name="location-on" size={16} color="gray" />
-            <Text style={styles.location}>{university}</Text>
-          </View>
+        {/* Actions */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/(tabs)/create/createScreen")}
+          >
+            <Ionicons name="add-outline" size={20} color="#3b82f6" />
+            <Text style={styles.actionText}>Add Listing</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              router.push("/(tabs)/home/homeScreens/savedListingsScreen")
+            }
+          >
+            <Ionicons name="bookmark-outline" size={20} color="#3b82f6" />
+            <Text style={styles.actionText}>Saved</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              router.push("/(tabs)/home/homeScreens/isbnSubscriptionsScreen")
+            }
+          >
+            <Ionicons name="notifications-outline" size={20} color="#3b82f6" />
+            <Text style={styles.actionText}>ISBN Alerts</Text>
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={styles.editProfileButton}
-          onPress={handleEditProfile}
-        >
-          <Text style={styles.editProfileText}>Edit Profile</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Selling Section */}
-      <ScrollView style={styles.scrollContainer}>
-        <View style={styles.sellingSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              My Listings ({userListings.length})
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(tabs)/create/createScreen")}
-            >
-              <Text style={styles.addNew}>+ Add New</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Listings Section */}
+        <View style={styles.listingsSection}>
+          <Text style={styles.sectionTitle}>My Listings</Text>
 
           {listingsLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#38b6ff" />
-              <Text style={styles.loadingText}>Loading your listings...</Text>
+              <ActivityIndicator size="small" color="#3b82f6" />
             </View>
           ) : userListings.length > 0 ? (
-            <View style={styles.itemGrid}>
+            <View style={styles.listingsGrid}>
               {userListings.map((listing) => (
                 <TouchableOpacity
-                  key={`${listing.type}-${listing.id}`} // Updated key to include type
-                  style={styles.itemCard}
-                  onPress={() => handleListingPress(listing)} // Pass the entire listing object
+                  key={`${listing.type}-${listing.id}`}
+                  style={styles.listingCard}
+                  onPress={() => handleListingPress(listing)}
                 >
                   {listing.image_url ? (
                     <Image
@@ -276,15 +289,15 @@ export default function ProfileScreen() {
                       style={styles.listingImage}
                     />
                   ) : (
-                    <View style={styles.placeholderImage}>
+                    <View style={styles.listingImagePlaceholder}>
                       <Ionicons
                         name={
                           listing.type === "book"
                             ? "book-outline"
                             : "cube-outline"
                         }
-                        size={40}
-                        color="#999"
+                        size={24}
+                        color="#9ca3af"
                       />
                     </View>
                   )}
@@ -298,16 +311,14 @@ export default function ProfileScreen() {
               ))}
             </View>
           ) : (
-            <View style={styles.emptyStateContainer}>
-              <Ionicons name="book-outline" size={60} color="#ccc" />
+            <View style={styles.emptyState}>
+              <Ionicons name="albums-outline" size={48} color="#d1d5db" />
               <Text style={styles.emptyStateText}>No listings yet</Text>
               <TouchableOpacity
-                style={styles.createListingButton}
+                style={styles.createButton}
                 onPress={() => router.push("/(tabs)/create/createScreen")}
               >
-                <Text style={styles.createListingButtonText}>
-                  Create Your First Listing
-                </Text>
+                <Text style={styles.createButtonText}>Create Listing</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -318,180 +329,137 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  container: {
     flex: 1,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffff",
   },
-  profileSection: {
+  profileHeader: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 40,
-    gap: 20,
-    backgroundColor: "#f2f2f2",
+    padding: 24,
+    gap: 16,
   },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#ddd",
-    justifyContent: "center",
-    alignItems: "center",
+  profileImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     overflow: "hidden",
   },
-  profileImageActual: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  profileImage: {
+    width: 80,
+    height: 80,
   },
-  imageIcon: {
-    marginBottom: 10,
-    color: "gray",
-    opacity: 0.7,
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    backgroundColor: "#f3f4f6",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  userInfo: {
-    alignItems: "flex-start",
-    marginTop: 10,
-    backgroundColor: "transparent",
+  profileInfo: {
+    flex: 1,
   },
   username: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "600",
-    color: "#4169e1",
-    marginBottom: 5,
+    color: "#111827",
+    marginBottom: 2,
   },
-  locationContainer: {
+  university: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 24,
+    gap: 8,
+    marginBottom: 32,
+  },
+  actionButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "transparent",
+    justifyContent: "center",
+    backgroundColor: "#f8fafc",
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
   },
-  location: {
+  actionText: {
     fontSize: 14,
-    color: "gray",
-    marginLeft: 4,
+    fontWeight: "500",
+    color: "#3b82f6",
   },
-  editProfileButton: {
-    position: "absolute",
-    right: 20,
-    top: 10,
-  },
-  editProfileText: {
-    fontSize: 14,
-    color: "gray",
-  },
-  sellingSection: {
-    backgroundColor: "#f2f2f2",
-    marginHorizontal: 30,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-    backgroundColor: "transparent",
+  listingsSection: {
+    paddingHorizontal: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
+    color: "#111827",
+    marginBottom: 16,
   },
-  seeAll: {
-    fontSize: 14,
-    color: "gray",
+  loadingContainer: {
+    padding: 40,
+    alignItems: "center",
   },
-  itemGrid: {
+  listingsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
+    gap: 12,
   },
-  itemCard: {
+  listingCard: {
     width: "48%",
-    height: 177,
-    backgroundColor: "white",
-    marginBottom: 15,
+    backgroundColor: "#ffffff",
     borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
     overflow: "hidden",
-  },
-  scrollContainer: {
-    flex: 1,
   },
   listingImage: {
     width: "100%",
     height: 120,
-    resizeMode: "cover",
   },
-  placeholderImage: {
+  listingImagePlaceholder: {
     width: "100%",
     height: 120,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#f9fafb",
     justifyContent: "center",
     alignItems: "center",
   },
   listingInfo: {
-    padding: 8,
-    flex: 1,
+    padding: 12,
   },
   listingTitle: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "500",
+    color: "#111827",
     marginBottom: 4,
   },
   listingPrice: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#38b6ff",
-    marginBottom: 2,
+    fontWeight: "600",
+    color: "#3b82f6",
   },
-  listingCondition: {
-    fontSize: 12,
-    color: "#666",
-  },
-  listingType: {
-    fontSize: 11,
-    color: "#999",
-    fontStyle: "italic",
-  },
-  loadingContainer: {
-    padding: 20,
+  emptyState: {
     alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: "#666",
-  },
-  emptyStateContainer: {
-    padding: 40,
-    alignItems: "center",
+    paddingVertical: 48,
   },
   emptyStateText: {
     fontSize: 16,
-    color: "#666",
+    color: "#6b7280",
     marginTop: 12,
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  createListingButton: {
-    backgroundColor: "#38b6ff",
-    paddingHorizontal: 20,
+  createButton: {
+    backgroundColor: "#3b82f6",
+    paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
-  createListingButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  addNew: {
+  createButtonText: {
+    color: "#ffffff",
     fontSize: 14,
-    color: "#38b6ff",
-    fontWeight: "600",
+    fontWeight: "500",
   },
 });

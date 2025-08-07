@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
 
@@ -31,19 +31,25 @@ interface BookListing {
 
 export default function SearchModal() {
   const router = useRouter();
+  const { type } = useLocalSearchParams();
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [isbnSearch, setISBNSearch] = useState("");
   const [condition, setCondition] = useState("Any");
   const [paymentType, setPaymentType] = useState("Any");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [searchResults, setSearchResults] = useState<BookListing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchType, setSearchType] = useState<'books' | 'items'>('books');
+  const [searchType, setSearchType] = useState<"books" | "items">(
+    (type === "items" ? "items" : "books") as "books" | "items"
+  );
 
   // Modal state
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Options
   const bookConditionOptions = ["Any", "New", "Used", "Noted"];
@@ -55,22 +61,25 @@ export default function SearchModal() {
     if (!searchQuery.trim() && !isbnSearch.trim()) {
       Alert.alert(
         "Search Required",
-        `Please enter a ${searchType === 'books' ? 'book title or ISBN' : 'item name'} to search.`
+        `Please enter a ${
+          searchType === "books" ? "book title or ISBN" : "item name"
+        } to search.`
       );
       return;
     }
 
     setIsLoading(true);
     try {
-      const tableName = searchType === 'books' ? 'book_listing' : 'item_listing';
+      const tableName =
+        searchType === "books" ? "book_listing" : "item_listing";
       let query = supabase.from(tableName).select("*");
 
       if (searchQuery.trim()) {
-        const searchField = searchType === 'books' ? 'title' : 'name';
+        const searchField = "title";
         query = query.ilike(searchField, `%${searchQuery.trim()}%`);
       }
 
-      if (isbnSearch.trim() && searchType === 'books') {
+      if (isbnSearch.trim() && searchType === "books") {
         query = query.eq("isbn", isbnSearch.trim());
       }
 
@@ -80,6 +89,21 @@ export default function SearchModal() {
 
       if (paymentType !== "Any") {
         query = query.eq("payment_type", paymentType);
+      }
+
+      // Add price range filters
+      if (minPrice.trim()) {
+        const minPriceNum = parseFloat(minPrice.trim());
+        if (!isNaN(minPriceNum) && minPriceNum >= 0) {
+          query = query.gte("price", minPriceNum);
+        }
+      }
+
+      if (maxPrice.trim()) {
+        const maxPriceNum = parseFloat(maxPrice.trim());
+        if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
+          query = query.lte("price", maxPriceNum);
+        }
       }
 
       const { data, error } = await query;
@@ -96,7 +120,10 @@ export default function SearchModal() {
       setSearchResults(data || []);
     } catch (error) {
       console.error("Search error:", error);
-      Alert.alert("Search Error", `Unable to search ${searchType}. Please try again.`);
+      Alert.alert(
+        "Search Error",
+        `Unable to search ${searchType}. Please try again.`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -108,14 +135,67 @@ export default function SearchModal() {
     setISBNSearch("");
     setCondition("Any");
     setPaymentType("Any");
+    setMinPrice("");
+    setMaxPrice("");
     setSearchResults([]);
   };
 
   // Handle search type change
-  const handleSearchTypeChange = (type: 'books' | 'items') => {
+  const handleSearchTypeChange = (type: "books" | "items") => {
     setSearchType(type);
     setCondition("Any"); // Reset condition to "Any" when switching types
     clearSearch();
+  };
+
+  // Handle ISBN subscription
+  const handleISBNSubscription = async (isbn: string) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert("Error", "You must be logged in to subscribe to ISBNs");
+        return;
+      }
+
+      // Check if subscription already exists
+      const { data: existing } = await supabase
+        .from("isbn_subscriptions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("isbn", isbn)
+        .single();
+
+      if (existing) {
+        Alert.alert(
+          "Already Subscribed",
+          "You're already subscribed to this ISBN"
+        );
+        setShowSubscriptionModal(false);
+        return;
+      }
+
+      const { error } = await supabase.from("isbn_subscriptions").insert({
+        user_id: user.id,
+        isbn: isbn,
+        created_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error("Error subscribing to ISBN:", error);
+        Alert.alert("Error", "Failed to subscribe to ISBN");
+        return;
+      }
+
+      Alert.alert(
+        "Subscription Added",
+        "You'll be notified when a book with this ISBN becomes available"
+      );
+      setShowSubscriptionModal(false);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
   };
 
   // Render picker modal
@@ -164,6 +244,109 @@ export default function SearchModal() {
     </Modal>
   );
 
+  // ISBN Subscription Modal Component
+  const ISBNSubscriptionModal = () => {
+    const [isbn, setIsbn] = useState("");
+    const [isbnError, setIsbnError] = useState("");
+
+    const validateISBN = (text: string) => {
+      // Remove any non-numeric characters for validation
+      const numericOnly = text.replace(/\D/g, '');
+      
+      if (numericOnly.length === 0) {
+        setIsbnError("");
+        return false;
+      }
+      
+      if (numericOnly.length < 11) {
+        setIsbnError("ISBN must be at least 11 digits");
+        return false;
+      }
+      
+      if (numericOnly.length > 13) {
+        setIsbnError("ISBN cannot exceed 13 digits");
+        return false;
+      }
+      
+      setIsbnError("");
+      return true;
+    };
+
+    const handleISBNChange = (text: string) => {
+      // Only allow numeric characters
+      const numericOnly = text.replace(/\D/g, '');
+      setIsbn(numericOnly);
+      validateISBN(numericOnly);
+    };
+
+    const handleSubscribe = () => {
+      const trimmedISBN = isbn.trim();
+      if (trimmedISBN && validateISBN(trimmedISBN)) {
+        handleISBNSubscription(trimmedISBN);
+        setIsbn("");
+        setIsbnError("");
+      } else if (!trimmedISBN) {
+        setIsbnError("Please enter an ISBN");
+      }
+    };
+
+    if (!showSubscriptionModal) return null;
+
+    return (
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showSubscriptionModal}
+        onRequestClose={() => setShowSubscriptionModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.subscriptionModalContainer}>
+            <View style={styles.subscriptionModalHeader}>
+              <Text style={styles.subscriptionModalTitle}>
+                Subscribe to ISBN
+              </Text>
+              <TouchableOpacity onPress={() => setShowSubscriptionModal(false)}>
+                <Ionicons name="close" size={24} color="#6b7280" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.subscriptionModalDescription}>
+              Enter the ISBN of the book you're looking for. We'll notify you
+              when it becomes available.
+            </Text>
+            <TextInput
+              style={[
+                styles.isbnInput,
+                isbnError ? styles.isbnInputError : null
+              ]}
+              placeholder="Enter 11-13 digit ISBN..."
+              value={isbn}
+              onChangeText={handleISBNChange}
+              keyboardType="number-pad"
+              maxLength={13}
+            />
+            {isbnError ? (
+              <Text style={styles.errorText}>{isbnError}</Text>
+            ) : null}
+            <View style={styles.subscriptionModalActions}>
+              <TouchableOpacity
+                style={styles.cancelSubscriptionButton}
+                onPress={() => setShowSubscriptionModal(false)}
+              >
+                <Text style={styles.cancelSubscriptionButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.subscribeActionButton}
+                onPress={handleSubscribe}
+              >
+                <Text style={styles.subscribeActionButtonText}>Subscribe</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
@@ -183,18 +366,28 @@ export default function SearchModal() {
       {/* Search Type Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, searchType === 'books' && styles.activeTab]}
-          onPress={() => handleSearchTypeChange('books')}
+          style={[styles.tab, searchType === "books" && styles.activeTab]}
+          onPress={() => handleSearchTypeChange("books")}
         >
-          <Text style={[styles.tabText, searchType === 'books' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              searchType === "books" && styles.activeTabText,
+            ]}
+          >
             Books
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, searchType === 'items' && styles.activeTab]}
-          onPress={() => handleSearchTypeChange('items')}
+          style={[styles.tab, searchType === "items" && styles.activeTab]}
+          onPress={() => handleSearchTypeChange("items")}
         >
-          <Text style={[styles.tabText, searchType === 'items' && styles.activeTabText]}>
+          <Text
+            style={[
+              styles.tabText,
+              searchType === "items" && styles.activeTabText,
+            ]}
+          >
             Items
           </Text>
         </TouchableOpacity>
@@ -206,30 +399,22 @@ export default function SearchModal() {
           <Ionicons name="search" size={20} style={styles.searchIcon} />
           <TextInput
             style={styles.mainSearchInput}
-            placeholder={searchType === 'books' ? 'Search by book title...' : 'Search by item name...'}
+            placeholder={
+              searchType === "books"
+                ? "Search by book title..."
+                : "Search by item name..."
+            }
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
             onSubmitEditing={handleSearch}
           />
         </View>
-
-        <TouchableOpacity
-          style={styles.searchButton}
-          onPress={handleSearch}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="small" color="white" />
-          ) : (
-            <Text style={styles.searchButtonText}>Search</Text>
-          )}
-        </TouchableOpacity>
       </View>
 
       {/* Filters - Always Visible */}
       <View style={styles.filtersContainer}>
-        {searchType === 'books' && (
+        {searchType === "books" && (
           <View style={styles.filterRow}>
             <Text style={styles.filterLabel}>ISBN</Text>
             <TextInput
@@ -264,14 +449,66 @@ export default function SearchModal() {
             <Ionicons name="chevron-down" size={16} color="#666" />
           </TouchableOpacity>
         </View>
+
+        <View style={styles.filterRow}>
+          <Text style={styles.filterLabel}>Price</Text>
+          <View style={styles.priceRangeContainer}>
+            <TextInput
+              style={styles.priceInput}
+              placeholder="Min"
+              value={minPrice}
+              onChangeText={setMinPrice}
+              keyboardType="decimal-pad"
+            />
+            <Text style={styles.priceRangeSeparator}>-</Text>
+            <TextInput
+              style={styles.priceInput}
+              placeholder="Max"
+              value={maxPrice}
+              onChangeText={setMaxPrice}
+              keyboardType="decimal-pad"
+            />
+          </View>
+        </View>
+
+        {/* Search Button */}
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={handleSearch}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.searchButtonText}>Search</Text>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Search Results */}
       <View style={styles.resultsContainer}>
         {searchResults.length > 0 && (
-          <Text style={styles.resultsHeader}>
-            {searchResults.length} {searchType === 'books' ? 'book' : 'item'}{searchResults.length !== 1 ? 's' : ''} found
-          </Text>
+          <View style={styles.resultsHeaderContainer}>
+            <Text style={styles.resultsHeader}>
+              {searchResults.length} {searchType === "books" ? "book" : "item"}
+              {searchResults.length !== 1 ? "s" : ""} found
+            </Text>
+            {searchType === "books" && (
+              <TouchableOpacity
+                style={styles.subscribeSmallButton}
+                onPress={() => setShowSubscriptionModal(true)}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={16}
+                  color="#3b82f6"
+                />
+                <Text style={styles.subscribeSmallButtonText}>
+                  Subscribe to ISBN
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
 
         <FlatList
@@ -295,9 +532,27 @@ export default function SearchModal() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             !isLoading && searchQuery ? (
-              <Text style={styles.emptyText}>
-                No {searchType} found matching your search.
-              </Text>
+              <View style={styles.emptyContainer}>
+                <Ionicons name="search-outline" size={48} color="#d1d5db" />
+                <Text style={styles.emptyText}>
+                  No {searchType} found matching your search.
+                </Text>
+                {searchType === "books" && (
+                  <>
+                    <Text style={styles.emptySubtext}>
+                      Can't find the book you're looking for?
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.subscribeButton}
+                      onPress={() => setShowSubscriptionModal(true)}
+                    >
+                      <Text style={styles.subscribeButtonText}>
+                        Subscribe to ISBN
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
             ) : null
           }
         />
@@ -305,7 +560,7 @@ export default function SearchModal() {
 
       {/* Condition Modal */}
       {renderPickerModal(
-        searchType === 'books' ? bookConditionOptions : itemConditionOptions,
+        searchType === "books" ? bookConditionOptions : itemConditionOptions,
         isConditionModalVisible,
         setConditionModalVisible,
         condition,
@@ -320,6 +575,9 @@ export default function SearchModal() {
         paymentType,
         setPaymentType
       )}
+
+      {/* ISBN Subscription Modal */}
+      <ISBNSubscriptionModal />
 
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </SafeAreaView>
@@ -369,6 +627,8 @@ const styles = StyleSheet.create({
     height: 48,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 16,
+    width: "100%",
   },
   searchButtonText: {
     color: "white",
@@ -414,15 +674,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#495057",
   },
+  priceRangeContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  priceInput: {
+    flex: 1,
+    backgroundColor: "#f1f3f4",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 40,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  priceRangeSeparator: {
+    fontSize: 16,
+    color: "#6c757d",
+    fontWeight: "500",
+  },
   resultsContainer: {
     flex: 1,
     padding: 16,
+  },
+  resultsHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
   resultsHeader: {
     fontSize: 16,
     fontWeight: "600",
     color: "#495057",
-    marginBottom: 12,
+    flex: 1,
+  },
+  subscribeSmallButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f9ff",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+    gap: 4,
+  },
+  subscribeSmallButtonText: {
+    color: "#3b82f6",
+    fontSize: 12,
+    fontWeight: "500",
   },
   resultItem: {
     backgroundColor: "white",
@@ -456,11 +758,107 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#adb5bd",
   },
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 48,
+    paddingHorizontal: 32,
+  },
   emptyText: {
     textAlign: "center",
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "#9ca3af",
+    marginBottom: 24,
+  },
+  subscribeButton: {
+    backgroundColor: "#3b82f6",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  subscribeButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  subscriptionModalContainer: {
+    backgroundColor: "#ffffff",
+    margin: 24,
+    borderRadius: 16,
+    padding: 24,
+    width: "90%",
+    maxWidth: 400,
+  },
+  subscriptionModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  subscriptionModalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  subscriptionModalDescription: {
     fontSize: 16,
-    color: "#6c757d",
-    marginTop: 32,
+    color: "#6b7280",
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  isbnInput: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  isbnInputError: {
+    borderColor: "#ef4444",
+    backgroundColor: "#fef2f2",
+  },
+  errorText: {
+    color: "#ef4444",
+    fontSize: 14,
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  subscriptionModalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelSubscriptionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    alignItems: "center",
+  },
+  cancelSubscriptionButtonText: {
+    color: "#6b7280",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  subscribeActionButton: {
+    flex: 1,
+    backgroundColor: "#3b82f6",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  subscribeActionButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
   },
   modalOverlay: {
     flex: 1,
