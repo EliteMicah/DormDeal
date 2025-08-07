@@ -8,8 +8,9 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCallback } from "react";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
 import EditProfileModal from "../editProfileModal";
@@ -58,6 +59,13 @@ export default function ProfileScreen() {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Refresh listings when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserListings();
+    }, [])
+  );
 
   const fetchUserProfile = async () => {
     try {
@@ -285,10 +293,6 @@ export default function ProfileScreen() {
                       {listing.title}
                     </Text>
                     <Text style={styles.listingPrice}>${listing.price}</Text>
-                    {/* Optional: Display listing type */}
-                    <Text style={styles.listingType}>
-                      {listing.type === "book" ? "Book" : "Item"}
-                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -401,7 +405,7 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     width: "48%",
-    height: 175,
+    height: 177,
     backgroundColor: "white",
     marginBottom: 15,
     borderRadius: 8,

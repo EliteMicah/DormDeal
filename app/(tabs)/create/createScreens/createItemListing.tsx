@@ -39,7 +39,7 @@ export default function CreateItemListing() {
 
   // Options
   const conditionOptions = ["New", "Like New", "Used"];
-  const paymentTypeOptions = ["Venmo", "Zelle", "Cash"];
+  const paymentTypeOptions = ["Any, Venmo", "Zelle", "Cash"];
 
   // Get current user on component mount
   useEffect(() => {

@@ -48,7 +48,9 @@ export default function CreateEventListing() {
   const [loading, setLoading] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
+  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(
+    null
+  );
 
   const paymentService = PaymentService.getInstance();
   const eventService = EventService.getInstance();
@@ -90,13 +92,14 @@ export default function CreateEventListing() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [16, 9],
       quality: 0.8,
     });
 
     if (!result.canceled) {
+      // Store image locally - it will only be uploaded to event-images bucket after successful payment
       updateFormData("image", result.assets[0].uri);
     }
   };
@@ -236,26 +239,27 @@ export default function CreateEventListing() {
 
     try {
       if (!paymentResult?.transactionId) {
-        throw new Error('Payment information not found');
+        throw new Error("Payment information not found");
       }
 
       // Parse tags and requirements
       const tagsArray = formData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
-      
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
       const requirementsArray = formData.requirements
-        .split('\n')
-        .map(req => req.trim())
-        .filter(req => req.length > 0);
+        .split("\n")
+        .map((req) => req.trim())
+        .filter((req) => req.length > 0);
 
       // Convert date format from MM/DD/YYYY to YYYY-MM-DD
       const formatDate = (dateStr: string): string => {
-        const parts = dateStr.split('/');
-        if (parts.length !== 3) throw new Error('Date must be in MM/DD/YYYY format');
+        const parts = dateStr.split("/");
+        if (parts.length !== 3)
+          throw new Error("Date must be in MM/DD/YYYY format");
         const [month, day, year] = parts;
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
       };
 
       // Simple time format (assumes user enters HH:MM format)
@@ -263,61 +267,67 @@ export default function CreateEventListing() {
         return timeStr.trim();
       };
 
-      // Create event data
+      // Create event data with temporary image URI (will be uploaded after payment)
       const eventData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         event_date: formatDate(formData.date),
         event_time: formatTime(formData.time),
         location: formData.location.trim(),
-        max_capacity: formData.maxCapacity ? parseInt(formData.maxCapacity) : undefined,
+        max_capacity: formData.maxCapacity
+          ? parseInt(formData.maxCapacity)
+          : undefined,
         tags: tagsArray,
         requirements: requirementsArray,
         additional_info: formData.additionalInfo.trim() || undefined,
         contact_email: formData.contactEmail.trim(),
         payment_transaction_id: paymentResult.transactionId,
-        image_url: undefined
+        image_url: undefined, // Will be set after image upload
+        temp_image_uri: formData.image || undefined, // Pass undefined if image is null
       };
 
       // Create the event in the database
-      const createdEvent = await eventService.createEvent(eventData);
-      console.log('Event created:', createdEvent);
+      const createdEvent = await eventService.createEvent({
+        ...eventData,
+        temp_image_uri: formData.image || undefined, // Updated line
+      });
+      console.log("Event created:", createdEvent);
 
-      Alert.alert(
-        "Event Created Successfully! 🎉",
-        "Your event has been published and will be visible to all users.",
-        [
-          {
-            text: "View Event",
-            onPress: () =>
-              router.push("/(tabs)/home/homeScreens/eventCardScreen"),
+      const successMessage = formData.image
+        ? "Your event has been published with image and will be visible to all users."
+        : "Your event has been published and will be visible to all users.";
+
+      Alert.alert("Event Created Successfully! 🎉", successMessage, [
+        {
+          text: "View Event",
+          onPress: () =>
+            router.push("/(tabs)/home/homeScreens/eventCardScreen"),
+        },
+        {
+          text: "Create Another",
+          onPress: () => {
+            setFormData({
+              title: "",
+              description: "",
+              date: "",
+              time: "",
+              location: "",
+              maxCapacity: "",
+              tags: "",
+              requirements: "",
+              additionalInfo: "",
+              contactEmail: "",
+              image: null,
+            });
+            setPaymentCompleted(false);
+            setPaymentResult(null);
           },
-          {
-            text: "Create Another",
-            onPress: () => {
-              setFormData({
-                title: "",
-                description: "",
-                date: "",
-                time: "",
-                location: "",
-                maxCapacity: "",
-                tags: "",
-                requirements: "",
-                additionalInfo: "",
-                contactEmail: "",
-                image: null,
-              });
-              setPaymentCompleted(false);
-              setPaymentResult(null);
-            },
-          },
-        ]
-      );
+        },
+      ]);
     } catch (error: any) {
-      console.error('Error creating event:', error);
+      console.error("Error creating event:", error);
       Alert.alert(
-        "Error", 
+        "Error",
         error.message || "Failed to create event. Please try again."
       );
     } finally {
