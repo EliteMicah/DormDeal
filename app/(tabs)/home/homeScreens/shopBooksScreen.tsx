@@ -148,7 +148,7 @@ export default function shopBooksScreen() {
           headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerBackTitle: "‎",
           headerTintColor: "black",
         }}
       />

@@ -152,7 +152,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           uri: imageUri,
           type: `image/${fileExt}`,
           name: fileName,
-        };
+        } as any; // Cast to any to bypass type checking
       } else {
         // For other URIs, try the fetch approach but with better error handling
         try {
@@ -167,7 +167,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             throw new Error("Image blob is empty");
           }
 
-          fileToUpload = blob;
+          // Create a File object from the Blob
+          fileToUpload = new File([blob], fileName, {
+            type: `image/${fileExt}`,
+          });
         } catch (fetchError) {
           console.error("Error converting to blob:", fetchError);
           // Fallback to direct URI approach
@@ -175,7 +178,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             uri: imageUri,
             type: `image/${fileExt}`,
             name: fileName,
-          };
+          } as any; // Cast to any to bypass type checking
         }
       }
 
@@ -212,7 +215,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      
+
       console.log("Generated public URL:", publicUrl);
       return publicUrl;
     } catch (error) {
@@ -286,22 +289,27 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   const handleDeleteAccount = async () => {
     try {
+      // Retrieve the user again
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        Alert.alert("Error", "User not authenticated");
+        return;
+      }
+
       // First delete the profile
       const { error: deleteError } = await supabase
         .from("profiles")
         .delete()
-        .eq("id", supabase.auth.user()?.id);
+        .eq("id", user.id); // Use user.id here
 
       if (deleteError) {
         console.error("Error deleting profile:", deleteError.message);
         Alert.alert("Error", "Failed to delete account");
         return;
-      }
-
-      // Then sign out
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error.message);
       }
 
       onClose();

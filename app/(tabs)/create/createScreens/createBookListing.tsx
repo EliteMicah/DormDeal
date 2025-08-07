@@ -39,7 +39,7 @@ export default function CreateBookListing() {
 
   // Options
   const conditionOptions = ["New", "Used", "Noted"];
-  const paymentTypeOptions = ["Venmo", "Zelle", "Cash"];
+  const paymentTypeOptions = ["Any, Venmo", "Zelle", "Cash"];
 
   // Get current user on component mount
   useEffect(() => {

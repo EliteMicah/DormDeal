@@ -5,13 +5,13 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function CreateScreen() {
   const router = useRouter();
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Create Listing</Text>
         <Text style={styles.subtitle}>Choose what you'd like to sell</Text>
-        
+
         <View style={styles.optionsContainer}>
           <TouchableOpacity
             style={styles.optionCard}
@@ -59,7 +59,7 @@ export default function CreateScreen() {
               </Text>
               <View style={styles.premiumBadge}>
                 <Ionicons name="star" size={14} color="#FFD700" />
-                <Text style={styles.premiumText}>Premium - $10</Text>
+                <Text style={styles.premiumText}>Premium - $15</Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#FF6B35" />

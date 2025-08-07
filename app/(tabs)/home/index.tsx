@@ -163,7 +163,18 @@ export default function HomeScreen() {
 
         {/* Featured Event Card */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Featured Event</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Event</Text>
+            <TouchableOpacity
+              style={styles.seeAllButton}
+              onPress={() =>
+                router.push("/(tabs)/home/homeScreens/allEventsScreen")
+              }
+            >
+              <Text style={styles.seeAllText}>See All</Text>
+              <Ionicons name="chevron-forward" size={16} color="#4A90E2" />
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
             style={styles.featuredCard}
             onPress={() =>
@@ -345,11 +356,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 5,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#333",
-    marginBottom: 16,
+    paddingBottom: 5,
+  },
+  seeAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  seeAllText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#4A90E2",
+    marginRight: 4,
   },
   featuredCard: {
     backgroundColor: "#FFFFFF",
