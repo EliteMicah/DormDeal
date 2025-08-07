@@ -8,12 +8,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../../lib/supabase";
 
-interface ItemListing {
+interface BookListing {
   id: number;
   title: string;
   price: number;
@@ -21,66 +21,82 @@ interface ItemListing {
   image_url?: string;
   user_id: string;
   created_at: string;
-  category?: string;
+  isbn?: string;
   payment_type: string;
   description?: string;
   username?: string;
 }
 
-const ItemCard = ({
-  item,
+const BookCard = ({
+  book,
   onPress,
 }: {
-  item: ItemListing;
+  book: BookListing;
   onPress: () => void;
 }) => (
   <TouchableOpacity style={styles.card} onPress={onPress}>
-    {item.image_url ? (
-      <Image source={{ uri: item.image_url }} style={styles.cardImage} />
+    {book.image_url ? (
+      <Image source={{ uri: book.image_url }} style={styles.cardImage} />
     ) : (
       <View style={[styles.cardImage, styles.placeholder]}>
-        <Ionicons name="cube-outline" size={32} color="#9ca3af" />
+        <Ionicons name="book-outline" size={32} color="#9ca3af" />
       </View>
     )}
     <View style={styles.cardInfo}>
-      <Text style={styles.cardTitle} numberOfLines={1}>
-        {item.title}
+      <Text style={styles.cardTitle} numberOfLines={2}>
+        {book.title}
       </Text>
-      <Text style={styles.cardPrice}>${item.price}</Text>
+      <Text style={styles.cardPrice}>${book.price}</Text>
       <Text style={styles.cardSeller} numberOfLines={1}>
-        {item.username || "Anonymous"}
+        {book.username || "Anonymous"}
       </Text>
+      {book.isbn && (
+        <Text style={styles.cardIsbn} numberOfLines={1}>
+          ISBN: {book.isbn}
+        </Text>
+      )}
     </View>
   </TouchableOpacity>
 );
 
-export default function shopItemsScreen() {
+export default function BooksByConditionScreen() {
   const router = useRouter();
-  const [items, setItems] = useState<ItemListing[]>([]);
+  const { condition } = useLocalSearchParams();
+  const [books, setBooks] = useState<BookListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchItems();
-  }, []);
+    if (condition) {
+      fetchBooksByCondition();
+    }
+  }, [condition]);
 
-  const fetchItems = async () => {
+  const fetchBooksByCondition = async () => {
     try {
       const { data, error } = await supabase
-        .from("item_listing")
+        .from("book_listing")
         .select("*")
+        .eq("condition", condition)
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error fetching items:", error);
+        console.error("Error fetching books:", error);
         return;
       }
 
-      setItems(data || []);
+      setBooks(data || []);
     } catch (error) {
-      console.error("Unexpected error fetching items:", error);
+      console.error("Unexpected error fetching books:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getHeaderTitle = () => {
+    if (typeof condition === "string") {
+      return `${condition} Books`;
+    }
+    return "Books";
   };
 
   return (
@@ -96,15 +112,18 @@ export default function shopItemsScreen() {
       />
 
       <View style={styles.header}>
-        <Text style={styles.title}>Items</Text>
+        <Text style={styles.title}>{getHeaderTitle()}</Text>
+        <Text style={styles.subtitle}>
+          {books.length} {books.length === 1 ? "book" : "books"} available
+        </Text>
       </View>
 
       <TouchableOpacity
         style={styles.searchBar}
-        onPress={() => router.push("/searchModal?type=items")}
+        onPress={() => router.push("/searchModal?type=books")}
       >
         <Ionicons name="search" size={20} color="#9ca3af" />
-        <Text style={styles.searchText}>Search items...</Text>
+        <Text style={styles.searchText}>Search books...</Text>
       </TouchableOpacity>
 
       {isLoading ? (
@@ -113,20 +132,26 @@ export default function shopItemsScreen() {
         </View>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {items.length === 0 ? (
+          {books.length === 0 ? (
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>No items available</Text>
+              <Ionicons name="book-outline" size={64} color="#d1d5db" />
+              <Text style={styles.emptyText}>
+                No {condition?.toString().toLowerCase()} books available
+              </Text>
+              <Text style={styles.emptySubtext}>
+                Check back later or try a different condition
+              </Text>
             </View>
           ) : (
             <View style={styles.grid}>
-              {items.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
+              {books.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
                   onPress={() =>
                     router.push({
-                      pathname: "/(tabs)/home/homeScreens/itemDetailsScreen",
-                      params: { itemId: item.id },
+                      pathname: "/(tabs)/home/homeScreens/bookDetailsScreen",
+                      params: { bookId: book.id },
                     })
                   }
                 />
@@ -153,6 +178,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     color: "#111827",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#6b7280",
+    marginTop: 4,
   },
   searchBar: {
     flexDirection: "row",
@@ -195,10 +225,18 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#f3f4f6",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   cardImage: {
     width: "100%",
-    height: 140,
+    height: 160,
     backgroundColor: "#f9fafb",
   },
   placeholder: {
@@ -212,17 +250,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#111827",
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 18,
   },
   cardPrice: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     color: "#3b82f6",
     marginBottom: 4,
   },
+  cardCondition: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#059669",
+    backgroundColor: "#d1fae5",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+    marginBottom: 6,
+  },
   cardSeller: {
     fontSize: 12,
     color: "#6b7280",
+    marginBottom: 2,
+  },
+  cardIsbn: {
+    fontSize: 10,
+    color: "#9ca3af",
+    fontFamily: "monospace",
   },
   empty: {
     flex: 1,
@@ -231,7 +287,15 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
     color: "#9ca3af",
+    textAlign: "center",
   },
 });

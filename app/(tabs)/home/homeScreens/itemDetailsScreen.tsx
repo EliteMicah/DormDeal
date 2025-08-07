@@ -35,7 +35,7 @@ const itemConditionOptions = ["New", "Like New", "Used"];
 const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
 export default function ItemDetailsScreen() {
-  const { itemId } = useLocalSearchParams();
+  const { itemId, returnTo } = useLocalSearchParams();
   const router = useRouter();
   const [itemDetails, setItemDetails] = useState<ItemListing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,11 +53,13 @@ export default function ItemDetailsScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
     if (itemId) {
       fetchCurrentUser();
       fetchItemDetails();
+      checkIfBookmarked();
     }
   }, [itemId]);
 
@@ -241,6 +243,74 @@ export default function ItemDetailsScreen() {
     }
   };
 
+  const checkIfBookmarked = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || !itemId) return;
+
+      const { data, error } = await supabase
+        .from("saved_listings")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("listing_type", "item")
+        .eq("listing_id", parseInt(itemId.toString()))
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Error checking bookmark status:", error);
+        return;
+      }
+
+      setIsBookmarked(!!data);
+    } catch (error) {
+      console.error("Unexpected error checking bookmark:", error);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || !itemId) return;
+
+      if (isBookmarked) {
+        // Remove bookmark
+        const { error } = await supabase
+          .from("saved_listings")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("listing_type", "item")
+          .eq("listing_id", parseInt(itemId.toString()));
+
+        if (error) {
+          console.error("Error removing bookmark:", error);
+          return;
+        }
+
+        setIsBookmarked(false);
+      } else {
+        // Add bookmark
+        const { error } = await supabase.from("saved_listings").insert({
+          user_id: user.id,
+          listing_type: "item",
+          listing_id: parseInt(itemId.toString()),
+        });
+
+        if (error) {
+          console.error("Error adding bookmark:", error);
+          return;
+        }
+
+        setIsBookmarked(true);
+      }
+    } catch (error) {
+      console.error("Unexpected error toggling bookmark:", error);
+    }
+  };
+
   // Render picker modal
   const renderPickerModal = (
     options: string[],
@@ -326,11 +396,12 @@ export default function ItemDetailsScreen() {
     <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       <Stack.Screen
         options={{
-          headerTitle: "",
+          headerTitle: "‎",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerBackTitle: "‎",
           headerTintColor: "black",
+          animation: "none",
         }}
       />
 
@@ -338,6 +409,7 @@ export default function ItemDetailsScreen() {
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.imageContainer}>
           {itemDetails.image_url ? (
@@ -410,12 +482,28 @@ export default function ItemDetailsScreen() {
             </>
           ) : (
             <>
-              <Text style={styles.title}>{itemDetails.title}</Text>
-              <Text style={styles.price}>${itemDetails.price}</Text>
-              <Text style={styles.metadata}>
-                {itemDetails.condition} · Posted{" "}
-                {formatDate(itemDetails.created_at)}
-              </Text>
+              <View style={styles.titleRow}>
+                <View style={styles.titleInfo}>
+                  <Text style={styles.title}>{itemDetails.title}</Text>
+                  <Text style={styles.price}>${itemDetails.price}</Text>
+                  <Text style={styles.metadata}>
+                    {itemDetails.condition} · Posted{" "}
+                    {formatDate(itemDetails.created_at)}
+                  </Text>
+                </View>
+                {!isOwner && (
+                  <TouchableOpacity
+                    style={styles.bookmarkButton}
+                    onPress={toggleBookmark}
+                  >
+                    <Ionicons
+                      name={isBookmarked ? "bookmark" : "bookmark-outline"}
+                      size={24}
+                      color={isBookmarked ? "#ef4444" : "#9ca3af"}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
             </>
           )}
 
@@ -452,13 +540,15 @@ export default function ItemDetailsScreen() {
             )}
           </View>
 
-          {/* Payment Method */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Payment Method</Text>
-            <Text style={styles.sectionText}>
-              {itemDetails.payment_type || "Not specified"}
-            </Text>
-          </View>
+          {/* Payment Method - Only show when not editing */}
+          {!isEditing && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Payment Method</Text>
+              <Text style={styles.sectionText}>
+                {itemDetails.payment_type || "Not specified"}
+              </Text>
+            </View>
+          )}
 
           {/* Seller */}
           <View style={styles.section}>
@@ -513,7 +603,9 @@ export default function ItemDetailsScreen() {
                 onPress={handleDelete}
               >
                 <MaterialIcons name="delete" size={18} color="#ff4757" />
-                <Text style={styles.deleteButtonBottomText}>Delete Listing</Text>
+                <Text style={styles.deleteButtonBottomText}>
+                  Delete Listing
+                </Text>
               </TouchableOpacity>
             </>
           )}
@@ -551,6 +643,9 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 100,
+  },
   imageContainer: {
     width: "100%",
     height: 280,
@@ -572,6 +667,20 @@ const styles = StyleSheet.create({
   content: {
     padding: 24,
     gap: 24,
+  },
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  titleInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  bookmarkButton: {
+    padding: 8,
+    marginTop: -8,
   },
   title: {
     fontSize: 28,

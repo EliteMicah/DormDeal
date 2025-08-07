@@ -9,6 +9,8 @@ import {
   View,
   ScrollView,
   Alert,
+  Keyboard,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
@@ -26,12 +28,14 @@ export default function CreateBookListing() {
   const [isbn, setIsbn] = useState("");
   const [condition, setCondition] = useState("New");
   const [price, setPrice] = useState("");
-  const [paymentType, setPaymentType] = useState("Venmo");
+  const [paymentType, setPaymentType] = useState("Any");
   const [description, setDescription] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [username, setUsername] = useState<string>("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isDescriptionFocused, setIsDescriptionFocused] = useState(false);
 
   // Modal visibility states
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
@@ -39,9 +43,9 @@ export default function CreateBookListing() {
 
   // Options
   const conditionOptions = ["New", "Used", "Noted"];
-  const paymentTypeOptions = ["Any, Venmo", "Zelle", "Cash"];
+  const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
-  // Get current user on component mount
+  // Get current user on component mount and set up keyboard listeners
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -61,6 +65,24 @@ export default function CreateBookListing() {
       }
     };
     getCurrentUser();
+
+    // Set up keyboard listeners
+    const keyboardWillShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setIsKeyboardVisible(true)
+    );
+    const keyboardWillHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setIsKeyboardVisible(false);
+        setIsDescriptionFocused(false);
+      }
+    );
+
+    return () => {
+      keyboardWillShowListener.remove();
+      keyboardWillHideListener.remove();
+    };
   }, []);
 
   const pickImage = async () => {
@@ -162,8 +184,8 @@ export default function CreateBookListing() {
 
     // Validate price is a number
     const numericPrice = parseFloat(price);
-    if (isNaN(numericPrice) || numericPrice <= 0) {
-      setFormError("Please enter a valid price.");
+    if (isNaN(numericPrice) || numericPrice < 0) {
+      setFormError("Please enter a valid price (0 or greater).");
       return;
     }
 
@@ -331,7 +353,7 @@ export default function CreateBookListing() {
             <TextInput
               style={styles.inputField}
               placeholder="$20"
-              keyboardType="number-pad"
+              keyboardType="decimal-pad"
               value={price}
               onChangeText={setPrice}
               returnKeyType="done"
@@ -366,6 +388,8 @@ export default function CreateBookListing() {
               maxLength={300}
               value={description}
               onChangeText={setDescription}
+              onFocus={() => setIsDescriptionFocused(true)}
+              onBlur={() => setIsDescriptionFocused(false)}
               placeholderTextColor="#6c757d"
             />
           </View>
@@ -403,6 +427,18 @@ export default function CreateBookListing() {
         setPaymentModalVisible,
         paymentType,
         setPaymentType
+      )}
+
+      {/* Done button above keyboard */}
+      {isKeyboardVisible && isDescriptionFocused && (
+        <View style={styles.keyboardAccessory}>
+          <TouchableOpacity
+            style={styles.doneButton}
+            onPress={() => Keyboard.dismiss()}
+          >
+            <Text style={styles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </SafeAreaView>
   );
@@ -583,5 +619,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6c757d",
     fontWeight: "500",
+  },
+  keyboardAccessory: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#f8f9fa",
+    borderTopWidth: 1,
+    borderTopColor: "#dee2e6",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: "flex-end",
+  },
+  doneButton: {
+    backgroundColor: "#007bff",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  doneButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

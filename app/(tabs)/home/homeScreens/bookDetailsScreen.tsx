@@ -36,7 +36,7 @@ const bookConditionOptions = ["New", "Used", "Noted"];
 const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
 
 export default function BookDetailsScreen() {
-  const { bookId } = useLocalSearchParams();
+  const { bookId, returnTo } = useLocalSearchParams();
   const router = useRouter();
   const [bookDetails, setBookDetails] = useState<BookListing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,11 +55,13 @@ export default function BookDetailsScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   useEffect(() => {
     if (bookId) {
       fetchCurrentUser();
       fetchBookDetails();
+      checkIfBookmarked();
     }
   }, [bookId]);
 
@@ -246,6 +248,74 @@ export default function BookDetailsScreen() {
     }
   };
 
+  const checkIfBookmarked = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || !bookId) return;
+
+      const { data, error } = await supabase
+        .from("saved_listings")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("listing_type", "book")
+        .eq("listing_id", parseInt(bookId.toString()))
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Error checking bookmark status:", error);
+        return;
+      }
+
+      setIsBookmarked(!!data);
+    } catch (error) {
+      console.error("Unexpected error checking bookmark:", error);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || !bookId) return;
+
+      if (isBookmarked) {
+        // Remove bookmark
+        const { error } = await supabase
+          .from("saved_listings")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("listing_type", "book")
+          .eq("listing_id", parseInt(bookId.toString()));
+
+        if (error) {
+          console.error("Error removing bookmark:", error);
+          return;
+        }
+
+        setIsBookmarked(false);
+      } else {
+        // Add bookmark
+        const { error } = await supabase.from("saved_listings").insert({
+          user_id: user.id,
+          listing_type: "book",
+          listing_id: parseInt(bookId.toString()),
+        });
+
+        if (error) {
+          console.error("Error adding bookmark:", error);
+          return;
+        }
+
+        setIsBookmarked(true);
+      }
+    } catch (error) {
+      console.error("Unexpected error toggling bookmark:", error);
+    }
+  };
+
   // Render picker modal
   const renderPickerModal = (
     options: string[],
@@ -331,11 +401,12 @@ export default function BookDetailsScreen() {
     <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       <Stack.Screen
         options={{
-          headerTitle: "",
+          headerTitle: " ",
           headerBackVisible: true,
           headerTransparent: true,
-          headerBackTitle: "‎", // Empty Whitespace Character for back button
+          headerBackTitle: "‎",
           headerTintColor: "black",
+          animation: "none",
         }}
       />
 
@@ -343,6 +414,7 @@ export default function BookDetailsScreen() {
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.imageContainer}>
           {bookDetails.image_url ? (
@@ -402,12 +474,28 @@ export default function BookDetailsScreen() {
             </>
           ) : (
             <>
-              <Text style={styles.title}>{bookDetails.title}</Text>
-              <Text style={styles.price}>${bookDetails.price}</Text>
-              <Text style={styles.metadata}>
-                {bookDetails.condition} · Posted{" "}
-                {formatDate(bookDetails.created_at)}
-              </Text>
+              <View style={styles.titleRow}>
+                <View style={styles.titleInfo}>
+                  <Text style={styles.title}>{bookDetails.title}</Text>
+                  <Text style={styles.price}>${bookDetails.price}</Text>
+                  <Text style={styles.metadata}>
+                    {bookDetails.condition} · Posted{" "}
+                    {formatDate(bookDetails.created_at)}
+                  </Text>
+                </View>
+                {!isOwner && (
+                  <TouchableOpacity
+                    style={styles.bookmarkButton}
+                    onPress={toggleBookmark}
+                  >
+                    <Ionicons
+                      name={isBookmarked ? "bookmark" : "bookmark-outline"}
+                      size={24}
+                      color={isBookmarked ? "#ef4444" : "#9ca3af"}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
             </>
           )}
 
@@ -544,7 +632,9 @@ export default function BookDetailsScreen() {
                 onPress={handleDelete}
               >
                 <MaterialIcons name="delete" size={18} color="#ff4757" />
-                <Text style={styles.deleteButtonBottomText}>Delete Listing</Text>
+                <Text style={styles.deleteButtonBottomText}>
+                  Delete Listing
+                </Text>
               </TouchableOpacity>
             </>
           )}
@@ -581,6 +671,9 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
   },
   imageContainer: {
     width: "100%",
@@ -914,5 +1007,21 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  titleInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  bookmarkButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "#f8f8f8",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
