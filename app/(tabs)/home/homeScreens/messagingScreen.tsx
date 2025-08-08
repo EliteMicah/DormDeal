@@ -110,8 +110,7 @@ export default function MessagingScreen() {
   const filteredConversations = conversations.filter((conversation) => {
     if (searchQuery.trim().length > 0 && searchResults.length === 0) {
       // If searching but no user results, filter by conversation content
-      const otherParticipant = conversation.participants?.find(p => p.user_id !== conversation.participants?.[0]?.user_id);
-      const participantName = otherParticipant?.user?.full_name || otherParticipant?.user?.username || '';
+      const participantName = conversation.other_user?.username || '';
       const lastMessage = conversation.last_message?.content || '';
       
       const matchesSearch = 
@@ -160,9 +159,7 @@ export default function MessagingScreen() {
   };
 
   const getConversationTitle = (conversation: Conversation) => {
-    return conversation.other_user?.full_name || 
-           conversation.other_user?.username || 
-           'Unknown User';
+    return conversation.other_user?.username || 'Unknown User';
   };
 
   const getConversationAvatar = (conversation: Conversation) => {
@@ -181,18 +178,15 @@ export default function MessagingScreen() {
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
             <Text style={styles.avatarText}>
-              {getInitials(item.full_name || item.username || '')}
+              {getInitials(item.username || '')}
             </Text>
           </View>
         )}
       </View>
       <View style={styles.searchResultContent}>
         <Text style={styles.searchResultName}>
-          {item.full_name || item.username || 'Unknown User'}
+          {item.username || 'Unknown User'}
         </Text>
-        {item.username && item.full_name && (
-          <Text style={styles.searchResultUsername}>@{item.username}</Text>
-        )}
       </View>
     </TouchableOpacity>
   );

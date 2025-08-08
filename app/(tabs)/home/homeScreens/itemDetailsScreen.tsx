@@ -16,6 +16,7 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../../lib/supabase";
+import { SimpleMessagingService as MessagingService } from "../../../../lib/simpleMessaging";
 
 // Item listing interface
 interface ItemListing {
@@ -55,6 +56,7 @@ export default function ItemDetailsScreen() {
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isStartingConversation, setIsStartingConversation] = useState(false);
 
   useEffect(() => {
     if (itemId) {
@@ -312,6 +314,95 @@ export default function ItemDetailsScreen() {
     }
   };
 
+  const handleMessageSeller = async () => {
+    if (!itemDetails?.user_id || !currentUserId) {
+      Alert.alert("Error", "Unable to start conversation. Please try again.");
+      return;
+    }
+
+    if (itemDetails.user_id === currentUserId) {
+      Alert.alert("Error", "You cannot message yourself.");
+      return;
+    }
+
+    setIsStartingConversation(true);
+    try {
+      const messagingService = MessagingService.getInstance();
+      const conversationId = await messagingService.getOrCreateDirectConversation(itemDetails.user_id);
+      
+      // Navigate to the chat screen
+      router.push({
+        pathname: "/(tabs)/home/homeScreens/chatScreen",
+        params: { conversationId }
+      });
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      Alert.alert("Error", "Failed to start conversation. Please try again.");
+    } finally {
+      setIsStartingConversation(false);
+    }
+  };
+
+  const handleMakeOffer = async () => {
+    if (!itemDetails?.user_id || !currentUserId) {
+      Alert.alert("Error", "Unable to start conversation. Please try again.");
+      return;
+    }
+
+    if (itemDetails.user_id === currentUserId) {
+      Alert.alert("Error", "You cannot make an offer on your own listing.");
+      return;
+    }
+
+    // Show a simple prompt for the offer amount
+    Alert.prompt(
+      "Make an Offer",
+      `Enter your offer for "${itemDetails.title}" (Current price: $${itemDetails.price})`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Send Offer",
+          onPress: (offerAmount) => {
+            if (offerAmount && !isNaN(parseFloat(offerAmount))) {
+              sendOfferMessage(parseFloat(offerAmount));
+            } else {
+              Alert.alert("Error", "Please enter a valid offer amount.");
+            }
+          },
+        },
+      ],
+      "plain-text",
+      "",
+      "numeric"
+    );
+  };
+
+  const sendOfferMessage = async (offerAmount: number) => {
+    setIsStartingConversation(true);
+    try {
+      const messagingService = MessagingService.getInstance();
+      const conversationId = await messagingService.getOrCreateDirectConversation(itemDetails!.user_id);
+      
+      // Send the offer message
+      const offerMessage = `Hi! I'm interested in your "${itemDetails!.title}". Would you accept $${offerAmount.toFixed(2)} for it?`;
+      await messagingService.sendMessage(conversationId, offerMessage);
+      
+      // Navigate to the chat screen
+      router.push({
+        pathname: "/(tabs)/home/homeScreens/chatScreen",
+        params: { conversationId }
+      });
+    } catch (error) {
+      console.error("Error sending offer:", error);
+      Alert.alert("Error", "Failed to send offer. Please try again.");
+    } finally {
+      setIsStartingConversation(false);
+    }
+  };
+
   // Render picker modal
   const renderPickerModal = (
     options: string[],
@@ -511,10 +602,19 @@ export default function ItemDetailsScreen() {
           {/* Buyer Action Buttons - Only show for non-owners */}
           {!isOwner && (
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>Message Seller</Text>
+              <TouchableOpacity 
+                style={[styles.primaryButton, isStartingConversation && styles.disabledButton]} 
+                onPress={handleMessageSeller}
+                disabled={isStartingConversation}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {isStartingConversation ? "Starting Chat..." : "Message Seller"}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.secondaryButton}>
+              <TouchableOpacity 
+                style={styles.secondaryButton}
+                onPress={handleMakeOffer}
+              >
                 <Text style={styles.secondaryButtonText}>Make Offer</Text>
               </TouchableOpacity>
             </View>
