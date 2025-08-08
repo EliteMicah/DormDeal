@@ -401,7 +401,7 @@ export default function BookDetailsScreen() {
     <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       <Stack.Screen
         options={{
-          headerTitle: " ",
+          headerTitle: "",
           headerBackVisible: true,
           headerTransparent: true,
           headerBackTitle: "‎",
