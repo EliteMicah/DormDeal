@@ -31,19 +31,24 @@ export default function MessagingScreen() {
   
   const messagingService = MessagingService.getInstance();
 
-  // Load conversations on mount and when screen comes into focus
+  // Load conversations on mount
   useEffect(() => {
     loadConversations();
-    subscribeToConversationUpdates();
     
     return () => {
       messagingService.unsubscribeFromAll();
     };
   }, []);
 
+  // Handle focus/unfocus for subscriptions
   useFocusEffect(
     useCallback(() => {
       loadConversations();
+      subscribeToConversationUpdates();
+      
+      return () => {
+        messagingService.unsubscribeFromAll();
+      };
     }, [])
   );
 

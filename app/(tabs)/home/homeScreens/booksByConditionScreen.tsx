@@ -61,23 +61,53 @@ const BookCard = ({
 
 export default function BooksByConditionScreen() {
   const router = useRouter();
-  const { condition } = useLocalSearchParams();
+  const { condition, query, isbn, paymentType, minPrice, maxPrice } = useLocalSearchParams();
   const [books, setBooks] = useState<BookListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (condition) {
-      fetchBooksByCondition();
-    }
-  }, [condition]);
+    fetchBooks();
+  }, [condition, query, isbn, paymentType, minPrice, maxPrice]);
 
-  const fetchBooksByCondition = async () => {
+  const fetchBooks = async () => {
     try {
-      const { data, error } = await supabase
+      let bookQuery = supabase
         .from("book_listing")
         .select("*")
-        .eq("condition", condition)
         .order("created_at", { ascending: false });
+
+      // Apply search filters
+      if (query && typeof query === 'string') {
+        bookQuery = bookQuery.ilike("title", `%${query}%`);
+      }
+
+      if (isbn && typeof isbn === 'string') {
+        bookQuery = bookQuery.eq("isbn", isbn);
+      }
+
+      if (condition && typeof condition === 'string') {
+        bookQuery = bookQuery.eq("condition", condition);
+      }
+
+      if (paymentType && typeof paymentType === 'string') {
+        bookQuery = bookQuery.eq("payment_type", paymentType);
+      }
+
+      if (minPrice && typeof minPrice === 'string') {
+        const minPriceNum = parseFloat(minPrice);
+        if (!isNaN(minPriceNum) && minPriceNum >= 0) {
+          bookQuery = bookQuery.gte("price", minPriceNum);
+        }
+      }
+
+      if (maxPrice && typeof maxPrice === 'string') {
+        const maxPriceNum = parseFloat(maxPrice);
+        if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
+          bookQuery = bookQuery.lte("price", maxPriceNum);
+        }
+      }
+
+      const { data, error } = await bookQuery;
 
       if (error) {
         console.error("Error fetching books:", error);
@@ -93,6 +123,11 @@ export default function BooksByConditionScreen() {
   };
 
   const getHeaderTitle = () => {
+    // If there are search parameters (query, isbn, etc), show "Search Results"
+    if (query || isbn || (paymentType && paymentType !== 'Any') || minPrice || maxPrice) {
+      return "Search Results";
+    }
+    
     if (typeof condition === "string") {
       return `${condition} Books`;
     }
@@ -105,9 +140,12 @@ export default function BooksByConditionScreen() {
         options={{
           headerTitle: "",
           headerBackVisible: true,
-          headerTransparent: true,
           headerBackTitle: "‎",
           headerTintColor: "black",
+          headerStyle: {
+            backgroundColor: 'transparent',
+          },
+          headerShadowVisible: false,
         }}
       />
 
@@ -136,10 +174,14 @@ export default function BooksByConditionScreen() {
             <View style={styles.empty}>
               <Ionicons name="book-outline" size={64} color="#d1d5db" />
               <Text style={styles.emptyText}>
-                No {condition?.toString().toLowerCase()} books available
+                {query || isbn || (paymentType && paymentType !== 'Any') || minPrice || maxPrice
+                  ? "No books found matching your search"
+                  : `No ${condition?.toString().toLowerCase()} books available`}
               </Text>
               <Text style={styles.emptySubtext}>
-                Check back later or try a different condition
+                {query || isbn || (paymentType && paymentType !== 'Any') || minPrice || maxPrice
+                  ? "Try adjusting your search criteria"
+                  : "Check back later or try a different condition"}
               </Text>
             </View>
           ) : (
