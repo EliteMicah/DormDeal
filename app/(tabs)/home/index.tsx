@@ -40,7 +40,16 @@ export default function HomeScreen() {
     icon: string;
     color: string;
     route: RouteType; // Use the defined type here
+    category?: string;
   }[] = [
+    {
+      id: 0,
+      title: "All Items",
+      icon: "🛍️",
+      color: "#9B59B6",
+      route: "/home/homeScreens/shopItemsScreen",
+      category: "all",
+    },
     {
       id: 1,
       title: "Textbooks",
@@ -54,20 +63,15 @@ export default function HomeScreen() {
       icon: "💻",
       color: "#7B68EE",
       route: "/home/homeScreens/shopItemsScreen",
+      category: "Electronics",
     },
     {
       id: 3,
-      title: "Furniture",
-      icon: "🪑",
-      color: "#50C878",
-      route: "/home/homeScreens/shopItemsScreen",
-    },
-    {
-      id: 4,
       title: "Clothing",
       icon: "👕",
-      color: "#FF6B6B",
+      color: "#50C878",
       route: "/home/homeScreens/shopItemsScreen",
+      category: "Clothing",
     },
   ];
 
@@ -216,7 +220,9 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { marginTop: 10 }]}>
+          <Text
+            style={[styles.sectionTitle, { marginTop: 10, marginBottom: 10 }]}
+          >
             Shop by Category
           </Text>
           <View style={styles.quickActionsGrid}>
@@ -227,7 +233,16 @@ export default function HomeScreen() {
                   styles.quickActionCard,
                   { backgroundColor: action.color },
                 ]}
-                onPress={() => router.push(action.route)}
+                onPress={() => {
+                  if (action.category) {
+                    router.push({
+                      pathname: action.route,
+                      params: { category: action.category },
+                    });
+                  } else {
+                    router.push(action.route);
+                  }
+                }}
                 activeOpacity={0.8}
               >
                 <Text style={styles.quickActionIcon}>{action.icon}</Text>
@@ -360,13 +375,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#333",
-    paddingBottom: 5,
   },
   seeAllButton: {
     flexDirection: "row",

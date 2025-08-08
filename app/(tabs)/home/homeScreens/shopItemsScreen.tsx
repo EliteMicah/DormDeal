@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../../lib/supabase";
@@ -56,19 +56,62 @@ const ItemCard = ({
 
 export default function shopItemsScreen() {
   const router = useRouter();
+  const { category, query, paymentType, categoryFilter, minPrice, maxPrice } = useLocalSearchParams();
   const [items, setItems] = useState<ItemListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentCategory, setCurrentCategory] = useState<string>(
+    typeof category === 'string' ? category : 'all'
+  );
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [currentCategory, query, paymentType, categoryFilter, minPrice, maxPrice]);
+
+  useEffect(() => {
+    setCurrentCategory(typeof category === 'string' ? category : 'all');
+  }, [category]);
 
   const fetchItems = async () => {
     try {
-      const { data, error } = await supabase
+      let itemQuery = supabase
         .from("item_listing")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // Apply search filters
+      if (query && typeof query === 'string') {
+        itemQuery = itemQuery.ilike("title", `%${query}%`);
+      }
+
+      // Apply category filter if not "all"
+      if (currentCategory && currentCategory !== 'all') {
+        itemQuery = itemQuery.eq('category', currentCategory);
+      }
+
+      // Apply category filter from search if present
+      if (categoryFilter && typeof categoryFilter === 'string' && categoryFilter !== 'Any') {
+        itemQuery = itemQuery.eq('category', categoryFilter);
+      }
+
+      if (paymentType && typeof paymentType === 'string') {
+        itemQuery = itemQuery.eq("payment_type", paymentType);
+      }
+
+      if (minPrice && typeof minPrice === 'string') {
+        const minPriceNum = parseFloat(minPrice);
+        if (!isNaN(minPriceNum) && minPriceNum >= 0) {
+          itemQuery = itemQuery.gte("price", minPriceNum);
+        }
+      }
+
+      if (maxPrice && typeof maxPrice === 'string') {
+        const maxPriceNum = parseFloat(maxPrice);
+        if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
+          itemQuery = itemQuery.lte("price", maxPriceNum);
+        }
+      }
+
+      const { data, error } = await itemQuery;
 
       if (error) {
         console.error("Error fetching items:", error);
@@ -89,14 +132,28 @@ export default function shopItemsScreen() {
         options={{
           headerTitle: "",
           headerBackVisible: true,
-          headerTransparent: true,
           headerBackTitle: "‎",
           headerTintColor: "black",
+          headerStyle: {
+            backgroundColor: 'transparent',
+          },
+          headerShadowVisible: false,
         }}
       />
 
       <View style={styles.header}>
-        <Text style={styles.title}>Items</Text>
+        <Text style={styles.title}>
+          {query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice
+            ? 'Search Results'
+            : currentCategory === 'all' 
+            ? 'All Items' 
+            : currentCategory}
+        </Text>
+        {(query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice) && (
+          <Text style={styles.subtitle}>
+            {items.length} {items.length === 1 ? "item" : "items"} found
+          </Text>
+        )}
       </View>
 
       <TouchableOpacity
@@ -115,7 +172,19 @@ export default function shopItemsScreen() {
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {items.length === 0 ? (
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>No items available</Text>
+              <Ionicons name="cube-outline" size={64} color="#d1d5db" />
+              <Text style={styles.emptyText}>
+                {query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice
+                  ? "No items found matching your search"
+                  : currentCategory === 'all'
+                  ? "No items available"
+                  : `No ${currentCategory.toLowerCase()} items available`}
+              </Text>
+              <Text style={styles.emptySubtext}>
+                {query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice
+                  ? "Try adjusting your search criteria"
+                  : "Check back later for new listings"}
+              </Text>
             </View>
           ) : (
             <View style={styles.grid}>
@@ -153,6 +222,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     color: "#111827",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#6b7280",
+    marginTop: 4,
   },
   searchBar: {
     flexDirection: "row",
@@ -231,7 +305,16 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptySubtext: {
+    fontSize: 14,
     color: "#9ca3af",
+    textAlign: "center",
   },
 });

@@ -38,9 +38,9 @@ export default function SearchModal() {
   const [isbnSearch, setISBNSearch] = useState("");
   const [condition, setCondition] = useState("Any");
   const [paymentType, setPaymentType] = useState("Any");
+  const [categoryFilter, setCategoryFilter] = useState("Any");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [searchResults, setSearchResults] = useState<BookListing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchType, setSearchType] = useState<"books" | "items">(
     (type === "items" ? "items" : "books") as "books" | "items"
@@ -49,83 +49,110 @@ export default function SearchModal() {
   // Modal state
   const [isConditionModalVisible, setConditionModalVisible] = useState(false);
   const [isPaymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Options
   const bookConditionOptions = ["Any", "New", "Used", "Noted"];
   const itemConditionOptions = ["Any", "New", "Like New", "Used"];
   const paymentTypeOptions = ["Any", "Venmo", "Zelle", "Cash"];
+  const categoryOptions = [
+    "Any",
+    "Electronics",
+    "Furniture",
+    "Clothing & Accessories",
+    "Books & Media",
+    "Sports & Recreation",
+    "Home & Garden",
+    "Kitchen & Dining",
+    "Beauty & Personal Care",
+    "Toys & Games",
+    "Art & Crafts",
+    "Musical Instruments",
+    "Tools & Hardware",
+    "Automotive",
+    "Pet Supplies",
+    "Office & Business",
+    "Health & Fitness",
+    "Jewelry & Watches",
+    "Collectibles & Antiques",
+    "Baby & Kids",
+    "Travel & Luggage",
+    "Outdoor & Camping",
+    "Party & Event Supplies",
+    "School & Educational",
+    "Photography",
+    "Other",
+  ];
 
   // Search function
-  const handleSearch = async () => {
-    if (!searchQuery.trim() && !isbnSearch.trim()) {
+  const handleSearch = () => {
+    // Check if user has any search criteria (query, ISBN, or filters)
+    const hasSearchQuery = searchQuery.trim() || isbnSearch.trim();
+    const hasFilters = condition !== "Any" || 
+                      paymentType !== "Any" || 
+                      (searchType === "items" && categoryFilter !== "Any") ||
+                      minPrice.trim() || 
+                      maxPrice.trim();
+
+    if (!hasSearchQuery && !hasFilters) {
       Alert.alert(
         "Search Required",
         `Please enter a ${
-          searchType === "books" ? "book title or ISBN" : "item name"
+          searchType === "books" ? "book title, ISBN, or apply filters" : "item name or apply filters"
         } to search.`
       );
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const tableName =
-        searchType === "books" ? "book_listing" : "item_listing";
-      let query = supabase.from(tableName).select("*");
+    // Build search parameters
+    const searchParams: any = {};
+    
+    if (searchQuery.trim()) {
+      searchParams.query = searchQuery.trim();
+    }
+    
+    if (isbnSearch.trim() && searchType === "books") {
+      searchParams.isbn = isbnSearch.trim();
+    }
+    
+    if (condition !== "Any") {
+      searchParams.condition = condition;
+    }
+    
+    if (paymentType !== "Any") {
+      searchParams.paymentType = paymentType;
+    }
+    
+    if (categoryFilter !== "Any" && searchType === "items") {
+      searchParams.categoryFilter = categoryFilter;
+    }
+    
+    if (minPrice.trim()) {
+      searchParams.minPrice = minPrice.trim();
+    }
+    
+    if (maxPrice.trim()) {
+      searchParams.maxPrice = maxPrice.trim();
+    }
 
-      if (searchQuery.trim()) {
-        const searchField = "title";
-        query = query.ilike(searchField, `%${searchQuery.trim()}%`);
-      }
-
-      if (isbnSearch.trim() && searchType === "books") {
-        query = query.eq("isbn", isbnSearch.trim());
-      }
-
-      if (condition !== "Any") {
-        query = query.eq("condition", condition);
-      }
-
-      if (paymentType !== "Any") {
-        query = query.eq("payment_type", paymentType);
-      }
-
-      // Add price range filters
-      if (minPrice.trim()) {
-        const minPriceNum = parseFloat(minPrice.trim());
-        if (!isNaN(minPriceNum) && minPriceNum >= 0) {
-          query = query.gte("price", minPriceNum);
-        }
-      }
-
-      if (maxPrice.trim()) {
-        const maxPriceNum = parseFloat(maxPrice.trim());
-        if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
-          query = query.lte("price", maxPriceNum);
-        }
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error("Search error:", error);
-        Alert.alert(
-          "Search Error",
-          `Unable to search ${searchType}. Please try again.`
-        );
-        return;
-      }
-
-      setSearchResults(data || []);
-    } catch (error) {
-      console.error("Search error:", error);
-      Alert.alert(
-        "Search Error",
-        `Unable to search ${searchType}. Please try again.`
-      );
-    } finally {
-      setIsLoading(false);
+    // Navigate to appropriate results screen and close modal
+    if (searchType === "books") {
+      router.back();
+      setTimeout(() => {
+        router.push({
+          pathname: "/(tabs)/home/homeScreens/booksByConditionScreen",
+          params: searchParams,
+        });
+      }, 100);
+    } else {
+      router.back();
+      setTimeout(() => {
+        router.push({
+          pathname: "/(tabs)/home/homeScreens/shopItemsScreen", 
+          params: searchParams,
+        });
+      }, 100);
     }
   };
 
@@ -135,9 +162,9 @@ export default function SearchModal() {
     setISBNSearch("");
     setCondition("Any");
     setPaymentType("Any");
+    setCategoryFilter("Any");
     setMinPrice("");
     setMaxPrice("");
-    setSearchResults([]);
   };
 
   // Handle search type change
@@ -439,6 +466,19 @@ export default function SearchModal() {
           </TouchableOpacity>
         </View>
 
+        {searchType === "items" && (
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Category</Text>
+            <TouchableOpacity
+              style={styles.filterDropdown}
+              onPress={() => setCategoryModalVisible(true)}
+            >
+              <Text style={styles.filterDropdownText}>{categoryFilter}</Text>
+              <Ionicons name="chevron-down" size={16} color="#666" />
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={styles.filterRow}>
           <Text style={styles.filterLabel}>Payment</Text>
           <TouchableOpacity
@@ -485,78 +525,24 @@ export default function SearchModal() {
         </TouchableOpacity>
       </View>
 
-      {/* Search Results */}
-      <View style={styles.resultsContainer}>
-        {searchResults.length > 0 && (
-          <View style={styles.resultsHeaderContainer}>
-            <Text style={styles.resultsHeader}>
-              {searchResults.length} {searchType === "books" ? "book" : "item"}
-              {searchResults.length !== 1 ? "s" : ""} found
+      {/* ISBN Subscription Info */}
+      {searchType === "books" && (
+        <View style={styles.subscriptionInfoContainer}>
+          <View style={styles.subscriptionInfo}>
+            <Ionicons name="information-circle-outline" size={20} color="#3b82f6" />
+            <Text style={styles.subscriptionInfoText}>
+              Can't find a book? Subscribe to its ISBN to get notified when it's available.
             </Text>
-            {searchType === "books" && (
-              <TouchableOpacity
-                style={styles.subscribeSmallButton}
-                onPress={() => setShowSubscriptionModal(true)}
-              >
-                <Ionicons
-                  name="notifications-outline"
-                  size={16}
-                  color="#3b82f6"
-                />
-                <Text style={styles.subscribeSmallButtonText}>
-                  Subscribe to ISBN
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
-        )}
-
-        <FlatList
-          data={searchResults}
-          keyExtractor={(item) =>
-            item.id?.toString() || Math.random().toString()
-          }
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.resultItem}>
-              <View style={styles.resultContent}>
-                <Text style={styles.resultTitle}>{item.title}</Text>
-                <Text style={styles.resultDetails}>
-                  ${item.price} • {item.condition} • {item.payment_type}
-                </Text>
-                {item.isbn && (
-                  <Text style={styles.resultISBN}>ISBN: {item.isbn}</Text>
-                )}
-              </View>
-            </TouchableOpacity>
-          )}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            !isLoading && searchQuery ? (
-              <View style={styles.emptyContainer}>
-                <Ionicons name="search-outline" size={48} color="#d1d5db" />
-                <Text style={styles.emptyText}>
-                  No {searchType} found matching your search.
-                </Text>
-                {searchType === "books" && (
-                  <>
-                    <Text style={styles.emptySubtext}>
-                      Can't find the book you're looking for?
-                    </Text>
-                    <TouchableOpacity
-                      style={styles.subscribeButton}
-                      onPress={() => setShowSubscriptionModal(true)}
-                    >
-                      <Text style={styles.subscribeButtonText}>
-                        Subscribe to ISBN
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
-            ) : null
-          }
-        />
-      </View>
+          <TouchableOpacity
+            style={styles.subscribeButton}
+            onPress={() => setShowSubscriptionModal(true)}
+          >
+            <Ionicons name="notifications-outline" size={16} color="#ffffff" />
+            <Text style={styles.subscribeButtonText}>Subscribe to ISBN</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Condition Modal */}
       {renderPickerModal(
@@ -574,6 +560,15 @@ export default function SearchModal() {
         setPaymentModalVisible,
         paymentType,
         setPaymentType
+      )}
+
+      {/* Category Modal */}
+      {renderPickerModal(
+        categoryOptions,
+        isCategoryModalVisible,
+        setCategoryModalVisible,
+        categoryFilter,
+        setCategoryFilter
       )}
 
       {/* ISBN Subscription Modal */}
@@ -694,94 +689,36 @@ const styles = StyleSheet.create({
     color: "#6c757d",
     fontWeight: "500",
   },
-  resultsContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  resultsHeaderContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  resultsHeader: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#495057",
-    flex: 1,
-  },
-  subscribeSmallButton: {
-    flexDirection: "row",
-    alignItems: "center",
+  subscriptionInfoContainer: {
     backgroundColor: "#f0f9ff",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#bfdbfe",
-    gap: 4,
-  },
-  subscribeSmallButtonText: {
-    color: "#3b82f6",
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  resultItem: {
-    backgroundColor: "white",
+    marginHorizontal: 16,
+    marginTop: 16,
     borderRadius: 12,
     padding: 16,
-    marginBottom: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
   },
-  resultContent: {
+  subscriptionInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 12,
+    gap: 8,
+  },
+  subscriptionInfoText: {
     flex: 1,
-  },
-  resultTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#212529",
-    marginBottom: 4,
-  },
-  resultDetails: {
     fontSize: 14,
-    color: "#6c757d",
-    marginBottom: 2,
-  },
-  resultISBN: {
-    fontSize: 12,
-    color: "#adb5bd",
-  },
-  emptyContainer: {
-    alignItems: "center",
-    paddingVertical: 48,
-    paddingHorizontal: 32,
-  },
-  emptyText: {
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#374151",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    textAlign: "center",
-    fontSize: 14,
-    color: "#9ca3af",
-    marginBottom: 24,
+    color: "#1e40af",
+    lineHeight: 20,
   },
   subscribeButton: {
     backgroundColor: "#3b82f6",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
   },
   subscribeButtonText: {
     color: "#ffffff",

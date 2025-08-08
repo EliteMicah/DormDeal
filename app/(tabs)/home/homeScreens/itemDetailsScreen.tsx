@@ -23,6 +23,7 @@ interface ItemListing {
   title: string;
   price: number;
   condition: string;
+  category?: string;
   image_url?: string;
   user_id: string;
   created_at: string;
@@ -539,6 +540,14 @@ export default function ItemDetailsScreen() {
               </Text>
             )}
           </View>
+
+          {/* Category - Only show when not editing */}
+          {!isEditing && itemDetails.category && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Category</Text>
+              <Text style={styles.sectionText}>{itemDetails.category}</Text>
+            </View>
+          )}
 
           {/* Payment Method - Only show when not editing */}
           {!isEditing && (
