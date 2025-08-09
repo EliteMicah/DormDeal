@@ -88,7 +88,17 @@ export default function BookDetailsScreen() {
 
       if (error) {
         console.error("Error fetching book details:", error);
-        Alert.alert("Error", "Could not load book details.");
+        // Handle case when listing was deleted (PGRST116 = no rows found)
+        if (error.code === "PGRST116") {
+          Alert.alert("Listing Deleted", "This listing has been deleted and is no longer available.", [
+            {
+              text: "OK",
+              onPress: () => router.back()
+            }
+          ]);
+        } else {
+          Alert.alert("Error", "Could not load book details.");
+        }
         return;
       }
 

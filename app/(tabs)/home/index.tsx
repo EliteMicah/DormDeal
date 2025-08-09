@@ -8,9 +8,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../../lib/supabase";
+import { NotificationService } from "../../../lib/notificationService";
+import { SimpleMessagingService } from "../../../lib/simpleMessaging";
+import { useFocusEffect } from "expo-router";
 
 // Define a type for the routes
 type RouteType =
@@ -23,7 +26,12 @@ export default function HomeScreen() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("");
-  const [hasNotifications, setHasNotifications] = useState(true);
+  const [hasNotifications, setHasNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [hasMessages, setHasMessages] = useState(false);
+  const notificationService = NotificationService.getInstance();
+  const messagingService = SimpleMessagingService.getInstance();
 
   const featuredEvent = {
     title: "Spring Book Exchange",
@@ -75,8 +83,8 @@ export default function HomeScreen() {
     },
   ];
 
-  // Fetch username for personalized greeting
-  const fetchUsername = async () => {
+  // Fetch username and notification count
+  const fetchUserData = async () => {
     try {
       const {
         data: { user },
@@ -98,13 +106,36 @@ export default function HomeScreen() {
       if (profileError) {
         console.error("Error fetching profile:", profileError.message);
         setUsername("Student");
-        return;
-      }
-
-      if (profileData) {
+      } else if (profileData) {
         setUsername(profileData.username || "Student");
       } else {
         setUsername("Student");
+      }
+
+      // Fetch unread notification count
+      try {
+        const count = await notificationService.getUnreadCount(user.id);
+        setUnreadCount(count);
+        setHasNotifications(count > 0);
+      } catch (notificationError) {
+        console.error("Error fetching notification count:", notificationError);
+        setHasNotifications(false);
+        setUnreadCount(0);
+      }
+
+      // Fetch unread message count
+      try {
+        const conversations = await messagingService.getConversations();
+        let totalUnreadMessages = 0;
+        conversations.forEach((conversation) => {
+          totalUnreadMessages += conversation.unread_count || 0;
+        });
+        setUnreadMessageCount(totalUnreadMessages);
+        setHasMessages(totalUnreadMessages > 0);
+      } catch (messageError) {
+        console.error("Error fetching message count:", messageError);
+        setHasMessages(false);
+        setUnreadMessageCount(0);
       }
     } catch (error) {
       console.error("Error:", (error as Error).message);
@@ -115,8 +146,45 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    fetchUsername();
+    fetchUserData();
   }, []);
+
+  // Subscribe to real-time notifications and refresh counts on focus
+  useFocusEffect(
+    useCallback(() => {
+      // Refresh counts when screen comes into focus (after visiting notifications/messages)
+      fetchUserData();
+
+      const setupRealtimeSubscription = async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          notificationService.subscribeToNotifications(user.id, () => {
+            // Refresh notification count when a new notification arrives
+            fetchUserData();
+          });
+
+          // Also subscribe to message updates (if the messaging service supports it)
+          try {
+            messagingService.subscribeToConversations(() => {
+              // Refresh message count when new messages arrive
+              fetchUserData();
+            });
+          } catch (error) {
+            // If messaging service doesn't support real-time, it's okay
+            console.log("Messaging real-time not available");
+          }
+        }
+      };
+
+      setupRealtimeSubscription();
+
+      return () => {
+        notificationService.unsubscribeFromNotifications();
+      };
+    }, [])
+  );
 
   if (isLoading) {
     return (
@@ -150,17 +218,45 @@ export default function HomeScreen() {
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={styles.iconButton}
-              onPress={() => console.log("Notifs Pressed")}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              onPress={() =>
+                router.push("/home/homeScreens/notificationsScreen")
+              }
             >
               <Ionicons name="notifications-outline" size={24} color="#333" />
-              {hasNotifications && <View style={styles.notificationDot} />}
+              {hasNotifications && (
+                <View style={styles.notificationBadgeContainer}>
+                  <View style={styles.notificationDot} />
+                  {unreadCount > 0 && (
+                    <View style={styles.notificationBadge}>
+                      <Text style={styles.notificationBadgeText}>
+                        {unreadCount > 99 ? "99+" : unreadCount.toString()}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={() => router.push("/home/homeScreens/messagingScreen")}
             >
               <Ionicons name="chatbubble-outline" size={24} color="#333" />
-              {hasNotifications && <View style={styles.notificationDot} />}
+              {hasMessages && (
+                <View style={styles.notificationBadgeContainer}>
+                  <View style={styles.notificationDot} />
+                  {unreadMessageCount > 0 && (
+                    <View style={styles.notificationBadge}>
+                      <Text style={styles.notificationBadgeText}>
+                        {unreadMessageCount > 99
+                          ? "99+"
+                          : unreadMessageCount.toString()}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -350,19 +446,40 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 12,
-    minWidth: 44,
-    minHeight: 44,
+    minWidth: 48,
+    minHeight: 48,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 24,
+  },
+  notificationBadgeContainer: {
+    position: "absolute",
+    top: 4,
+    right: 4,
   },
   notificationDot: {
-    position: "absolute",
-    top: 6,
-    right: 6,
     width: 8,
     height: 8,
-    borderRadius: 6,
+    borderRadius: 4,
     backgroundColor: "#FF4757",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#FF4757",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#f2f2f2",
+  },
+  notificationBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "600",
   },
   scrollView: {
     flex: 1,

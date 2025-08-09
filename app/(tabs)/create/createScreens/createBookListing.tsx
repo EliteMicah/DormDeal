@@ -11,6 +11,7 @@ import {
   Alert,
   Keyboard,
   Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
@@ -20,6 +21,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../../lib/supabase";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+import { NotificationService } from "../../../../lib/notificationService";
 
 export default function CreateBookListing() {
   const router = useRouter();
@@ -68,11 +70,11 @@ export default function CreateBookListing() {
 
     // Set up keyboard listeners
     const keyboardWillShowListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       () => setIsKeyboardVisible(true)
     );
     const keyboardWillHideListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
       () => {
         setIsKeyboardVisible(false);
         setIsDescriptionFocused(false);
@@ -251,6 +253,23 @@ export default function CreateBookListing() {
         return;
       }
 
+      // Send notifications to ISBN subscribers
+      // This supplements the database trigger to ensure notifications are always sent
+      if (isbn.trim() && data && data[0]) {
+        try {
+          const notificationService = NotificationService.getInstance();
+          await notificationService.checkISBNMatches(
+            isbn.trim(),
+            data[0].id.toString(),
+            title.trim()
+          );
+          console.log("ISBN notification check completed for:", isbn.trim());
+        } catch (notificationError) {
+          console.error("Error sending ISBN notifications:", notificationError);
+          // Don't block the listing creation if notification fails
+        }
+      }
+
       // Success - show alert and navigate back
       Alert.alert(
         "Success!",
@@ -284,12 +303,18 @@ export default function CreateBookListing() {
         }}
       />
 
-      <ScrollView
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.scrollContent}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={0}
       >
+        <ScrollView
+          style={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
         <Text style={styles.mainTitle}>Create Listing</Text>
 
         <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
@@ -409,7 +434,8 @@ export default function CreateBookListing() {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Condition Modal */}
       {renderPickerModal(
@@ -449,12 +475,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 120,
     paddingHorizontal: 24,
+    flexGrow: 1,
   },
   mainTitle: {
     fontSize: 28,

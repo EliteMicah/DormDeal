@@ -14,7 +14,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { SimpleMessagingService as MessagingService, DirectConversation as Conversation, UserProfile } from "../../../../lib/simpleMessaging";
+import {
+  SimpleMessagingService as MessagingService,
+  DirectConversation as Conversation,
+  UserProfile,
+} from "../../../../lib/simpleMessaging";
 import { useFocusEffect } from "@react-navigation/native";
 
 // Use the types from the messaging service
@@ -28,13 +32,13 @@ export default function MessagingScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
   const [searching, setSearching] = useState(false);
-  
+
   const messagingService = MessagingService.getInstance();
 
   // Load conversations on mount
   useEffect(() => {
     loadConversations();
-    
+
     return () => {
       messagingService.unsubscribeFromAll();
     };
@@ -45,7 +49,7 @@ export default function MessagingScreen() {
     useCallback(() => {
       loadConversations();
       subscribeToConversationUpdates();
-      
+
       return () => {
         messagingService.unsubscribeFromAll();
       };
@@ -57,8 +61,8 @@ export default function MessagingScreen() {
       const conversationsData = await messagingService.getConversations();
       setConversations(conversationsData);
     } catch (error) {
-      console.error('Error loading conversations:', error);
-      Alert.alert('Error', 'Failed to load conversations');
+      console.error("Error loading conversations:", error);
+      Alert.alert("Error", "Failed to load conversations");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -73,14 +77,14 @@ export default function MessagingScreen() {
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    
+
     if (query.trim().length > 2) {
       setSearching(true);
       try {
         const users = await messagingService.searchUsers(query);
         setSearchResults(users);
       } catch (error) {
-        console.error('Error searching users:', error);
+        console.error("Error searching users:", error);
       } finally {
         setSearching(false);
       }
@@ -91,13 +95,16 @@ export default function MessagingScreen() {
 
   const startNewConversation = async (user: UserProfile) => {
     try {
-      const conversationId = await messagingService.getOrCreateDirectConversation(user.id);
-      router.push(`/home/homeScreens/chatScreen?conversationId=${conversationId}`);
+      const conversationId =
+        await messagingService.getOrCreateDirectConversation(user.id);
+      router.push(
+        `/home/homeScreens/chatScreen?conversationId=${conversationId}`
+      );
       setSearchQuery("");
       setSearchResults([]);
     } catch (error) {
-      console.error('Error creating conversation:', error);
-      Alert.alert('Error', 'Failed to start conversation');
+      console.error("Error creating conversation:", error);
+      Alert.alert("Error", "Failed to start conversation");
     }
   };
 
@@ -110,18 +117,19 @@ export default function MessagingScreen() {
   const filteredConversations = conversations.filter((conversation) => {
     if (searchQuery.trim().length > 0 && searchResults.length === 0) {
       // If searching but no user results, filter by conversation content
-      const participantName = conversation.other_user?.username || '';
-      const lastMessage = conversation.last_message?.content || '';
-      
-      const matchesSearch = 
+      const participantName = conversation.other_user?.username || "";
+      const lastMessage = conversation.last_message?.content || "";
+
+      const matchesSearch =
         participantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       if (!matchesSearch) return false;
     }
-    
+
     const matchesTab =
-      activeTab === "all" || (activeTab === "unread" && conversation.unread_count > 0);
+      activeTab === "all" ||
+      (activeTab === "unread" && conversation.unread_count > 0);
     return matchesTab;
   });
 
@@ -155,15 +163,46 @@ export default function MessagingScreen() {
   };
 
   const getTotalUnreadCount = () => {
-    return conversations.reduce((total, conversation) => total + conversation.unread_count, 0);
+    return conversations.reduce(
+      (total, conversation) => total + conversation.unread_count,
+      0
+    );
   };
 
   const getConversationTitle = (conversation: Conversation) => {
-    return conversation.other_user?.username || 'Unknown User';
+    return conversation.other_user?.username || "Unknown User";
   };
 
   const getConversationAvatar = (conversation: Conversation) => {
     return conversation.other_user?.avatar_url;
+  };
+
+  const handleDeleteConversation = (conversation: Conversation) => {
+    const participantName = conversation.other_user?.username || "Unknown User";
+    
+    Alert.alert(
+      "Delete Conversation",
+      `Are you sure you want to delete this conversation with ${participantName}?\n\nIf this conversation is about a transaction, please make sure to delete the associated item or book listing first to avoid confusion for other users.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await messagingService.deleteConversation(conversation.id);
+              await loadConversations(); // Refresh the conversation list
+            } catch (error) {
+              console.error("Error deleting conversation:", error);
+              Alert.alert("Error", "Failed to delete conversation. Please try again.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderSearchResult = ({ item }: { item: UserProfile }) => (
@@ -178,14 +217,14 @@ export default function MessagingScreen() {
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
             <Text style={styles.avatarText}>
-              {getInitials(item.username || '')}
+              {getInitials(item.username || "")}
             </Text>
           </View>
         )}
       </View>
       <View style={styles.searchResultContent}>
         <Text style={styles.searchResultName}>
-          {item.username || 'Unknown User'}
+          {item.username || "Unknown User"}
         </Text>
       </View>
     </TouchableOpacity>
@@ -197,14 +236,20 @@ export default function MessagingScreen() {
       onPress={() => {
         router.push(`/home/homeScreens/chatScreen?conversationId=${item.id}`);
       }}
+      onLongPress={() => handleDeleteConversation(item)}
       activeOpacity={0.7}
     >
       <View style={styles.avatarContainer}>
         {getConversationAvatar(item) ? (
-          <Image source={{ uri: getConversationAvatar(item)! }} style={styles.avatar} />
+          <Image
+            source={{ uri: getConversationAvatar(item)! }}
+            style={styles.avatar}
+          />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Text style={styles.avatarText}>{getInitials(getConversationTitle(item))}</Text>
+            <Text style={styles.avatarText}>
+              {getInitials(getConversationTitle(item))}
+            </Text>
           </View>
         )}
       </View>
@@ -212,12 +257,17 @@ export default function MessagingScreen() {
       <View style={styles.chatContent}>
         <View style={styles.chatHeader}>
           <Text
-            style={[styles.chatName, item.unread_count > 0 && styles.unreadName]}
+            style={[
+              styles.chatName,
+              item.unread_count > 0 && styles.unreadName,
+            ]}
           >
             {getConversationTitle(item)}
           </Text>
           <Text style={styles.timestamp}>
-            {item.last_message ? formatTimestamp(item.last_message.created_at) : ''}
+            {item.last_message
+              ? formatTimestamp(item.last_message.created_at)
+              : ""}
           </Text>
         </View>
         <View style={styles.messageRow}>
@@ -228,7 +278,7 @@ export default function MessagingScreen() {
             ]}
             numberOfLines={1}
           >
-            {item.last_message?.content || 'No messages yet'}
+            {item.last_message?.content || "No messages yet"}
           </Text>
           {item.unread_count > 0 && (
             <View style={styles.unreadBadge}>
@@ -268,7 +318,10 @@ export default function MessagingScreen() {
             )}
           </View>
         </View>
-        <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/home/homeScreens/newMessageScreen')}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => router.push("/home/homeScreens/newMessageScreen")}
+        >
           <Ionicons name="create-outline" size={24} color="#4A90E2" />
         </TouchableOpacity>
       </View>
@@ -285,15 +338,21 @@ export default function MessagingScreen() {
             placeholderTextColor="#999"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => {
-              setSearchQuery("");
-              setSearchResults([]);
-            }}>
+            <TouchableOpacity
+              onPress={() => {
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+            >
               <Ionicons name="close-circle" size={20} color="#999" />
             </TouchableOpacity>
           )}
           {searching && (
-            <ActivityIndicator size="small" color="#4A90E2" style={{ marginLeft: 8 }} />
+            <ActivityIndicator
+              size="small"
+              color="#4A90E2"
+              style={{ marginLeft: 8 }}
+            />
           )}
         </View>
       </View>

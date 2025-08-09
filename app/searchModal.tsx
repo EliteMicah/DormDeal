@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
+import { NotificationService } from "../lib/notificationService";
 
 // Types
 interface BookListing {
@@ -175,7 +176,7 @@ export default function SearchModal() {
   };
 
   // Handle ISBN subscription
-  const handleISBNSubscription = async (isbn: string) => {
+  const handleISBNSubscription = async (isbn: string, title?: string) => {
     try {
       const {
         data: { user },
@@ -185,40 +186,31 @@ export default function SearchModal() {
         return;
       }
 
-      // Check if subscription already exists
-      const { data: existing } = await supabase
-        .from("isbn_subscriptions")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("isbn", isbn)
-        .single();
+      const notificationService = NotificationService.getInstance();
+      
+      try {
+        await notificationService.subscribeToISBN(
+          user.id,
+          isbn,
+          title, // Pass the book title if available
+        );
 
-      if (existing) {
         Alert.alert(
-          "Already Subscribed",
-          "You're already subscribed to this ISBN"
+          "Subscription Added",
+          "You'll be notified when a book with this ISBN becomes available"
         );
         setShowSubscriptionModal(false);
-        return;
+      } catch (serviceError: any) {
+        if (serviceError.message === "Already subscribed to this ISBN") {
+          Alert.alert(
+            "Already Subscribed",
+            "You're already subscribed to this ISBN"
+          );
+        } else {
+          Alert.alert("Error", "Failed to subscribe to ISBN");
+        }
+        setShowSubscriptionModal(false);
       }
-
-      const { error } = await supabase.from("isbn_subscriptions").insert({
-        user_id: user.id,
-        isbn: isbn,
-        created_at: new Date().toISOString(),
-      });
-
-      if (error) {
-        console.error("Error subscribing to ISBN:", error);
-        Alert.alert("Error", "Failed to subscribe to ISBN");
-        return;
-      }
-
-      Alert.alert(
-        "Subscription Added",
-        "You'll be notified when a book with this ISBN becomes available"
-      );
-      setShowSubscriptionModal(false);
     } catch (error) {
       console.error("Unexpected error:", error);
       Alert.alert("Error", "Something went wrong. Please try again.");

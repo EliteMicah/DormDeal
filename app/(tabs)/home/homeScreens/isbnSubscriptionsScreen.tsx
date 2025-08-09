@@ -150,7 +150,7 @@ export default function ISBNSubscriptionsScreen() {
       />
 
       <View style={styles.header}>
-        <Text style={styles.title}>ISBN Subscriptions</Text>
+        <Text style={styles.title}>ISBN Alerts</Text>
         <Text style={styles.subtitle}>
           Get notified when books become available
         </Text>

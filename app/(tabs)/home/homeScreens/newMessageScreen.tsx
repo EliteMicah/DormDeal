@@ -14,7 +14,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { SimpleMessagingService as MessagingService, UserProfile } from "../../../../lib/simpleMessaging";
+import {
+  SimpleMessagingService as MessagingService,
+  UserProfile,
+} from "../../../../lib/simpleMessaging";
 
 export default function NewMessageScreen() {
   const router = useRouter();
@@ -39,8 +42,8 @@ export default function NewMessageScreen() {
       const users = await messagingService.searchUsers(searchQuery, 20);
       setSearchResults(users);
     } catch (error) {
-      console.error('Error searching users:', error);
-      Alert.alert('Error', 'Failed to search users');
+      console.error("Error searching users:", error);
+      Alert.alert("Error", "Failed to search users");
     } finally {
       setSearching(false);
     }
@@ -49,11 +52,14 @@ export default function NewMessageScreen() {
   const handleUserSelect = async (user: UserProfile) => {
     try {
       // For direct messages, immediately create/navigate to conversation
-      const conversationId = await messagingService.getOrCreateDirectConversation(user.id);
-      router.replace(`/home/homeScreens/chatScreen?conversationId=${conversationId}`);
+      const conversationId =
+        await messagingService.getOrCreateDirectConversation(user.id);
+      router.replace(
+        `/home/homeScreens/chatScreen?conversationId=${conversationId}`
+      );
     } catch (error) {
-      console.error('Error creating conversation:', error);
-      Alert.alert('Error', 'Failed to start conversation');
+      console.error("Error creating conversation:", error);
+      Alert.alert("Error", "Failed to start conversation");
     }
   };
 
@@ -78,26 +84,19 @@ export default function NewMessageScreen() {
           <Image source={{ uri: item.avatar_url }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>
-              {getInitials(item.full_name || item.username)}
-            </Text>
+            <Text style={styles.avatarText}>{getInitials(item.username)}</Text>
           </View>
         )}
       </View>
       <View style={styles.userInfo}>
-        <Text style={styles.userName}>
-          {item.full_name || item.username || 'Unknown User'}
-        </Text>
-        {item.username && item.full_name && (
-          <Text style={styles.userHandle}>@{item.username}</Text>
-        )}
+        <Text style={styles.userName}>{item.username || "Unknown User"}</Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color="#CCC" />
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <Stack.Screen
         options={{
           headerTitle: "New Message",
@@ -123,11 +122,8 @@ export default function NewMessageScreen() {
             placeholderTextColor="#999"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            autoFocus
           />
-          {searching && (
-            <ActivityIndicator size="small" color="#4A90E2" />
-          )}
+          {searching && <ActivityIndicator size="small" color="#4A90E2" />}
         </View>
       </View>
 
@@ -151,7 +147,8 @@ export default function NewMessageScreen() {
       ) : searchResults.length > 0 ? (
         <View style={styles.resultsContainer}>
           <Text style={styles.resultsHeader}>
-            {searchResults.length} user{searchResults.length !== 1 ? 's' : ''} found
+            {searchResults.length} user{searchResults.length !== 1 ? "s" : ""}{" "}
+            found
           </Text>
           <FlatList
             data={searchResults}
@@ -184,6 +181,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
+    marginTop: 35,
     paddingVertical: 16,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,

@@ -18,7 +18,8 @@ import {
 } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   SimpleMessagingService as MessagingService,
@@ -68,6 +69,18 @@ export default function ChatScreen() {
     };
   }, [conversationId]);
 
+  // Mark conversation as read when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (conversationId) {
+        // Mark as read when screen is focused
+        messagingService.markAsRead(conversationId).catch((error) => {
+          console.error("Error marking conversation as read:", error);
+        });
+      }
+    }, [conversationId])
+  );
+
   const getCurrentUser = async () => {
     try {
       const {
@@ -113,10 +126,10 @@ export default function ChatScreen() {
         setMessages((prevMessages) => {
           // Only update if we have new messages
           if (latestMessages.length > prevMessages.length) {
-            console.log(
-              "Polling found new messages:",
-              latestMessages.length - prevMessages.length
-            );
+            // console.log(
+            //   "Polling found new messages:",
+            //   latestMessages.length - prevMessages.length
+            // );
             return latestMessages;
           }
           return prevMessages;
@@ -128,11 +141,11 @@ export default function ChatScreen() {
   };
 
   const subscribeToMessages = () => {
-    console.log("Subscribing to messages for conversation:", conversationId);
+    //console.log("Subscribing to messages for conversation:", conversationId);
     messagingService.subscribeToConversation(
       conversationId,
       (newMessage) => {
-        console.log("Received new message via subscription:", newMessage);
+        //console.log("Received new message via subscription:", newMessage);
         setMessages((prev) => {
           // Remove any optimistic message with same content and sender
           const filteredMessages = prev.filter(
@@ -149,7 +162,7 @@ export default function ChatScreen() {
             (msg) => msg.id === newMessage.id
           );
           if (messageExists) {
-            console.log("Message already exists, skipping:", newMessage.id);
+            //console.log("Message already exists, skipping:", newMessage.id);
             return prev;
           }
 
@@ -166,10 +179,10 @@ export default function ChatScreen() {
         messagingService.markAsRead(conversationId);
       },
       (updatedMessage) => {
-        console.log(
-          "Received message update via subscription:",
-          updatedMessage
-        );
+        // console.log(
+        //   "Received message update via subscription:",
+        //   updatedMessage
+        // );
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === updatedMessage.id ? updatedMessage : msg
@@ -177,10 +190,10 @@ export default function ChatScreen() {
         );
       },
       (deletedMessageId) => {
-        console.log(
-          "Received message deletion via subscription:",
-          deletedMessageId
-        );
+        // console.log(
+        //   "Received message deletion via subscription:",
+        //   deletedMessageId
+        // );
         setMessages((prev) =>
           prev.filter((msg) => msg.id !== deletedMessageId)
         );
@@ -220,17 +233,17 @@ export default function ChatScreen() {
     }, 100);
 
     try {
-      console.log(
-        "Sending message:",
-        messageText,
-        "to conversation:",
-        conversationId
-      );
+      // console.log(
+      //   "Sending message:",
+      //   messageText,
+      //   "to conversation:",
+      //   conversationId
+      // );
       const sentMessage = await messagingService.sendMessage(
         conversationId,
         messageText
       );
-      console.log("Message sent successfully:", sentMessage);
+      // console.log("Message sent successfully:", sentMessage);
     } catch (error) {
       console.error("Error sending message:", error);
       Alert.alert("Error", "Failed to send message");
