@@ -1,6 +1,6 @@
 import { StyleSheet, AppState, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 AppState.addEventListener("change", (state) => {
   if (state === "active") {

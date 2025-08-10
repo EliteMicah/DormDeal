@@ -11,7 +11,7 @@ module.exports = function (api) {
         {
           alias: {
             //"@supabase": "./lib/supabase",
-            "@": "./src",
+            "@": "./",
           },
         },
       ],

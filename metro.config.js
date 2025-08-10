@@ -10,6 +10,8 @@ config.resolver = {
     ...config.resolver.alias,
     // Ensure proper resolution of @supabase/supabase-js
     "@supabase/supabase-js": require.resolve("@supabase/supabase-js"),
+    // Add alias for project root
+    "@": __dirname,
   },
   // Add additional extensions for better compatibility
   sourceExts: [...config.resolver.sourceExts, "mjs", "cjs"],
