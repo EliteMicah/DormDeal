@@ -12,7 +12,6 @@ export default function HomeLayout() {
         headerTransparent: true,
         headerBackTitle: "‎", // Empty whitespace character for back button [U+200E]
         headerTintColor: "black",
-        headerBackTitleVisible: false,
       }}
     >
       <Stack.Screen name="index" options={{ title: "" }} />

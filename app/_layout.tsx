@@ -9,7 +9,6 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import { NavigationContainer } from "@react-navigation/native";
 import { useColorScheme } from "react-native";
 
 export { ErrorBoundary } from "expo-router";
@@ -48,19 +47,17 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <NavigationContainer>
-      <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="searchModal"
-            options={{
-              presentation: "modal",
-              headerShown: false,
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </NavigationContainer>
+    <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="searchModal"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </ThemeProvider>
   );
 }

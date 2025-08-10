@@ -4,21 +4,28 @@
     "slug": "rebooked",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/RebookedIcon2copy.png",
-    "scheme": "myapp",
+    "icon": "./assets/images/RebookedIcon.png",
+    "scheme": "rebooked",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/SplashRebooked.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elitemicah.rebooked"
+      "bundleIdentifier": "com.elitemicah.rebooked",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/SplashRebooked.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.elitemicah.rebooked"
@@ -26,19 +33,14 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/RebookedFavicon.png"
     },
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
     "experiments": {
       "typedRoutes": true
-    },
-    "router": {
-      "initialRoute": "/(tabs)/index"
-    },
-    "log": {
-      "ignoreLogs": [
-        "[Reanimated] Reduced motion setting is enabled on this device."
-      ]
     },
     "extra": {
       "eas": {
