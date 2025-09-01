@@ -1,20 +1,21 @@
 {
   "expo": {
-    "name": "rebooked",
-    "slug": "rebooked",
+    "name": "DormDeal",
+    "slug": "DormDeal",
     "version": "1.0.0",
+    "platforms": ["ios"],
     "orientation": "portrait",
     "icon": "./assets/images/RebookedIcon.png",
-    "scheme": "rebooked",
+    "scheme": "dormdeal",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/SplashRebooked.png",
+      "image": "./assets/images/RebookedIcon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.elitemicah.rebooked",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.elitemicah.DormDeal",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -35,16 +36,14 @@
       "output": "static",
       "favicon": "./assets/images/RebookedFavicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-router", "expo-font"],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "7464af44-b096-4b8d-ba97-d0c86736f2b2"
+        "projectId": "aab5b19a-0578-4abc-ac57-55d97b587597"
       }
     },
     "owner": "elitemicah"
