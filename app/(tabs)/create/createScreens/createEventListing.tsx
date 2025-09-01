@@ -20,8 +20,8 @@ import {
   PaymentService,
   PAYMENT_METHODS,
   EVENT_LISTING_FEE,
-} from "../../../../lib/paymentService";
-import { EventService } from "../../../../lib/eventService";
+  EventService,
+} from "../../../../supabase-client";
 
 interface EventFormData {
   title: string;
@@ -80,27 +80,32 @@ export default function CreateEventListing() {
   };
 
   const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
-      Alert.alert(
-        "Permission required",
-        "Permission to access camera roll is required!"
-      );
-      return;
-    }
+      if (permissionResult.granted === false) {
+        Alert.alert(
+          "Permission required",
+          "Permission to access camera roll is required!"
+        );
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      aspect: [16, 9],
-      quality: 0.8,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      // Store image locally - it will only be uploaded to event-images bucket after successful payment
-      updateFormData("image", result.assets[0].uri);
+      if (!result.canceled) {
+        // Store image locally - it will only be uploaded to event-images bucket after successful payment
+        updateFormData("image", result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("ImagePicker error:", error);
+      Alert.alert("Error", "Error accessing image library. Please try again.");
     }
   };
 
@@ -109,21 +114,21 @@ export default function CreateEventListing() {
   const validateForm = (): boolean => {
     const newErrors: Partial<EventFormData> = {};
 
-    if (!formData.title.trim()) newErrors.title = "Event title is required";
-    if (!formData.description.trim())
-      newErrors.description = "Description is required";
-    if (!formData.date.trim()) newErrors.date = "Event date is required";
-    if (!formData.time.trim()) newErrors.time = "Event time is required";
-    if (!formData.location.trim()) newErrors.location = "Location is required";
-    if (!formData.contactEmail.trim())
-      newErrors.contactEmail = "Contact email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.contactEmail)) {
-      newErrors.contactEmail = "Please enter a valid email address";
-    }
+    // if (!formData.title.trim()) newErrors.title = "Event title is required";
+    // if (!formData.description.trim())
+    //   newErrors.description = "Description is required";
+    // if (!formData.date.trim()) newErrors.date = "Event date is required";
+    // if (!formData.time.trim()) newErrors.time = "Event time is required";
+    // if (!formData.location.trim()) newErrors.location = "Location is required";
+    // if (!formData.contactEmail.trim())
+    //   newErrors.contactEmail = "Contact email is required";
+    // else if (!/\S+@\S+\.\S+/.test(formData.contactEmail)) {
+    //   newErrors.contactEmail = "Please enter a valid email address";
+    // }
 
-    if (formData.maxCapacity && isNaN(Number(formData.maxCapacity))) {
-      newErrors.maxCapacity = "Max capacity must be a number";
-    }
+    // if (formData.maxCapacity && isNaN(Number(formData.maxCapacity))) {
+    //   newErrors.maxCapacity = "Max capacity must be a number";
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -140,34 +145,21 @@ export default function CreateEventListing() {
 
     setPaymentProcessing(true);
 
-    // Simulate payment processing
-    // In a real app, you would integrate with Stripe, Square, or another payment processor
+    // Feature still in progress
     try {
-      // Show payment options
-      const availablePaymentMethods =
-        paymentService.getAvailablePaymentMethods();
-      const paymentButtons = availablePaymentMethods
-        .slice(0, 3)
-        .map((method) => ({
-          text: `Pay with ${method.name}`,
-          onPress: () => processPayment(method.id),
-        }));
-
       Alert.alert(
-        `Payment Required - $${EVENT_LISTING_FEE}`,
-        "Choose your payment method to create this premium event listing:",
+        "Feature Still in Progress",
+        "Payment processing for event listings is currently under development. Please check back later!",
         [
           {
-            text: "Cancel",
-            style: "cancel",
+            text: "OK",
             onPress: () => setPaymentProcessing(false),
           },
-          ...paymentButtons,
         ]
       );
     } catch (error) {
       setPaymentProcessing(false);
-      Alert.alert("Payment Error", "Something went wrong. Please try again.");
+      Alert.alert("Error", "Something went wrong. Please try again.");
     }
   };
 
@@ -448,6 +440,7 @@ export default function CreateEventListing() {
                   style={[styles.input, errors.date && styles.inputError]}
                   placeholder="MM/DD/YYYY"
                   value={formData.date}
+                  keyboardType="number-pad"
                   onChangeText={(text) => updateFormData("date", text)}
                 />
                 {errors.date && (

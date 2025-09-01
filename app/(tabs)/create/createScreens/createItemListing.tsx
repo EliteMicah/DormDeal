@@ -18,7 +18,7 @@ import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
 
@@ -97,11 +97,11 @@ export default function CreateItemListing() {
 
     // Set up keyboard listeners
     const keyboardWillShowListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       () => setIsKeyboardVisible(true)
     );
     const keyboardWillHideListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
       () => {
         setIsKeyboardVisible(false);
         setIsDescriptionFocused(false);
@@ -115,22 +115,28 @@ export default function CreateItemListing() {
   }, []);
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
-      return;
-    }
+    try {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+        return;
+      }
 
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("ImagePicker error:", error);
+      alert("Error accessing image library. Please try again.");
     }
   };
 
@@ -325,126 +331,126 @@ export default function CreateItemListing() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-        <Text style={styles.mainTitle}>Create Listing</Text>
+          <Text style={styles.mainTitle}>Create Listing</Text>
 
-        <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.image} />
-          ) : (
-            <View style={{ alignItems: "center" }}>
-              <Ionicons
-                name="camera-outline"
-                size={40}
-                style={styles.imageIcon}
-              />
-              <Text style={styles.imageText}>Add Photo</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.formContainer}>
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Title</Text>
-            <TextInput
-              style={styles.inputField}
-              placeholder="Name of the Item"
-              value={title}
-              onChangeText={setTitle}
-              placeholderTextColor="#6c757d"
-            />
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Category</Text>
-            <TouchableOpacity
-              style={styles.dropdownField}
-              onPress={() => setCategoryModalVisible(true)}
-            >
-              <Text style={styles.dropdownText}>{category}</Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                style={styles.dropdownIcon}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Condition</Text>
-            <TouchableOpacity
-              style={styles.dropdownField}
-              onPress={() => setConditionModalVisible(true)}
-            >
-              <Text style={styles.dropdownText}>{condition}</Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                style={styles.dropdownIcon}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Price</Text>
-            <TextInput
-              style={styles.inputField}
-              placeholder="$20"
-              keyboardType="decimal-pad"
-              value={price}
-              onChangeText={setPrice}
-              returnKeyType="done"
-              placeholderTextColor="#6c757d"
-            />
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Payment Type</Text>
-            <TouchableOpacity
-              style={styles.dropdownField}
-              onPress={() => setPaymentModalVisible(true)}
-            >
-              <Text style={styles.dropdownText}>{paymentType}</Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                style={styles.dropdownIcon}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Description</Text>
-            <TextInput
-              style={styles.descriptionField}
-              placeholder="Describe your item in detail..."
-              multiline={true}
-              numberOfLines={4}
-              textAlignVertical="top"
-              returnKeyType="default"
-              maxLength={300}
-              value={description}
-              onChangeText={setDescription}
-              onFocus={() => setIsDescriptionFocused(true)}
-              onBlur={() => setIsDescriptionFocused(false)}
-              placeholderTextColor="#6c757d"
-            />
-          </View>
-
-          {formError && <Text style={styles.errorText}>{formError}</Text>}
-
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              isUploading && styles.submitButtonDisabled,
-            ]}
-            onPress={handleSubmit}
-            disabled={isUploading}
-          >
-            <Text style={styles.submitButtonText}>
-              {isUploading ? "Creating Listing..." : "Create Listing"}
-            </Text>
+          <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <View style={{ alignItems: "center" }}>
+                <Ionicons
+                  name="camera-outline"
+                  size={40}
+                  style={styles.imageIcon}
+                />
+                <Text style={styles.imageText}>Add Photo</Text>
+              </View>
+            )}
           </TouchableOpacity>
-        </View>
+
+          <View style={styles.formContainer}>
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Title</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="Name of the Item"
+                value={title}
+                onChangeText={setTitle}
+                placeholderTextColor="#6c757d"
+              />
+            </View>
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Category</Text>
+              <TouchableOpacity
+                style={styles.dropdownField}
+                onPress={() => setCategoryModalVisible(true)}
+              >
+                <Text style={styles.dropdownText}>{category}</Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  style={styles.dropdownIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Condition</Text>
+              <TouchableOpacity
+                style={styles.dropdownField}
+                onPress={() => setConditionModalVisible(true)}
+              >
+                <Text style={styles.dropdownText}>{condition}</Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  style={styles.dropdownIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Price</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="$20"
+                keyboardType="decimal-pad"
+                value={price}
+                onChangeText={setPrice}
+                returnKeyType="done"
+                placeholderTextColor="#6c757d"
+              />
+            </View>
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Payment Type</Text>
+              <TouchableOpacity
+                style={styles.dropdownField}
+                onPress={() => setPaymentModalVisible(true)}
+              >
+                <Text style={styles.dropdownText}>{paymentType}</Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  style={styles.dropdownIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.fieldLabel}>Description</Text>
+              <TextInput
+                style={styles.descriptionField}
+                placeholder="Describe your item in detail..."
+                multiline={true}
+                numberOfLines={4}
+                textAlignVertical="top"
+                returnKeyType="default"
+                maxLength={300}
+                value={description}
+                onChangeText={setDescription}
+                onFocus={() => setIsDescriptionFocused(true)}
+                onBlur={() => setIsDescriptionFocused(false)}
+                placeholderTextColor="#6c757d"
+              />
+            </View>
+
+            {formError && <Text style={styles.errorText}>{formError}</Text>}
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isUploading && styles.submitButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={isUploading}
+            >
+              <Text style={styles.submitButtonText}>
+                {isUploading ? "Creating Listing..." : "Create Listing"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 

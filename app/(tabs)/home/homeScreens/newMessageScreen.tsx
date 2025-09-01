@@ -14,17 +14,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  SimpleMessagingService as MessagingService,
-  UserProfile,
-} from "../../../../lib/simpleMessaging";
+import { SimpleMessagingService as MessagingService } from "../../../../supabase-client";
 
 export default function NewMessageScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<UserProfile[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
 
   const messagingService = MessagingService.getInstance();
 
@@ -49,7 +46,7 @@ export default function NewMessageScreen() {
     }
   };
 
-  const handleUserSelect = async (user: UserProfile) => {
+  const handleUserSelect = async (user: any) => {
     try {
       // For direct messages, immediately create/navigate to conversation
       const conversationId =
@@ -64,16 +61,16 @@ export default function NewMessageScreen() {
   };
 
   const getInitials = (name?: string) => {
-    if (!name) return "?";
+    if (!name || typeof name !== "string") return "?";
     return name
       .split(" ")
-      .map((n) => n[0])
+      .map((n) => (n && n[0] ? n[0] : ""))
       .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
-  const renderUserItem = ({ item }: { item: UserProfile }) => (
+  const renderUserItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.userItem}
       onPress={() => handleUserSelect(item)}

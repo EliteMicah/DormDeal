@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 
 export default function SignInScreen() {
   const router = useRouter();

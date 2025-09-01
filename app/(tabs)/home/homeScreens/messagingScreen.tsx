@@ -14,11 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { useState, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  SimpleMessagingService as MessagingService,
-  DirectConversation as Conversation,
-  UserProfile,
-} from "../../../../lib/simpleMessaging";
+import { SimpleMessagingService as MessagingService } from "../../../../supabase-client";
 import { useFocusEffect } from "@react-navigation/native";
 
 // Use the types from the messaging service
@@ -27,10 +23,10 @@ export default function MessagingScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
 
   const messagingService = MessagingService.getInstance();
@@ -58,7 +54,9 @@ export default function MessagingScreen() {
 
   const loadConversations = async () => {
     try {
+      //console.log("Loading conversations...");
       const conversationsData = await messagingService.getConversations();
+      //console.log("Loaded conversations:", conversationsData.length);
       setConversations(conversationsData);
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -93,7 +91,7 @@ export default function MessagingScreen() {
     }
   };
 
-  const startNewConversation = async (user: UserProfile) => {
+  const startNewConversation = async (user: any) => {
     try {
       const conversationId =
         await messagingService.getOrCreateDirectConversation(user.id);
@@ -155,9 +153,10 @@ export default function MessagingScreen() {
   };
 
   const getInitials = (name: string) => {
+    if (!name || typeof name !== "string") return "?";
     return name
       .split(" ")
-      .map((n) => n[0])
+      .map((n) => (n && n[0] ? n[0] : ""))
       .join("")
       .toUpperCase();
   };
@@ -169,17 +168,17 @@ export default function MessagingScreen() {
     );
   };
 
-  const getConversationTitle = (conversation: Conversation) => {
+  const getConversationTitle = (conversation: any) => {
     return conversation.other_user?.username || "Unknown User";
   };
 
-  const getConversationAvatar = (conversation: Conversation) => {
+  const getConversationAvatar = (conversation: any) => {
     return conversation.other_user?.avatar_url;
   };
 
-  const handleDeleteConversation = (conversation: Conversation) => {
+  const handleDeleteConversation = (conversation: any) => {
     const participantName = conversation.other_user?.username || "Unknown User";
-    
+
     Alert.alert(
       "Delete Conversation",
       `Are you sure you want to delete this conversation with ${participantName}?\n\nIf this conversation is about a transaction, please make sure to delete the associated item or book listing first to avoid confusion for other users.`,
@@ -193,11 +192,33 @@ export default function MessagingScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await messagingService.deleteConversation(conversation.id);
-              await loadConversations(); // Refresh the conversation list
-            } catch (error) {
+              console.log("Deleting conversation:", conversation.id);
+
+              // Optimistically remove from UI first for better UX
+              setConversations((prev) =>
+                prev.filter((conv) => conv.id !== conversation.id)
+              );
+
+              // Delete from database
+              const result = await messagingService.deleteConversation(
+                conversation.id
+              );
+              console.log("Deletion result:", result);
+
+              // Refresh to ensure consistency
+              await loadConversations();
+
+              console.log("Conversation deletion completed successfully");
+            } catch (error: any) {
               console.error("Error deleting conversation:", error);
-              Alert.alert("Error", "Failed to delete conversation. Please try again.");
+
+              // Restore the conversation in UI if deletion failed
+              await loadConversations();
+
+              Alert.alert(
+                "Error",
+                `Failed to delete conversation: ${error?.message || error}`
+              );
             }
           },
         },
@@ -205,7 +226,7 @@ export default function MessagingScreen() {
     );
   };
 
-  const renderSearchResult = ({ item }: { item: UserProfile }) => (
+  const renderSearchResult = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.searchResultItem}
       onPress={() => startNewConversation(item)}
@@ -230,7 +251,7 @@ export default function MessagingScreen() {
     </TouchableOpacity>
   );
 
-  const renderConversationItem = ({ item }: { item: Conversation }) => (
+  const renderConversationItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => {

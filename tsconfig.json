@@ -10,15 +10,23 @@
     "noEmit": true,
     "jsx": "react-native",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
-    "types": ["react-native", "expo", "@types/react", "@types/react-native"]
+    "types": [
+      "react-native",
+      "expo",
+      "@types/react",
+      "@types/react-native"
+    ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "expo-env.d.ts",
-    "nativewind-env.d.ts"
+    "nativewind-env.d.ts",
+    ".expo/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

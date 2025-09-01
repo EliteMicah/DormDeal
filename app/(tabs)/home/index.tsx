@@ -8,11 +8,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../../lib/supabase";
-import { NotificationService } from "../../../lib/notificationService";
-import { SimpleMessagingService } from "../../../lib/simpleMessaging";
+import {
+  supabase,
+  NotificationService,
+  SimpleMessagingService,
+} from "../../../supabase-client";
 import { useFocusEffect } from "expo-router";
 
 // Define a type for the routes
@@ -30,8 +32,9 @@ export default function HomeScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [hasMessages, setHasMessages] = useState(false);
-  const notificationService = NotificationService.getInstance();
-  const messagingService = SimpleMessagingService.getInstance();
+  const notificationService = useRef(NotificationService.getInstance());
+  const messagingService = useRef(SimpleMessagingService.getInstance());
+  const isUnmounted = useRef(false);
 
   const featuredEvent = {
     title: "Spring Book Exchange",
@@ -47,7 +50,7 @@ export default function HomeScreen() {
     title: string;
     icon: string;
     color: string;
-    route: RouteType; // Use the defined type here
+    route: RouteType;
     category?: string;
   }[] = [
     {
@@ -79,12 +82,14 @@ export default function HomeScreen() {
       icon: "👕",
       color: "#50C878",
       route: "/home/homeScreens/shopItemsScreen",
-      category: "Clothing",
+      category: "Clothing & Accessories",
     },
   ];
 
   // Fetch username and notification count
   const fetchUserData = async () => {
+    if (isUnmounted.current) return;
+
     try {
       const {
         data: { user },
@@ -92,7 +97,9 @@ export default function HomeScreen() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        router.replace("/(tabs)/accountCreation/account/signInScreen");
+        if (!isUnmounted.current) {
+          router.replace("/(tabs)/accountCreation/account/signInScreen");
+        }
         return;
       }
 
@@ -102,6 +109,8 @@ export default function HomeScreen() {
         .select("username")
         .eq("id", user.id)
         .maybeSingle();
+
+      if (isUnmounted.current) return;
 
       if (profileError) {
         console.error("Error fetching profile:", profileError.message);
@@ -114,66 +123,108 @@ export default function HomeScreen() {
 
       // Fetch unread notification count
       try {
-        const count = await notificationService.getUnreadCount(user.id);
-        setUnreadCount(count);
-        setHasNotifications(count > 0);
+        const count = await (notificationService.current as any).getUnreadCount(
+          user.id
+        );
+        if (!isUnmounted.current) {
+          setUnreadCount(count);
+          setHasNotifications(count > 0);
+        }
       } catch (notificationError) {
-        console.error("Error fetching notification count:", notificationError);
-        setHasNotifications(false);
-        setUnreadCount(0);
+        if (!isUnmounted.current) {
+          console.error(
+            "Error fetching notification count:",
+            notificationError
+          );
+          setHasNotifications(false);
+          setUnreadCount(0);
+        }
       }
 
       // Fetch unread message count
       try {
-        const conversations = await messagingService.getConversations();
+        const conversations = await (
+          messagingService.current as any
+        ).getConversations();
         let totalUnreadMessages = 0;
-        conversations.forEach((conversation) => {
+        conversations.forEach((conversation: any) => {
           totalUnreadMessages += conversation.unread_count || 0;
         });
-        setUnreadMessageCount(totalUnreadMessages);
-        setHasMessages(totalUnreadMessages > 0);
+
+        if (!isUnmounted.current) {
+          setUnreadMessageCount(totalUnreadMessages);
+          setHasMessages(totalUnreadMessages > 0);
+        }
       } catch (messageError) {
-        console.error("Error fetching message count:", messageError);
-        setHasMessages(false);
-        setUnreadMessageCount(0);
+        if (!isUnmounted.current) {
+          console.error("Error fetching message count:", messageError);
+          setHasMessages(false);
+          setUnreadMessageCount(0);
+        }
       }
     } catch (error) {
-      console.error("Error:", (error as Error).message);
-      router.replace("/(tabs)/accountCreation/account/signInScreen");
+      if (!isUnmounted.current) {
+        console.error("Error:", (error as Error).message);
+        router.replace("/(tabs)/accountCreation/account/signInScreen");
+      }
     } finally {
-      setIsLoading(false);
+      if (!isUnmounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchUserData();
+    isUnmounted.current = false;
+
+    return () => {
+      isUnmounted.current = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isUnmounted.current) {
+      fetchUserData();
+    }
   }, []);
 
   // Subscribe to real-time notifications and refresh counts on focus
   useFocusEffect(
     useCallback(() => {
+      if (isUnmounted.current) return;
+
       // Refresh counts when screen comes into focus (after visiting notifications/messages)
       fetchUserData();
 
       const setupRealtimeSubscription = async () => {
+        if (isUnmounted.current) return;
+
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        if (user) {
-          notificationService.subscribeToNotifications(user.id, () => {
-            // Refresh notification count when a new notification arrives
-            fetchUserData();
-          });
+
+        if (user && !isUnmounted.current) {
+          (notificationService.current as any).subscribeToNotifications(
+            user.id,
+            () => {
+              // Refresh notification count when a new notification arrives
+              if (!isUnmounted.current) {
+                fetchUserData();
+              }
+            }
+          );
 
           // Also subscribe to message updates (if the messaging service supports it)
           try {
-            messagingService.subscribeToConversations(() => {
+            (messagingService.current as any).subscribeToConversations(() => {
               // Refresh message count when new messages arrive
-              fetchUserData();
+              if (!isUnmounted.current) {
+                fetchUserData();
+              }
             });
           } catch (error) {
             // If messaging service doesn't support real-time, it's okay
-            console.log("Messaging real-time not available");
+            console.error("Messaging real-time not available:", error);
           }
         }
       };
@@ -181,7 +232,11 @@ export default function HomeScreen() {
       setupRealtimeSubscription();
 
       return () => {
-        notificationService.unsubscribeFromNotifications();
+        try {
+          (notificationService.current as any).unsubscribeFromNotifications();
+        } catch (error) {
+          console.warn("Error unsubscribing from notifications:", error);
+        }
       };
     }, [])
   );
@@ -190,7 +245,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={[styles.container, styles.loadingContainer]}>
         <View style={styles.loadingContent}>
-          <Text style={styles.loadingText}>Welcome to Rebooked</Text>
+          <Text style={styles.loadingText}>Welcome to DormDeal</Text>
           <View style={styles.loadingDots}>
             <View style={[styles.dot, styles.dot1]} />
             <View style={[styles.dot, styles.dot2]} />

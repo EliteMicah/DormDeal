@@ -15,8 +15,7 @@ import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../lib/supabase";
-import { NotificationService } from "../lib/notificationService";
+import { supabase, NotificationService } from "../supabase-client";
 
 // Types
 interface BookListing {
@@ -192,7 +191,7 @@ export default function SearchModal() {
         await notificationService.subscribeToISBN(
           user.id,
           isbn,
-          title, // Pass the book title if available
+          title || "Unknown Title", // Pass the book title if available
         );
 
         Alert.alert(

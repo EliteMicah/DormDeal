@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 
 // Book listing interface
 interface BookListing {
@@ -90,12 +90,16 @@ export default function BookDetailsScreen() {
         console.error("Error fetching book details:", error);
         // Handle case when listing was deleted (PGRST116 = no rows found)
         if (error.code === "PGRST116") {
-          Alert.alert("Listing Deleted", "This listing has been deleted and is no longer available.", [
-            {
-              text: "OK",
-              onPress: () => router.back()
-            }
-          ]);
+          Alert.alert(
+            "Listing Deleted",
+            "This listing has been deleted and is no longer available.",
+            [
+              {
+                text: "OK",
+                onPress: () => router.back(),
+              },
+            ]
+          );
         } else {
           Alert.alert("Error", "Could not load book details.");
         }

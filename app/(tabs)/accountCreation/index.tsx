@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "../../../supabase-client";
 import { View, ActivityIndicator } from "react-native";
 
 export default function AccountIndex() {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { MessagingService } from '../lib/messaging';
-import { User, AuthError } from '@supabase/supabase-js';
+import { supabase, SimpleMessagingService } from '../supabase-client';
+import { User, AuthError, Session } from '@supabase/supabase-js';
 
 export interface UseAuthReturn {
   user: User | null;
@@ -17,18 +16,18 @@ export function useAuth(): UseAuthReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const messagingService = MessagingService.getInstance();
+  const messagingService = SimpleMessagingService.getInstance();
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: string, session: Session | null) => {
         setUser(session?.user ?? null);
         setLoading(false);
 

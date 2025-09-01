@@ -12,15 +12,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "../../../../lib/supabase";
-import {
-  NotificationService,
-  NotificationData,
-} from "../../../../lib/notificationService";
+import { supabase, NotificationService } from "../../../../supabase-client";
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const notificationService = NotificationService.getInstance();
@@ -53,7 +49,7 @@ export default function NotificationsScreen() {
     await fetchNotifications();
   };
 
-  const handleNotificationPress = async (notification: NotificationData) => {
+  const handleNotificationPress = async (notification: any) => {
     try {
       // Mark as read if not already read
       if (!notification.read) {
@@ -161,7 +157,7 @@ export default function NotificationsScreen() {
     return notificationDate.toLocaleDateString();
   };
 
-  const renderNotification = ({ item }: { item: NotificationData }) => (
+  const renderNotification = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={[styles.notificationCard, !item.read && styles.unreadNotification]}
       onPress={() => handleNotificationPress(item)}
@@ -226,7 +222,7 @@ export default function NotificationsScreen() {
         if (user) {
           notificationService.subscribeToNotifications(
             user.id,
-            (newNotification) => {
+            (newNotification: any) => {
               setNotifications((prev) => [newNotification, ...prev]);
             }
           );

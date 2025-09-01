@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 
 interface ISBNSubscription {
   id: string;

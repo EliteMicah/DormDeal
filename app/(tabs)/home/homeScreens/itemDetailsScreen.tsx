@@ -15,8 +15,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../../lib/supabase";
-import { SimpleMessagingService as MessagingService } from "../../../../lib/simpleMessaging";
+import {
+  supabase,
+  SimpleMessagingService as MessagingService,
+} from "../../../../supabase-client";
 
 // Item listing interface
 interface ItemListing {
@@ -328,12 +330,15 @@ export default function ItemDetailsScreen() {
     setIsStartingConversation(true);
     try {
       const messagingService = MessagingService.getInstance();
-      const conversationId = await messagingService.getOrCreateDirectConversation(itemDetails.user_id);
-      
+      const conversationId =
+        await messagingService.getOrCreateDirectConversation(
+          itemDetails.user_id
+        );
+
       // Navigate to the chat screen
       router.push({
         pathname: "/(tabs)/home/homeScreens/chatScreen",
-        params: { conversationId }
+        params: { conversationId },
       });
     } catch (error) {
       console.error("Error starting conversation:", error);
@@ -384,16 +389,21 @@ export default function ItemDetailsScreen() {
     setIsStartingConversation(true);
     try {
       const messagingService = MessagingService.getInstance();
-      const conversationId = await messagingService.getOrCreateDirectConversation(itemDetails!.user_id);
-      
+      const conversationId =
+        await messagingService.getOrCreateDirectConversation(
+          itemDetails!.user_id
+        );
+
       // Send the offer message
-      const offerMessage = `Hi! I'm interested in your "${itemDetails!.title}". Would you accept $${offerAmount.toFixed(2)} for it?`;
+      const offerMessage = `Hi! I'm interested in your "${
+        itemDetails!.title
+      }". Would you accept $${offerAmount.toFixed(2)} for it?`;
       await messagingService.sendMessage(conversationId, offerMessage);
-      
+
       // Navigate to the chat screen
       router.push({
         pathname: "/(tabs)/home/homeScreens/chatScreen",
-        params: { conversationId }
+        params: { conversationId },
       });
     } catch (error) {
       console.error("Error sending offer:", error);
@@ -602,16 +612,21 @@ export default function ItemDetailsScreen() {
           {/* Buyer Action Buttons - Only show for non-owners */}
           {!isOwner && (
             <View style={styles.actions}>
-              <TouchableOpacity 
-                style={[styles.primaryButton, isStartingConversation && styles.disabledButton]} 
+              <TouchableOpacity
+                style={[
+                  styles.primaryButton,
+                  isStartingConversation && styles.disabledButton,
+                ]}
                 onPress={handleMessageSeller}
                 disabled={isStartingConversation}
               >
                 <Text style={styles.primaryButtonText}>
-                  {isStartingConversation ? "Starting Chat..." : "Message Seller"}
+                  {isStartingConversation
+                    ? "Starting Chat..."
+                    : "Message Seller"}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={handleMakeOffer}
               >

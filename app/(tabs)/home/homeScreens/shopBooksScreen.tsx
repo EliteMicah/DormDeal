@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 
 // Book listing interface
 interface BookListing {
@@ -129,30 +129,30 @@ const ISBNSubscriptionModal = ({
 
   const validateISBN = (text: string) => {
     // Remove any non-numeric characters for validation
-    const numericOnly = text.replace(/\D/g, '');
-    
+    const numericOnly = text.replace(/\D/g, "");
+
     if (numericOnly.length === 0) {
       setIsbnError("");
       return false;
     }
-    
+
     if (numericOnly.length < 11) {
       setIsbnError("ISBN must be at least 11 digits");
       return false;
     }
-    
+
     if (numericOnly.length > 13) {
       setIsbnError("ISBN cannot exceed 13 digits");
       return false;
     }
-    
+
     setIsbnError("");
     return true;
   };
 
   const handleISBNChange = (text: string) => {
     // Only allow numeric characters
-    const numericOnly = text.replace(/\D/g, '');
+    const numericOnly = text.replace(/\D/g, "");
     setIsbn(numericOnly);
     validateISBN(numericOnly);
   };
@@ -184,19 +184,14 @@ const ISBNSubscriptionModal = ({
           it becomes available.
         </Text>
         <TextInput
-          style={[
-            styles.isbnInput,
-            isbnError ? styles.isbnInputError : null
-          ]}
+          style={[styles.isbnInput, isbnError ? styles.isbnInputError : null]}
           placeholder="Enter 11-13 digit ISBN..."
           value={isbn}
           onChangeText={handleISBNChange}
           keyboardType="numeric"
           maxLength={13}
         />
-        {isbnError ? (
-          <Text style={styles.errorText}>{isbnError}</Text>
-        ) : null}
+        {isbnError ? <Text style={styles.errorText}>{isbnError}</Text> : null}
         <View style={styles.modalActions}>
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
             <Text style={styles.cancelButtonText}>Cancel</Text>

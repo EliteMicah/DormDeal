@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 
 interface ItemListing {
   id: number;
@@ -56,11 +56,12 @@ const ItemCard = ({
 
 export default function shopItemsScreen() {
   const router = useRouter();
-  const { category, query, paymentType, categoryFilter, minPrice, maxPrice } = useLocalSearchParams();
+  const { category, query, paymentType, categoryFilter, minPrice, maxPrice } =
+    useLocalSearchParams();
   const [items, setItems] = useState<ItemListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentCategory, setCurrentCategory] = useState<string>(
-    typeof category === 'string' ? category : 'all'
+    typeof category === "string" ? category : "all"
   );
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export default function shopItemsScreen() {
   }, [currentCategory, query, paymentType, categoryFilter, minPrice, maxPrice]);
 
   useEffect(() => {
-    setCurrentCategory(typeof category === 'string' ? category : 'all');
+    setCurrentCategory(typeof category === "string" ? category : "all");
   }, [category]);
 
   const fetchItems = async () => {
@@ -79,32 +80,36 @@ export default function shopItemsScreen() {
         .order("created_at", { ascending: false });
 
       // Apply search filters
-      if (query && typeof query === 'string') {
+      if (query && typeof query === "string") {
         itemQuery = itemQuery.ilike("title", `%${query}%`);
       }
 
       // Apply category filter if not "all"
-      if (currentCategory && currentCategory !== 'all') {
-        itemQuery = itemQuery.eq('category', currentCategory);
+      if (currentCategory && currentCategory !== "all") {
+        itemQuery = itemQuery.eq("category", currentCategory);
       }
 
       // Apply category filter from search if present
-      if (categoryFilter && typeof categoryFilter === 'string' && categoryFilter !== 'Any') {
-        itemQuery = itemQuery.eq('category', categoryFilter);
+      if (
+        categoryFilter &&
+        typeof categoryFilter === "string" &&
+        categoryFilter !== "Any"
+      ) {
+        itemQuery = itemQuery.eq("category", categoryFilter);
       }
 
-      if (paymentType && typeof paymentType === 'string') {
+      if (paymentType && typeof paymentType === "string") {
         itemQuery = itemQuery.eq("payment_type", paymentType);
       }
 
-      if (minPrice && typeof minPrice === 'string') {
+      if (minPrice && typeof minPrice === "string") {
         const minPriceNum = parseFloat(minPrice);
         if (!isNaN(minPriceNum) && minPriceNum >= 0) {
           itemQuery = itemQuery.gte("price", minPriceNum);
         }
       }
 
-      if (maxPrice && typeof maxPrice === 'string') {
+      if (maxPrice && typeof maxPrice === "string") {
         const maxPriceNum = parseFloat(maxPrice);
         if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
           itemQuery = itemQuery.lte("price", maxPriceNum);
@@ -135,7 +140,7 @@ export default function shopItemsScreen() {
           headerBackTitle: "‎",
           headerTintColor: "black",
           headerStyle: {
-            backgroundColor: 'transparent',
+            backgroundColor: "transparent",
           },
           headerShadowVisible: false,
         }}
@@ -143,13 +148,21 @@ export default function shopItemsScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>
-          {query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice
-            ? 'Search Results'
-            : currentCategory === 'all' 
-            ? 'All Items' 
+          {query ||
+          (paymentType && paymentType !== "Any") ||
+          (categoryFilter && categoryFilter !== "Any") ||
+          minPrice ||
+          maxPrice
+            ? "Search Results"
+            : currentCategory === "all"
+            ? "All Items"
             : currentCategory}
         </Text>
-        {(query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice) && (
+        {(query ||
+          (paymentType && paymentType !== "Any") ||
+          (categoryFilter && categoryFilter !== "Any") ||
+          minPrice ||
+          maxPrice) && (
           <Text style={styles.subtitle}>
             {items.length} {items.length === 1 ? "item" : "items"} found
           </Text>
@@ -174,14 +187,22 @@ export default function shopItemsScreen() {
             <View style={styles.empty}>
               <Ionicons name="cube-outline" size={64} color="#d1d5db" />
               <Text style={styles.emptyText}>
-                {query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice
+                {query ||
+                (paymentType && paymentType !== "Any") ||
+                (categoryFilter && categoryFilter !== "Any") ||
+                minPrice ||
+                maxPrice
                   ? "No items found matching your search"
-                  : currentCategory === 'all'
+                  : currentCategory === "all"
                   ? "No items available"
                   : `No ${currentCategory.toLowerCase()} items available`}
               </Text>
               <Text style={styles.emptySubtext}>
-                {query || (paymentType && paymentType !== 'Any') || (categoryFilter && categoryFilter !== 'Any') || minPrice || maxPrice
+                {query ||
+                (paymentType && paymentType !== "Any") ||
+                (categoryFilter && categoryFilter !== "Any") ||
+                minPrice ||
+                maxPrice
                   ? "Try adjusting your search criteria"
                   : "Check back later for new listings"}
               </Text>

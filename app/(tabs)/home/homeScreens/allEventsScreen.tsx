@@ -13,14 +13,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { EventService, Event } from "../../../../lib/eventService";
+import {
+  supabase,
+  EventService,
+  NotificationService,
+  SimpleMessagingService,
+} from "../../../../supabase-client";
 
 export default function AllEventsScreen() {
   const router = useRouter();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const eventService = EventService.getInstance();
 
   const fetchEvents = async (isRefresh = false) => {
@@ -30,15 +35,12 @@ export default function AllEventsScreen() {
       } else {
         setLoading(true);
       }
-      
+
       const fetchedEvents = await eventService.getEvents();
       setEvents(fetchedEvents);
     } catch (error: any) {
       console.error("Error fetching events:", error);
-      Alert.alert(
-        "Error",
-        "Failed to load events. Please try again."
-      );
+      Alert.alert("Error", "Failed to load events. Please try again.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -54,7 +56,7 @@ export default function AllEventsScreen() {
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Tomorrow";
     if (diffDays < 7) return `${diffDays} days`;
-    
+
     return eventDate.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -62,7 +64,10 @@ export default function AllEventsScreen() {
   };
 
   const formatEventTime = (timeStr: string) => {
-    const [hours, minutes] = timeStr.split(":");
+    if (!timeStr || typeof timeStr !== "string") return timeStr;
+    const timeParts = timeStr.split(":");
+    if (timeParts.length < 2) return timeStr;
+    const [hours, minutes] = timeParts;
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12;
@@ -73,7 +78,7 @@ export default function AllEventsScreen() {
     fetchEvents();
   }, []);
 
-  const renderEventCard = (event: Event) => (
+  const renderEventCard = (event: any) => (
     <TouchableOpacity
       key={event.id}
       style={styles.eventCard}
@@ -94,7 +99,7 @@ export default function AllEventsScreen() {
           <Ionicons name="calendar-outline" size={32} color="#999" />
         </View>
       )}
-      
+
       <View style={styles.eventContent}>
         <View style={styles.eventHeader}>
           <Text style={styles.eventTitle} numberOfLines={2}>
@@ -106,11 +111,11 @@ export default function AllEventsScreen() {
             </Text>
           </View>
         </View>
-        
+
         <Text style={styles.eventDescription} numberOfLines={3}>
           {event.description}
         </Text>
-        
+
         <View style={styles.eventFooter}>
           <View style={styles.eventDetails}>
             <View style={styles.detailRow}>
@@ -134,7 +139,7 @@ export default function AllEventsScreen() {
               </View>
             )}
           </View>
-          
+
           <TouchableOpacity
             style={styles.joinButton}
             onPress={(e) => {
@@ -146,16 +151,18 @@ export default function AllEventsScreen() {
             <Text style={styles.joinButtonText}>Join</Text>
           </TouchableOpacity>
         </View>
-        
+
         {event.tags && event.tags.length > 0 && (
           <View style={styles.tagsContainer}>
-            {event.tags.slice(0, 3).map((tag, index) => (
+            {event.tags.slice(0, 3).map((tag: any, index: number) => (
               <View key={index} style={styles.tag}>
                 <Text style={styles.tagText}>{tag}</Text>
               </View>
             ))}
             {event.tags.length > 3 && (
-              <Text style={styles.moreTagsText}>+{event.tags.length - 3} more</Text>
+              <Text style={styles.moreTagsText}>
+                +{event.tags.length - 3} more
+              </Text>
             )}
           </View>
         )}
@@ -177,7 +184,9 @@ export default function AllEventsScreen() {
           headerRight: () => (
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => router.push("/(tabs)/create/createScreens/createEventListing")}
+              onPress={() =>
+                router.push("/(tabs)/create/createScreens/createEventListing")
+              }
             >
               <Ionicons name="add" size={24} color="#FF6B35" />
             </TouchableOpacity>
@@ -209,11 +218,16 @@ export default function AllEventsScreen() {
                 <Ionicons name="calendar-outline" size={64} color="#CCC" />
                 <Text style={styles.emptyStateTitle}>No Events Found</Text>
                 <Text style={styles.emptyStateText}>
-                  There are no events available at the moment. Check back later or create your own event!
+                  There are no events available at the moment. Check back later
+                  or create your own event!
                 </Text>
                 <TouchableOpacity
                   style={styles.createEventButton}
-                  onPress={() => router.push("/(tabs)/create/createScreens/createEventListing")}
+                  onPress={() =>
+                    router.push(
+                      "/(tabs)/create/createScreens/createEventListing"
+                    )
+                  }
                 >
                   <Text style={styles.createEventButtonText}>Create Event</Text>
                 </TouchableOpacity>
@@ -222,17 +236,18 @@ export default function AllEventsScreen() {
               <>
                 <View style={styles.headerInfo}>
                   <Text style={styles.eventCount}>
-                    {events.length} event{events.length !== 1 ? 's' : ''} available
+                    {events.length} event{events.length !== 1 ? "s" : ""}{" "}
+                    available
                   </Text>
                 </View>
-                
+
                 <View style={styles.eventsContainer}>
                   {events.map(renderEventCard)}
                 </View>
               </>
             )}
           </View>
-          
+
           {/* Bottom spacing for tab bar */}
           <View style={styles.bottomSpacing} />
         </ScrollView>

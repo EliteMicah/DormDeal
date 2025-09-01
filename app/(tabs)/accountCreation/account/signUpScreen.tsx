@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import { supabase } from "../../../../lib/supabase";
+import { supabase } from "../../../../supabase-client";
 
 AppState.addEventListener("change", (state) => {
   if (state === "active") {
@@ -80,7 +80,10 @@ export default function SignUpScreen() {
       .single();
 
     if (error) {
-      console.error("Error checking supported school:", error.message);
+      console.error(
+        "Error checking supported school:",
+        error && error.message ? error.message : "Unknown error"
+      );
       return false;
     }
 
