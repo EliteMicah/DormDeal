@@ -3,7 +3,9 @@
     "name": "DormDeal",
     "slug": "DormDeal",
     "version": "1.0.0",
-    "platforms": ["ios"],
+    "platforms": [
+      "ios"
+    ],
     "orientation": "portrait",
     "icon": "./assets/images/RebookedIcon.png",
     "scheme": "dormdeal",
@@ -29,21 +31,25 @@
         "foregroundImage": "./assets/images/SplashRebooked.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.elitemicah.rebooked"
+      "package": "com.elitemicah.dormdeal"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/RebookedFavicon.png"
     },
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser"
+    ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "aab5b19a-0578-4abc-ac57-55d97b587597"
+        "projectId": "e3a564f3-52f5-456a-9aa4-ae6abaadbc44"
       }
     },
     "owner": "elitemicah"
