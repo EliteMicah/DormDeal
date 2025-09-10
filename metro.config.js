@@ -3,6 +3,9 @@ const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
 
+// Disable package exports to avoid Supabase compatibility issues with New Architecture
+config.resolver.unstable_enablePackageExports = false;
+
 // Add resolver configuration for better module resolution
 config.resolver = {
   ...config.resolver,

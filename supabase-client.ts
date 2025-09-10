@@ -66,28 +66,55 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: Platform.OS === "web",
   },
+  global: {
+    // Add error handling for fetch requests
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+        }
+      }).catch(error => {
+        console.warn('Supabase fetch error:', error);
+        throw error;
+      });
+    },
+  },
 });
 
 // Tells Supabase Auth to continuously refresh the session automatically
-if (Platform.OS !== "web") {
-  AppState.addEventListener("change", (state) => {
-    if (state === "active") {
-      supabase.auth.startAutoRefresh();
-    } else {
-      supabase.auth.stopAutoRefresh();
-    }
-  });
-} else {
-  // Web-specific visibility change handling
-  if (typeof document !== "undefined") {
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        supabase.auth.startAutoRefresh();
-      } else {
-        supabase.auth.stopAutoRefresh();
+// Wrap in try-catch to prevent crashes
+try {
+  if (Platform.OS !== "web") {
+    AppState.addEventListener("change", (state) => {
+      try {
+        if (state === "active") {
+          supabase.auth.startAutoRefresh();
+        } else {
+          supabase.auth.stopAutoRefresh();
+        }
+      } catch (error) {
+        console.warn('Supabase auth refresh error:', error);
       }
     });
+  } else {
+    // Web-specific visibility change handling
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", () => {
+        try {
+          if (document.visibilityState === "visible") {
+            supabase.auth.startAutoRefresh();
+          } else {
+            supabase.auth.stopAutoRefresh();
+          }
+        } catch (error) {
+          console.warn('Supabase auth refresh error:', error);
+        }
+      });
+    }
   }
+} catch (error) {
+  console.warn('Failed to set up Supabase auth listeners:', error);
 }
 
 // Service implementations
