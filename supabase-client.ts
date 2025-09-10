@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+import { SUPABASE_CONFIG } from "./constants/supabase";
 
 // Utility function to validate UUID format
 const isValidUUID = (uuid: string): boolean => {
@@ -31,9 +32,10 @@ const StringOptimizer = {
   },
 };
 
-// Use environment variables for credentials (fallback to current values for development)
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
+// Use environment variables for credentials (fallback to constants for development)
+const supabaseUrl = "https://qhevnbzpqkmglendhiur.supabase.co";
+const supabaseAnonKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFoZXZuYnpwcWttZ2xlbmRoaXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4NDQxNDksImV4cCI6MjA1MTQyMDE0OX0.daeLOMyU8s6W1Y_t6MmmT0-sSoqj_edQjWSRUj18dKA";
 
 // Create a web-compatible storage adapter
 const createStorage = () => {
@@ -69,13 +71,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     // Add error handling for fetch requests
     fetch: (url, options = {}) => {
+      // Ensure headers are properly formatted
+      const headers = options.headers || {};
+
       return fetch(url, {
         ...options,
-        headers: {
-          ...options.headers,
-        }
-      }).catch(error => {
-        console.warn('Supabase fetch error:', error);
+        headers: headers,
+      }).catch((error) => {
+        console.warn("Supabase fetch error:", error);
         throw error;
       });
     },
@@ -94,7 +97,7 @@ try {
           supabase.auth.stopAutoRefresh();
         }
       } catch (error) {
-        console.warn('Supabase auth refresh error:', error);
+        console.warn("Supabase auth refresh error:", error);
       }
     });
   } else {
@@ -108,13 +111,13 @@ try {
             supabase.auth.stopAutoRefresh();
           }
         } catch (error) {
-          console.warn('Supabase auth refresh error:', error);
+          console.warn("Supabase auth refresh error:", error);
         }
       });
     }
   }
 } catch (error) {
-  console.warn('Failed to set up Supabase auth listeners:', error);
+  console.warn("Failed to set up Supabase auth listeners:", error);
 }
 
 // Service implementations
@@ -259,12 +262,18 @@ export const EVENT_LISTING_FEE = 15;
 
 export const PaymentService = {
   getInstance: () => ({
-    processPayment: async (method: string, amount: number, description: string) => {
+    processPayment: async (
+      method: string,
+      amount: number,
+      description: string
+    ) => {
       try {
         // For now, simulate a successful payment processing
         // In a real implementation, this would integrate with payment providers
-        const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-        
+        const transactionId = `txn_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2, 15)}`;
+
         return {
           success: true,
           transactionId: transactionId,
@@ -277,7 +286,12 @@ export const PaymentService = {
         };
       }
     },
-    generateReceipt: (transactionId: string, method: string, amount: number, description: string) => {
+    generateReceipt: (
+      transactionId: string,
+      method: string,
+      amount: number,
+      description: string
+    ) => {
       return {
         transactionId,
         paymentMethod: method,
@@ -764,19 +778,24 @@ export const SimpleMessagingService = {
     unsubscribeFromAll: () => {
       supabase.removeAllChannels();
     },
-    
-    createUserProfile: async (userId: string, username?: string, fullName?: string) => {
+
+    createUserProfile: async (
+      userId: string,
+      username?: string,
+      fullName?: string
+    ) => {
       try {
-        const { error } = await supabase
-          .from("profiles")
-          .upsert({
+        const { error } = await supabase.from("profiles").upsert(
+          {
             id: userId,
             username: username || `user_${userId.substring(0, 8)}`,
             full_name: fullName || null,
             updated_at: new Date().toISOString(),
-          }, {
+          },
+          {
             onConflict: "id",
-          });
+          }
+        );
 
         if (error) throw error;
       } catch (error) {

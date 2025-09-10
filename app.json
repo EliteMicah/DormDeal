@@ -3,10 +3,7 @@
     "name": "DormDeal",
     "slug": "DormDeal",
     "version": "1.0.0",
-    "newArchEnabled": false,
-    "platforms": [
-      "ios"
-    ],
+    "platforms": ["ios"],
     "orientation": "portrait",
     "icon": "./assets/images/RebookedIcon.png",
     "scheme": "dormdeal",
@@ -20,7 +17,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.elitemicah.DormDeal",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to let you select images for your listings."
       }
     },
     "updates": {
@@ -39,10 +37,7 @@
       "output": "static",
       "favicon": "./assets/images/RebookedFavicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-router", "expo-font", "expo-image-picker"],
     "experiments": {
       "typedRoutes": true
     },

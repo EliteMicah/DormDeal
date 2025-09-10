@@ -58,9 +58,10 @@ if (!__DEV__) {
   };
 
   // Override global Promise rejection handler
-  const originalHandler = global.HermesInternal?.enablePromiseRejectionTracker;
+  const globalAny = global as any;
+  const originalHandler = globalAny.HermesInternal?.enablePromiseRejectionTracker;
   if (originalHandler) {
-    global.HermesInternal.enablePromiseRejectionTracker = function(options) {
+    globalAny.HermesInternal.enablePromiseRejectionTracker = function(options: any) {
       try {
         return originalHandler.call(this, options);
       } catch (e) {
@@ -72,7 +73,7 @@ if (!__DEV__) {
 }
 
 export default function App() {
-  const ctx = require.context("./app");
+  const ctx = (require as any).context("./app");
   return <ExpoRoot context={ctx} />;
 }
 
