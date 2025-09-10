@@ -162,7 +162,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     Animated.timing(deleteProgress, {
       toValue: 1,
       duration: 5000, // 5 seconds
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
 
     // Set a timer for 5 seconds
@@ -429,9 +429,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   };
 
-  const progressWidth = deleteProgress.interpolate({
+  // Use transform instead of width for native driver compatibility
+  const progressScale = deleteProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0%", "100%"],
+    outputRange: [0, 1],
   });
 
   return (
@@ -533,7 +534,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   style={[
                     styles.deleteProgress,
                     {
-                      width: progressWidth,
+                      transform: [{ scaleX: progressScale }],
                     },
                   ]}
                 />
@@ -754,7 +755,9 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
+    right: 0,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
+    transformOrigin: "left center",
   },
   deleteButtonText: {
     color: "#fff",

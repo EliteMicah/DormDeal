@@ -32,7 +32,7 @@
         "foregroundImage": "./assets/images/SplashRebooked.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.elitemicah.rebooked"
+      "package": "com.elitemicah.dormdeal"
     },
     "web": {
       "bundler": "metro",
@@ -41,7 +41,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
