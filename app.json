@@ -3,6 +3,7 @@
     "name": "DormDeal",
     "slug": "DormDeal",
     "version": "1.0.0",
+    "newArchEnabled": false,
     "platforms": [
       "ios"
     ],

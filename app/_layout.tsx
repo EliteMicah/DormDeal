@@ -8,15 +8,25 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import "react-native-reanimated";
-import { useColorScheme } from "react-native";
+import { useColorScheme, Platform, LogBox } from "react-native";
 
 export { ErrorBoundary } from "expo-router";
 
-export const unstable_settings = {
-  // Change this to point to your sign-up screen
-  initialRouteName: "(tabs)/accountCreation/account/signUpScreen",
-};
+// Removed unstable_settings to prevent navigation crashes
+// Let Expo Router handle initial route automatically
+
+// Suppress known warnings in production
+if (!__DEV__) {
+  LogBox.ignoreLogs([
+    'Warning: TurboModuleRegistry',
+    'Warning: Animated',
+    'RCTBridge required dispatch_sync',
+    'Module RCTDeviceEventEmitter',
+    'Exception was thrown by a native module',
+    'TurboModuleRegistry.getEnforcing',
+    'performVoidMethodInvocation',
+  ]);
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,12 +37,22 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      console.error("Font loading error:", error);
+      // Don't throw error in production to prevent crashes
+      if (__DEV__) {
+        throw error;
+      }
+    }
   }, [error]);
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      // Add small delay to ensure app is fully ready
+      const timer = setTimeout(() => {
+        SplashScreen.hideAsync().catch(console.error);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [loaded]);
 
@@ -47,7 +67,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
