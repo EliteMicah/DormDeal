@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Linking,
-  Text,
-  View,
-} from "react-native";
+import { StyleSheet, TouchableOpacity, Alert, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 
@@ -31,16 +24,19 @@ export default function donateScreen() {
           any help I can get!
         </Text>
       </View>
-      <View style={styles.mainCardContainer}>
-        <TouchableOpacity
-          onPress={() => Linking.openURL("https://venmo.com/u/EliteMicah")}
-        >
-          <Image
-            source={require("../../../../assets/images/myVenmo.png")}
-            style={styles.mainCardImage}
-          />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.donateButton}
+        onPress={() =>
+          Alert.alert(
+            "Coming Soon!",
+            "An in-app donation feature will be coming soon. Thank you for your support!",
+            [{ text: "OK" }]
+          )
+        }
+      >
+        <Text style={styles.donateButtonText}>❤️ Donate</Text>
+        <Text style={styles.donateButtonSubtext}>Support DormDeal</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -77,15 +73,33 @@ const styles = StyleSheet.create({
     fontWeight: 300,
     marginBottom: "10%",
   },
-  mainCardContainer: {
+  donateButton: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
     width: "85%",
-    height: 400,
-    borderRadius: 10,
-    marginHorizontal: 30,
-    overflow: "hidden",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 8,
   },
-  mainCardImage: {
-    height: "100%",
-    width: "100%",
+  donateButtonText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "white",
+    marginBottom: 5,
+  },
+  donateButtonSubtext: {
+    fontSize: 16,
+    fontWeight: "400",
+    color: "rgba(255, 255, 255, 0.9)",
   },
 });

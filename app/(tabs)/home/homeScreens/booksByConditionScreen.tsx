@@ -72,9 +72,61 @@ export default function BooksByConditionScreen() {
 
   const fetchBooks = async () => {
     try {
+      // First, get the current user's university
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error("Error getting user:", userError);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get current user's university from their profile
+      const { data: currentUserProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("university")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!currentUserProfile?.university) {
+        console.error("User does not have a university set in their profile");
+        setBooks([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Query books from users at the same university
+      // First get all user IDs from the same university
+      const { data: sameUniversityUsers, error: universityError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("university", currentUserProfile.university);
+
+      if (universityError) {
+        console.error("Error fetching university users:", universityError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!sameUniversityUsers || sameUniversityUsers.length === 0) {
+        setBooks([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const universityUserIds = sameUniversityUsers.map(user => user.id);
+
+      // Now query books from those users
       let bookQuery = supabase
         .from("book_listing")
         .select("*")
+        .in("user_id", universityUserIds)
         .order("created_at", { ascending: false });
 
       // Apply search filters
@@ -115,7 +167,41 @@ export default function BooksByConditionScreen() {
         return;
       }
 
-      setBooks(data || []);
+      if (!data || data.length === 0) {
+        setBooks([]);
+        return;
+      }
+
+      // Get usernames for the books
+      const bookUserIds = [...new Set(data.map(book => book.user_id))];
+      const { data: bookUserProfiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .in("id", bookUserIds);
+
+      if (profilesError) {
+        console.error("Error fetching book user profiles:", profilesError);
+        // Still set books but without usernames and filter out user's own listings
+        const filteredBooks = data.filter(book => book.user_id !== user.id);
+        setBooks(filteredBooks);
+        return;
+      }
+
+      // Create a lookup map for usernames
+      const usernameMap = new Map();
+      (bookUserProfiles || []).forEach(profile => {
+        usernameMap.set(profile.id, profile.username);
+      });
+
+      // Add usernames to the books and filter out user's own listings
+      const booksWithUsernames = data
+        .filter(book => book.user_id !== user.id)
+        .map(book => ({
+          ...book,
+          username: usernameMap.get(book.user_id) || "Anonymous"
+        }));
+
+      setBooks(booksWithUsernames);
     } catch (error) {
       console.error("Unexpected error fetching books:", error);
     } finally {

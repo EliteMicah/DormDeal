@@ -109,8 +109,8 @@ const EmptyState = ({ onSubscribe }: { onSubscribe: () => void }) => (
     <Text style={styles.emptySubtitle}>
       Can't find the book you're looking for?
     </Text>
-    <TouchableOpacity style={styles.subscribeButton} onPress={onSubscribe}>
-      <Text style={styles.subscribeButtonText}>Subscribe to ISBN</Text>
+    <TouchableOpacity style={styles.emptySubscribeButton} onPress={onSubscribe}>
+      <Text style={styles.emptySubscribeButtonText}>Subscribe to ISBN</Text>
     </TouchableOpacity>
   </View>
 );
@@ -224,9 +224,61 @@ export default function ShopBooksScreen() {
 
   const fetchBooks = async () => {
     try {
+      // First, get the current user's university
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error("Error getting user:", userError);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get current user's university from their profile
+      const { data: currentUserProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("university")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!currentUserProfile?.university) {
+        console.error("User does not have a university set in their profile");
+        setBooksData({ new: [], used: [], noted: [] });
+        setIsLoading(false);
+        return;
+      }
+
+      // Query books from users at the same university
+      // First get all user IDs from the same university
+      const { data: sameUniversityUsers, error: universityError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("university", currentUserProfile.university);
+
+      if (universityError) {
+        console.error("Error fetching university users:", universityError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!sameUniversityUsers || sameUniversityUsers.length === 0) {
+        setBooksData({ new: [], used: [], noted: [] });
+        setIsLoading(false);
+        return;
+      }
+
+      const universityUserIds = sameUniversityUsers.map(user => user.id);
+
+      // Now query books from those users
       const { data: allBooks, error } = await supabase
         .from("book_listing")
         .select("*")
+        .in("user_id", universityUserIds)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -234,10 +286,49 @@ export default function ShopBooksScreen() {
         return;
       }
 
+      if (!allBooks || allBooks.length === 0) {
+        setBooksData({ new: [], used: [], noted: [] });
+        return;
+      }
+
+      // Get usernames for the books
+      const bookUserIds = [...new Set(allBooks.map(book => book.user_id))];
+      const { data: bookUserProfiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .in("id", bookUserIds);
+
+      if (profilesError) {
+        console.error("Error fetching book user profiles:", profilesError);
+        // Still set books but without usernames and filter out user's own listings
+        const filteredBooks = allBooks.filter(book => book.user_id !== user.id);
+        const groupedBooks = {
+          new: filteredBooks.filter((book) => book.condition === "New") || [],
+          used: filteredBooks.filter((book) => book.condition === "Used") || [],
+          noted: filteredBooks.filter((book) => book.condition === "Noted") || [],
+        };
+        setBooksData(groupedBooks);
+        return;
+      }
+
+      // Create a lookup map for usernames
+      const usernameMap = new Map();
+      (bookUserProfiles || []).forEach(profile => {
+        usernameMap.set(profile.id, profile.username);
+      });
+
+      // Add usernames to the books and filter out user's own listings
+      const booksWithUsernames = allBooks
+        .filter(book => book.user_id !== user.id)
+        .map(book => ({
+          ...book,
+          username: usernameMap.get(book.user_id) || "Anonymous"
+        }));
+
       const groupedBooks = {
-        new: allBooks?.filter((book) => book.condition === "New") || [],
-        used: allBooks?.filter((book) => book.condition === "Used") || [],
-        noted: allBooks?.filter((book) => book.condition === "Noted") || [],
+        new: booksWithUsernames.filter((book) => book.condition === "New") || [],
+        used: booksWithUsernames.filter((book) => book.condition === "Used") || [],
+        noted: booksWithUsernames.filter((book) => book.condition === "Noted") || [],
       };
 
       setBooksData(groupedBooks);
@@ -499,6 +590,19 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   subscribeButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  emptySubscribeButton: {
+    backgroundColor: "#3b82f6",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptySubscribeButtonText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",

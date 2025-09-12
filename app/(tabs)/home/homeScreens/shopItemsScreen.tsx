@@ -74,9 +74,61 @@ export default function shopItemsScreen() {
 
   const fetchItems = async () => {
     try {
+      // First, get the current user's university
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error("Error getting user:", userError);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get current user's university from their profile
+      const { data: currentUserProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("university")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!currentUserProfile?.university) {
+        console.error("User does not have a university set in their profile");
+        setItems([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Query items from users at the same university
+      // First get all user IDs from the same university
+      const { data: sameUniversityUsers, error: universityError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("university", currentUserProfile.university);
+
+      if (universityError) {
+        console.error("Error fetching university users:", universityError);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!sameUniversityUsers || sameUniversityUsers.length === 0) {
+        setItems([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const universityUserIds = sameUniversityUsers.map(user => user.id);
+
+      // Now query items from those users
       let itemQuery = supabase
         .from("item_listing")
         .select("*")
+        .in("user_id", universityUserIds)
         .order("created_at", { ascending: false });
 
       // Apply search filters
@@ -123,7 +175,40 @@ export default function shopItemsScreen() {
         return;
       }
 
-      setItems(data || []);
+      if (!data || data.length === 0) {
+        setItems([]);
+        return;
+      }
+
+      // Get usernames for the items
+      const itemUserIds = [...new Set(data.map(item => item.user_id))];
+      const { data: itemUserProfiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .in("id", itemUserIds);
+
+      if (profilesError) {
+        console.error("Error fetching item user profiles:", profilesError);
+        // Still set items but without usernames
+        setItems(data);
+        return;
+      }
+
+      // Create a lookup map for usernames
+      const usernameMap = new Map();
+      (itemUserProfiles || []).forEach(profile => {
+        usernameMap.set(profile.id, profile.username);
+      });
+
+      // Add usernames to the items and filter out user's own listings
+      const itemsWithUsernames = data
+        .filter(item => item.user_id !== user.id)
+        .map(item => ({
+          ...item,
+          username: usernameMap.get(item.user_id) || "Anonymous"
+        }));
+
+      setItems(itemsWithUsernames);
     } catch (error) {
       console.error("Unexpected error fetching items:", error);
     } finally {

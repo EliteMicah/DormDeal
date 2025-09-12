@@ -380,9 +380,54 @@ export const EventService = {
     },
     getEvents: async () => {
       try {
+        // First, get the current user's university
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error("Error getting user:", userError);
+          return [];
+        }
+
+        // Get current user's university from their profile
+        const { data: currentUserProfile, error: profileError } = await supabase
+          .from("profiles")
+          .select("university")
+          .eq("id", user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          return [];
+        }
+
+        if (!currentUserProfile?.university) {
+          console.error("User does not have a university set in their profile");
+          return [];
+        }
+
+        // Query events from users at the same university
+        // First get all user IDs from the same university
+        const { data: sameUniversityUsers, error: universityError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("university", currentUserProfile.university);
+
+        if (universityError) {
+          console.error("Error fetching university users:", universityError);
+          return [];
+        }
+
+        if (!sameUniversityUsers || sameUniversityUsers.length === 0) {
+          return [];
+        }
+
+        const universityUserIds = sameUniversityUsers.map(user => user.id);
+
+        // Now query events from those users
         const { data, error } = await supabase
           .from("events")
           .select("*")
+          .in("organizer_id", universityUserIds)
           .eq("is_active", true)
           .order("created_at", { ascending: false });
 
