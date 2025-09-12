@@ -238,6 +238,7 @@ export default function BookDetailsScreen() {
 
   const confirmDelete = async () => {
     try {
+      // The database trigger will automatically handle image cleanup
       const { error } = await supabase
         .from("book_listing")
         .delete()

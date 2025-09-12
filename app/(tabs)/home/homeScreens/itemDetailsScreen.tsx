@@ -224,6 +224,7 @@ export default function ItemDetailsScreen() {
 
   const confirmDelete = async () => {
     try {
+      // The database trigger will automatically handle image cleanup
       const { error } = await supabase
         .from("item_listing")
         .delete()

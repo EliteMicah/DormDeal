@@ -240,14 +240,6 @@ export default function ProfileScreen() {
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push("/(tabs)/create/createScreen")}
-          >
-            <Ionicons name="add-outline" size={20} color="#3b82f6" />
-            <Text style={styles.actionText}>Add Listing</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
             onPress={() =>
               router.push("/(tabs)/home/homeScreens/savedListingsScreen")
             }

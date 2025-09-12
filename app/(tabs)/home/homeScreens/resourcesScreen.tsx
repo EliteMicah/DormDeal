@@ -2,6 +2,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Linking,
+  Alert,
   Text,
   View,
   ScrollView,
@@ -24,6 +25,14 @@ interface ResourceSection {
 export default function ResourcesScreen() {
   const router = useRouter();
 
+  const showComingSoon = () => {
+    Alert.alert(
+      "Coming Soon!",
+      "This feature will be available in a future update. Stay tuned!",
+      [{ text: "OK" }]
+    );
+  };
+
   const resourceSections: ResourceSection[] = [
     {
       title: "School",
@@ -31,10 +40,12 @@ export default function ResourcesScreen() {
         {
           icon: "flash-outline",
           title: "Clubs",
+          onPress: showComingSoon,
         },
         {
           icon: "calendar-outline",
           title: "Events",
+          onPress: showComingSoon,
         },
       ],
     },
@@ -44,14 +55,17 @@ export default function ResourcesScreen() {
         {
           icon: "location-outline",
           title: "Churches near you",
+          onPress: showComingSoon,
         },
         {
           icon: "book-outline",
           title: "Bible Studies",
+          onPress: showComingSoon,
         },
         {
           icon: "people-outline",
           title: "Get Connected",
+          onPress: showComingSoon,
         },
       ],
     },
@@ -61,10 +75,12 @@ export default function ResourcesScreen() {
         {
           icon: "flame-outline",
           title: "Mission Statement",
+          onPress: showComingSoon,
         },
         {
           icon: "notifications-outline",
           title: "Updates · What's new",
+          onPress: showComingSoon,
         },
         {
           icon: "heart-outline",

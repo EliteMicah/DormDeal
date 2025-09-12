@@ -419,7 +419,7 @@ export default function HomeScreen() {
               <View style={styles.resourcesText}>
                 <Text style={styles.resourcesTitle}>Campus Resources</Text>
                 <Text style={styles.resourcesSubtitle}>
-                  Study guides, tutoring, and academic support
+                  Find clubs, get connected, and see latest updates
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#666" />
