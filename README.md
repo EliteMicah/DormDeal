@@ -1,12 +1,12 @@
-# 📚 Rebooked
+# 📚 DormDeal
 
-**Rebooked** is a campus-focused marketplace app that allows college students to buy, sell, and exchange textbooks and other campus essentials—directly with each other.
+**DormDeal** is a campus-focused marketplace app that allows college students to buy, sell, and exchange textbooks and other campus essentials—directly with each other.
 
 ---
 
-## 🎯 What is Rebooked?
+## 🎯 What is DormDeal?
 
-Rebooked is designed to streamline the student-to-student exchange of textbooks and campus goods. It provides:
+DormDeal is designed to streamline the student-to-student exchange of textbooks and campus goods. It provides:
 
 - **Class-based book search** – Find books by university, course, and instructor
 - **Peer-to-peer selling** – Buy and sell directly with other students
@@ -64,4 +64,4 @@ This project is licensed under the [MIT License](LICENSE).
 ## 📬 Contact
 
 Have ideas, questions, or feedback?  
-Message @RebookedOfficial on Instagram!
+Message @DormDealOfficial on Instagram!
