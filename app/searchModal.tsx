@@ -89,17 +89,20 @@ export default function SearchModal() {
   const handleSearch = () => {
     // Check if user has any search criteria (query, ISBN, or filters)
     const hasSearchQuery = searchQuery.trim() || isbnSearch.trim();
-    const hasFilters = condition !== "Any" || 
-                      paymentType !== "Any" || 
-                      (searchType === "items" && categoryFilter !== "Any") ||
-                      minPrice.trim() || 
-                      maxPrice.trim();
+    const hasFilters =
+      condition !== "Any" ||
+      paymentType !== "Any" ||
+      (searchType === "items" && categoryFilter !== "Any") ||
+      minPrice.trim() ||
+      maxPrice.trim();
 
     if (!hasSearchQuery && !hasFilters) {
       Alert.alert(
         "Search Required",
         `Please enter a ${
-          searchType === "books" ? "book title, ISBN, or apply filters" : "item name or apply filters"
+          searchType === "books"
+            ? "book title, ISBN, or apply filters"
+            : "item name or apply filters"
         } to search.`
       );
       return;
@@ -107,31 +110,31 @@ export default function SearchModal() {
 
     // Build search parameters
     const searchParams: any = {};
-    
+
     if (searchQuery.trim()) {
       searchParams.query = searchQuery.trim();
     }
-    
+
     if (isbnSearch.trim() && searchType === "books") {
       searchParams.isbn = isbnSearch.trim();
     }
-    
+
     if (condition !== "Any") {
       searchParams.condition = condition;
     }
-    
+
     if (paymentType !== "Any") {
       searchParams.paymentType = paymentType;
     }
-    
+
     if (categoryFilter !== "Any" && searchType === "items") {
       searchParams.categoryFilter = categoryFilter;
     }
-    
+
     if (minPrice.trim()) {
       searchParams.minPrice = minPrice.trim();
     }
-    
+
     if (maxPrice.trim()) {
       searchParams.maxPrice = maxPrice.trim();
     }
@@ -141,7 +144,7 @@ export default function SearchModal() {
       router.back();
       setTimeout(() => {
         router.push({
-          pathname: "/(tabs)/home/homeScreens/booksByConditionScreen",
+          pathname: "/(tabs)/(home)/booksByConditionScreen",
           params: searchParams,
         });
       }, 100);
@@ -149,7 +152,7 @@ export default function SearchModal() {
       router.back();
       setTimeout(() => {
         router.push({
-          pathname: "/(tabs)/home/homeScreens/shopItemsScreen", 
+          pathname: "/(tabs)/(home)/shopItemsScreen",
           params: searchParams,
         });
       }, 100);
@@ -186,12 +189,12 @@ export default function SearchModal() {
       }
 
       const notificationService = NotificationService.getInstance();
-      
+
       try {
         await notificationService.subscribeToISBN(
           user.id,
           isbn,
-          title || "Unknown Title", // Pass the book title if available
+          title || "Unknown Title" // Pass the book title if available
         );
 
         Alert.alert(
@@ -269,30 +272,30 @@ export default function SearchModal() {
 
     const validateISBN = (text: string) => {
       // Remove any non-numeric characters for validation
-      const numericOnly = text.replace(/\D/g, '');
-      
+      const numericOnly = text.replace(/\D/g, "");
+
       if (numericOnly.length === 0) {
         setIsbnError("");
         return false;
       }
-      
+
       if (numericOnly.length < 11) {
         setIsbnError("ISBN must be at least 11 digits");
         return false;
       }
-      
+
       if (numericOnly.length > 13) {
         setIsbnError("ISBN cannot exceed 13 digits");
         return false;
       }
-      
+
       setIsbnError("");
       return true;
     };
 
     const handleISBNChange = (text: string) => {
       // Only allow numeric characters
-      const numericOnly = text.replace(/\D/g, '');
+      const numericOnly = text.replace(/\D/g, "");
       setIsbn(numericOnly);
       validateISBN(numericOnly);
     };
@@ -334,7 +337,7 @@ export default function SearchModal() {
             <TextInput
               style={[
                 styles.isbnInput,
-                isbnError ? styles.isbnInputError : null
+                isbnError ? styles.isbnInputError : null,
               ]}
               placeholder="Enter 11-13 digit ISBN..."
               value={isbn}
@@ -520,9 +523,14 @@ export default function SearchModal() {
       {searchType === "books" && (
         <View style={styles.subscriptionInfoContainer}>
           <View style={styles.subscriptionInfo}>
-            <Ionicons name="information-circle-outline" size={20} color="#3b82f6" />
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color="#3b82f6"
+            />
             <Text style={styles.subscriptionInfoText}>
-              Can't find a book? Subscribe to its ISBN to get notified when it's available.
+              Can't find a book? Subscribe to its ISBN to get notified when it's
+              available.
             </Text>
           </View>
           <TouchableOpacity

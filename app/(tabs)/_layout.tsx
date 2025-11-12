@@ -101,7 +101,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="(home)"
         options={{
           title: "Home",
           tabBarLabel: "",
@@ -117,15 +117,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="index"
-        options={{
-          href: null,
-          tabBarLabel: "",
-        }}
-        redirect={true}
-      />
-      <Tabs.Screen
-        name="create"
+        name="(create)"
         options={{
           title: "Create",
           tabBarLabel: "",
@@ -146,7 +138,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profileScreen"
+        name="(profile)"
         options={{
           title: "Profile",
           tabBarLabel: "",
@@ -159,13 +151,6 @@ export default function TabLayout() {
           }) => (
             <TabBarIcon name="person-outline" color={color} focused={focused} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="accountCreation"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
         }}
       />
     </Tabs>
