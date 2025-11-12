@@ -3,9 +3,7 @@
     "name": "DormDeal",
     "slug": "DormDeal",
     "version": "1.0.0",
-    "platforms": [
-      "ios"
-    ],
+    "platforms": ["ios"],
     "orientation": "portrait",
     "icon": "./assets/images/RebookedIcon.png",
     "scheme": "dormdeal",
@@ -19,7 +17,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.elitemicah.DormDeal",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "DormDeal needs access to your camera to take photos of books.",
+        "NSPhotoLibraryUsageDescription": "DormDeal needs access to your photo library to select book images."
       }
     },
     "updates": {
@@ -27,6 +27,7 @@
       "fallbackToCacheTimeout": 0
     },
     "android": {
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/SplashRebooked.png",
         "backgroundColor": "#ffffff"
@@ -38,11 +39,7 @@
       "output": "static",
       "favicon": "./assets/images/RebookedFavicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-web-browser"
-    ],
+    "plugins": ["expo-router", "expo-font", "expo-web-browser"],
     "experiments": {
       "typedRoutes": true
     },
