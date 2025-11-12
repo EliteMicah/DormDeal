@@ -86,6 +86,30 @@ export default function CreateBookListing() {
     };
   }, []);
 
+  const takePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera permissions to take photos!");
+        return;
+      }
+
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      alert("Error accessing camera. Please try again.");
+    }
+  };
+
   const pickImage = async () => {
     try {
       const { status } =
@@ -110,6 +134,28 @@ export default function CreateBookListing() {
       console.error("ImagePicker error:", error);
       alert("Error accessing image library. Please try again.");
     }
+  };
+
+  const showImageOptions = () => {
+    Alert.alert(
+      "Add Photo",
+      "Choose an option",
+      [
+        {
+          text: "Take Photo",
+          onPress: takePhoto,
+        },
+        {
+          text: "Choose from Library",
+          onPress: pickImage,
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   // Render picker modal
@@ -318,7 +364,7 @@ export default function CreateBookListing() {
         >
           <Text style={styles.mainTitle}>Create Listing</Text>
 
-          <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
+          <TouchableOpacity style={styles.imageContainer} onPress={showImageOptions}>
             {image ? (
               <Image source={{ uri: image }} style={styles.image} />
             ) : (

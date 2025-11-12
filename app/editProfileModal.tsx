@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
 import { supabase } from "../supabase-client";
 
 // Function to update username in all listings when user profile is updated
@@ -77,17 +79,26 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     if (!oldUrl || !oldUrl.includes("avatars")) return;
 
     try {
-      // Extract filename from URL
-      const urlParts = oldUrl.split("/");
-      const fileName = urlParts[urlParts.length - 1];
+      // Extract the full path from URL (including folder structure)
+      // URL format: https://.../storage/v1/object/public/avatars/{user_id}/{filename}
+      const urlParts = oldUrl.split("/avatars/");
+      if (urlParts.length < 2) {
+        console.error("Invalid avatar URL format:", oldUrl);
+        return;
+      }
 
-      if (fileName) {
+      const filePath = urlParts[1]; // Gets "{user_id}/{filename}"
+
+      if (filePath) {
+        console.log("Deleting file at path:", filePath);
         const { error } = await supabase.storage
           .from("avatars")
-          .remove([fileName]);
+          .remove([filePath]);
 
         if (error) {
           console.error("Error deleting old profile picture:", error);
+        } else {
+          console.log("Successfully deleted profile picture from storage");
         }
       }
     } catch (error) {
@@ -195,69 +206,33 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         throw new Error("User not authenticated");
       }
 
-      // For React Native, we need to use FormData or different blob conversion
-      const fileExt = imageUri.split(".").pop() || "jpg";
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = fileName;
+      // Use folder structure: {user_id}/filename.jpg to match DELETE policy
+      const fileName = `${Date.now()}.jpg`;
+      const filePath = `${user.id}/${fileName}`;
 
       console.log("Uploading to path:", filePath);
       console.log("Original image URI:", imageUri);
 
-      // Create FormData for proper file upload in React Native
-      const formData = new FormData();
-      formData.append("file", {
-        uri: imageUri,
-        type: `image/${fileExt}`,
-        name: fileName,
-      } as any);
+      // Read the file as base64
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-      // Alternative method: Use the file directly without FormData
-      // Convert URI to blob properly for React Native
-      let fileToUpload;
+      console.log("Read image as base64, length:", base64.length);
 
-      if (imageUri.startsWith("file://")) {
-        // For React Native file URIs, we need to handle them differently
-        fileToUpload = {
-          uri: imageUri,
-          type: `image/${fileExt}`,
-          name: fileName,
-        } as any; // Cast to any to bypass type checking
-      } else {
-        // For other URIs, try the fetch approach but with better error handling
-        try {
-          const response = await fetch(imageUri);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch image: ${response.status}`);
-          }
-          const blob = await response.blob();
-          console.log("Blob size:", blob.size, "type:", blob.type);
+      // Convert base64 to ArrayBuffer
+      const arrayBuffer = decode(base64);
+      console.log("Converted to ArrayBuffer, size:", arrayBuffer.byteLength);
 
-          if (blob.size === 0) {
-            throw new Error("Image blob is empty");
-          }
-
-          // Create a File object from the Blob
-          fileToUpload = new File([blob], fileName, {
-            type: `image/${fileExt}`,
-          });
-        } catch (fetchError) {
-          console.error("Error converting to blob:", fetchError);
-          // Fallback to direct URI approach
-          fileToUpload = {
-            uri: imageUri,
-            type: `image/${fileExt}`,
-            name: fileName,
-          } as any; // Cast to any to bypass type checking
-        }
+      if (arrayBuffer.byteLength === 0) {
+        throw new Error("Image is empty after conversion");
       }
 
-      console.log("File to upload:", fileToUpload);
-
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage with correct content type
       const { data, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, fileToUpload, {
-          contentType: `image/${fileExt}`,
+        .upload(filePath, arrayBuffer, {
+          contentType: "image/jpeg",
           upsert: true,
         });
 
@@ -267,18 +242,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       }
 
       console.log("Upload successful:", data);
-
-      // Verify the file was uploaded with content
-      const { data: fileInfo, error: infoError } = await supabase.storage
-        .from("avatars")
-        .list("", { search: fileName });
-
-      if (!infoError && fileInfo && fileInfo.length > 0) {
-        console.log("Uploaded file info:", fileInfo[0]);
-        if (fileInfo[0].metadata?.size === 0) {
-          console.warn("Warning: Uploaded file has 0 size!");
-        }
-      }
 
       // Use public URL (more reliable and doesn't expire)
       const {
@@ -308,12 +271,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
       setIsUploading(true);
 
-      // Launch image picker
+      // Launch image picker with compression
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1], // Square aspect ratio for profile pictures
-        quality: 0.8, // Reduce quality for faster upload
+        quality: 0.7, // Compress for faster upload and smaller file size
+        base64: false, // We'll read it separately
       });
 
       console.log("Image picker result:", result);
@@ -368,7 +332,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         {
           text: "Remove",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            // Delete from storage if it's a Supabase URL
+            if (profilePicture && profilePicture.includes("supabase")) {
+              try {
+                await deleteOldProfilePicture(profilePicture);
+                console.log("Profile picture deleted from storage");
+              } catch (error) {
+                console.error("Error deleting from storage:", error);
+                // Continue anyway to clear the UI
+              }
+            }
             setProfilePicture("");
           },
         },
