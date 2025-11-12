@@ -15,12 +15,19 @@ function TabBarIcon({
   focused: boolean;
   size?: number;
 }) {
-  // Create animated values for scale and background
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const backgroundOpacity = useRef(new Animated.Value(0)).current;
+  // Create animated values for scale and background with initial focused state
+  const scaleAnim = useRef(new Animated.Value(focused ? 1.1 : 1)).current;
+  const backgroundOpacity = useRef(new Animated.Value(focused ? 1 : 0)).current;
+  const isMounted = useRef(false);
 
   // Run animation when the focused state changes
   useEffect(() => {
+    // Skip animation on initial mount - values are already set correctly
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+
     Animated.parallel([
       Animated.spring(scaleAnim, {
         toValue: focused ? 1.1 : 1,
@@ -34,7 +41,7 @@ function TabBarIcon({
         useNativeDriver: true,
       }),
     ]).start();
-  }, [focused, scaleAnim, backgroundOpacity]);
+  }, [focused]);
 
   return (
     <View

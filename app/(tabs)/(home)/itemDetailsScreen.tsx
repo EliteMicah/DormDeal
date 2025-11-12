@@ -370,7 +370,7 @@ export default function ItemDetailsScreen() {
         },
         {
           text: "Send Offer",
-          onPress: (offerAmount) => {
+          onPress: (offerAmount: any) => {
             if (offerAmount && !isNaN(parseFloat(offerAmount))) {
               sendOfferMessage(parseFloat(offerAmount));
             } else {
@@ -496,8 +496,6 @@ export default function ItemDetailsScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer} edges={["top"]}>
-      
-
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
