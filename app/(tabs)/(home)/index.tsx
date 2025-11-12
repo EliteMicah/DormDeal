@@ -16,6 +16,7 @@ import {
   SimpleMessagingService,
 } from "../../../supabase-client";
 import { useFocusEffect } from "expo-router";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // Define a type for the routes
 type RouteType =
@@ -26,6 +27,7 @@ type RouteType =
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { user, userId, isLoading: authLoading, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [hasNotifications, setHasNotifications] = useState(false);
@@ -86,28 +88,15 @@ export default function HomeScreen() {
     },
   ];
 
-  // Fetch username and notification count
-  const fetchUserData = async () => {
+  // Separate functions for fetching different data
+  const fetchProfile = async (userId: string) => {
     if (isUnmounted.current) return;
 
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        if (!isUnmounted.current) {
-          router.replace("/signInScreen");
-        }
-        return;
-      }
-
-      // Fetch profile data from the profiles table
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("username")
-        .eq("id", user.id)
+        .eq("id", userId)
         .maybeSingle();
 
       if (isUnmounted.current) return;
@@ -120,57 +109,67 @@ export default function HomeScreen() {
       } else {
         setUsername("Student");
       }
-
-      // Fetch unread notification count
-      try {
-        const count = await (notificationService.current as any).getUnreadCount(
-          user.id
-        );
-        if (!isUnmounted.current) {
-          setUnreadCount(count);
-          setHasNotifications(count > 0);
-        }
-      } catch (notificationError) {
-        if (!isUnmounted.current) {
-          console.error(
-            "Error fetching notification count:",
-            notificationError
-          );
-          setHasNotifications(false);
-          setUnreadCount(0);
-        }
+    } catch (error) {
+      if (!isUnmounted.current) {
+        console.error("Error fetching profile:", error);
+        setUsername("Student");
       }
+    }
+  };
 
-      // Fetch unread message count
-      try {
-        const conversations = await (
-          messagingService.current as any
-        ).getConversations();
-        let totalUnreadMessages = 0;
-        conversations.forEach((conversation: any) => {
-          totalUnreadMessages += conversation.unread_count || 0;
-        });
+  const fetchNotificationCount = async (userId: string) => {
+    if (isUnmounted.current) return;
 
-        if (!isUnmounted.current) {
-          setUnreadMessageCount(totalUnreadMessages);
-          setHasMessages(totalUnreadMessages > 0);
-        }
-      } catch (messageError) {
-        if (!isUnmounted.current) {
-          console.error("Error fetching message count:", messageError);
-          setHasMessages(false);
-          setUnreadMessageCount(0);
-        }
+    try {
+      const count = await (notificationService.current as any).getUnreadCount(
+        userId
+      );
+      if (!isUnmounted.current) {
+        setUnreadCount(count);
+        setHasNotifications(count > 0);
       }
     } catch (error) {
       if (!isUnmounted.current) {
-        console.error("Error:", (error as Error).message);
-        router.replace("/signInScreen");
+        console.error("Error fetching notification count:", error);
+        setHasNotifications(false);
+        setUnreadCount(0);
       }
-    } finally {
+    }
+  };
+
+  const fetchMessageCount = async () => {
+    if (isUnmounted.current) return;
+
+    try {
+      const conversations = await (
+        messagingService.current as any
+      ).getConversations();
+      let totalUnreadMessages = 0;
+      conversations.forEach((conversation: any) => {
+        totalUnreadMessages += conversation.unread_count || 0;
+      });
+
       if (!isUnmounted.current) {
-        setIsLoading(false);
+        setUnreadMessageCount(totalUnreadMessages);
+        setHasMessages(totalUnreadMessages > 0);
       }
+    } catch (error) {
+      if (!isUnmounted.current) {
+        console.error("Error fetching message count:", error);
+        setHasMessages(false);
+        setUnreadMessageCount(0);
+      }
+    }
+  };
+
+  const fetchAllUserData = async (userId: string) => {
+    await Promise.all([
+      fetchProfile(userId),
+      fetchNotificationCount(userId),
+      fetchMessageCount(),
+    ]);
+    if (!isUnmounted.current) {
+      setIsLoading(false);
     }
   };
 
@@ -182,54 +181,52 @@ export default function HomeScreen() {
     };
   }, []);
 
+  // Initial data fetch - only when auth is ready
   useEffect(() => {
-    if (!isUnmounted.current) {
-      fetchUserData();
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      router.replace("/signInScreen");
+      return;
     }
-  }, []);
+
+    if (userId && !isUnmounted.current) {
+      fetchAllUserData(userId);
+    }
+  }, [authLoading, isAuthenticated, userId]);
 
   // Subscribe to real-time notifications and refresh counts on focus
   useFocusEffect(
     useCallback(() => {
-      if (isUnmounted.current) return;
+      if (isUnmounted.current || !userId) return;
 
-      // Refresh counts when screen comes into focus (after visiting notifications/messages)
-      fetchUserData();
+      // Only refresh counts when screen comes into focus - no auth check needed
+      fetchNotificationCount(userId);
+      fetchMessageCount();
 
-      const setupRealtimeSubscription = async () => {
-        if (isUnmounted.current) return;
-
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (user && !isUnmounted.current) {
-          (notificationService.current as any).subscribeToNotifications(
-            user.id,
-            () => {
-              // Refresh notification count when a new notification arrives
-              if (!isUnmounted.current) {
-                fetchUserData();
-              }
-            }
-          );
-
-          // Also subscribe to message updates (if the messaging service supports it)
-          try {
-            (messagingService.current as any).subscribeToConversations(() => {
-              // Refresh message count when new messages arrive
-              if (!isUnmounted.current) {
-                fetchUserData();
-              }
-            });
-          } catch (error) {
-            // If messaging service doesn't support real-time, it's okay
-            console.error("Messaging real-time not available:", error);
+      // Set up real-time subscriptions
+      (notificationService.current as any).subscribeToNotifications(
+        userId,
+        () => {
+          // Only refresh notification count when a new notification arrives
+          if (!isUnmounted.current && userId) {
+            fetchNotificationCount(userId);
           }
         }
-      };
+      );
 
-      setupRealtimeSubscription();
+      // Subscribe to message updates
+      try {
+        (messagingService.current as any).subscribeToConversations(() => {
+          // Only refresh message count when new messages arrive
+          if (!isUnmounted.current) {
+            fetchMessageCount();
+          }
+        });
+      } catch (error) {
+        // If messaging service doesn't support real-time, it's okay
+        console.error("Messaging real-time not available:", error);
+      }
 
       return () => {
         try {
@@ -238,7 +235,7 @@ export default function HomeScreen() {
           console.warn("Error unsubscribing from notifications:", error);
         }
       };
-    }, [])
+    }, [userId])
   );
 
   if (isLoading) {

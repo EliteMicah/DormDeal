@@ -10,6 +10,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "react-native";
+import { AuthProvider } from "../contexts/AuthContext";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -47,21 +48,23 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="searchModal"
-          options={{
-            presentation: "modal",
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen name="signInScreen" />
-        <Stack.Screen name="signUpScreen" />
-        <Stack.Screen name="verifyEmail" />
-        <Stack.Screen name="editProfileModal" options={{ presentation: "modal" }} />
-      </Stack>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="searchModal"
+            options={{
+              presentation: "modal",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen name="signInScreen" />
+          <Stack.Screen name="signUpScreen" />
+          <Stack.Screen name="verifyEmail" />
+          <Stack.Screen name="editProfileModal" options={{ presentation: "modal" }} />
+        </Stack>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
