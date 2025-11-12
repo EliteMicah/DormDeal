@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { SimpleMessagingService as MessagingService } from "../../../supabase-client";
 import { useFocusEffect } from "@react-navigation/native";
@@ -28,8 +28,17 @@ export default function MessagingScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [deletingConversationIds, setDeletingConversationIds] = useState<Set<string>>(new Set());
+
+  // Use ref to maintain latest deleting IDs for callbacks
+  const deletingIdsRef = useRef<Set<string>>(new Set());
 
   const messagingService = MessagingService.getInstance();
+
+  // Sync ref with state
+  useEffect(() => {
+    deletingIdsRef.current = deletingConversationIds;
+  }, [deletingConversationIds]);
 
   // Load conversations on mount
   useEffect(() => {
@@ -52,12 +61,19 @@ export default function MessagingScreen() {
     }, [])
   );
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       //console.log("Loading conversations...");
       const conversationsData = await messagingService.getConversations();
       //console.log("Loaded conversations:", conversationsData.length);
-      setConversations(conversationsData);
+
+      // Filter out conversations that are currently being deleted
+      // Use ref to get the latest value even in stale closures
+      const filteredConversations = conversationsData.filter(
+        (conv: any) => !deletingIdsRef.current.has(conv.id)
+      );
+
+      setConversations(filteredConversations);
     } catch (error) {
       console.error("Error loading conversations:", error);
       Alert.alert("Error", "Failed to load conversations");
@@ -65,13 +81,13 @@ export default function MessagingScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [messagingService]);
 
-  const subscribeToConversationUpdates = () => {
+  const subscribeToConversationUpdates = useCallback(() => {
     messagingService.subscribeToConversations(() => {
       loadConversations();
     });
-  };
+  }, [messagingService, loadConversations]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -192,6 +208,9 @@ export default function MessagingScreen() {
             try {
               console.log("Deleting conversation:", conversation.id);
 
+              // Mark as deleting to prevent race conditions with real-time updates
+              setDeletingConversationIds((prev) => new Set(prev).add(conversation.id));
+
               // Optimistically remove from UI first for better UX
               setConversations((prev) =>
                 prev.filter((conv) => conv.id !== conversation.id)
@@ -203,12 +222,29 @@ export default function MessagingScreen() {
               );
               console.log("Deletion result:", result);
 
+              // Wait a bit to ensure database changes propagate
+              await new Promise((resolve) => setTimeout(resolve, 500));
+
               // Refresh to ensure consistency
               await loadConversations();
+
+              // Remove from deleting set
+              setDeletingConversationIds((prev) => {
+                const next = new Set(prev);
+                next.delete(conversation.id);
+                return next;
+              });
 
               console.log("Conversation deletion completed successfully");
             } catch (error: any) {
               console.error("Error deleting conversation:", error);
+
+              // Remove from deleting set
+              setDeletingConversationIds((prev) => {
+                const next = new Set(prev);
+                next.delete(conversation.id);
+                return next;
+              });
 
               // Restore the conversation in UI if deletion failed
               await loadConversations();
