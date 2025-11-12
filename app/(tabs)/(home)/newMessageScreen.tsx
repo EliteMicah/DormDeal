@@ -22,8 +22,16 @@ export default function NewMessageScreen() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
+  const [existingConversations, setExistingConversations] = useState<any[]>([]);
+  const [existingUserIds, setExistingUserIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
 
   const messagingService = MessagingService.getInstance();
+
+  // Load existing conversations on mount
+  useEffect(() => {
+    loadExistingConversations();
+  }, []);
 
   useEffect(() => {
     if (searchQuery.trim().length > 2) {
@@ -33,11 +41,39 @@ export default function NewMessageScreen() {
     }
   }, [searchQuery]);
 
+  const loadExistingConversations = async () => {
+    setLoading(true);
+    try {
+      const conversations = await messagingService.getConversations();
+      setExistingConversations(conversations);
+
+      // Extract user IDs from existing conversations
+      const userIds = new Set<string>();
+      conversations.forEach((conv: any) => {
+        if (conv.other_user?.id) {
+          userIds.add(conv.other_user.id);
+        }
+      });
+      setExistingUserIds(userIds);
+    } catch (error) {
+      console.error("Error loading conversations:", error);
+      Alert.alert("Error", "Failed to load conversations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const searchUsers = async () => {
     setSearching(true);
     try {
       const users = await messagingService.searchUsers(searchQuery, 20);
-      setSearchResults(users);
+
+      // Filter to only show users with existing conversations
+      const filteredUsers = users.filter((user: any) =>
+        existingUserIds.has(user.id)
+      );
+
+      setSearchResults(filteredUsers);
     } catch (error) {
       console.error("Error searching users:", error);
       Alert.alert("Error", "Failed to search users");
@@ -112,12 +148,25 @@ export default function NewMessageScreen() {
       </View>
 
       {/* Instructions or Results */}
-      {searchQuery.length === 0 ? (
+      {loading ? (
+        <View style={styles.instructionsContainer}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={styles.instructionsTitle}>Loading conversations...</Text>
+        </View>
+      ) : existingConversations.length === 0 ? (
+        <View style={styles.instructionsContainer}>
+          <Ionicons name="chatbubbles-outline" size={48} color="#DDD" />
+          <Text style={styles.instructionsTitle}>No conversations yet</Text>
+          <Text style={styles.instructionsText}>
+            Start by buying or selling items to begin conversations with other users
+          </Text>
+        </View>
+      ) : searchQuery.length === 0 ? (
         <View style={styles.instructionsContainer}>
           <Ionicons name="search" size={48} color="#DDD" />
-          <Text style={styles.instructionsTitle}>Search for users</Text>
+          <Text style={styles.instructionsTitle}>Search your conversations</Text>
           <Text style={styles.instructionsText}>
-            Type a name or username to find people you want to message
+            Type a name to find people you've already messaged
           </Text>
         </View>
       ) : searchQuery.length <= 2 ? (
@@ -125,7 +174,7 @@ export default function NewMessageScreen() {
           <Ionicons name="text" size={48} color="#DDD" />
           <Text style={styles.instructionsTitle}>Keep typing</Text>
           <Text style={styles.instructionsText}>
-            Enter at least 3 characters to search for users
+            Enter at least 3 characters to search
           </Text>
         </View>
       ) : searchResults.length > 0 ? (
@@ -146,9 +195,9 @@ export default function NewMessageScreen() {
       ) : !searching ? (
         <View style={styles.instructionsContainer}>
           <Ionicons name="person-outline" size={48} color="#DDD" />
-          <Text style={styles.instructionsTitle}>No users found</Text>
+          <Text style={styles.instructionsTitle}>No matching conversations</Text>
           <Text style={styles.instructionsText}>
-            Try searching with a different name or username
+            You can only message people you've already talked to. Try searching with a different name.
           </Text>
         </View>
       ) : null}
