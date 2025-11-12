@@ -402,7 +402,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       }
 
       onClose();
-      router.replace("/(tabs)/accountCreation/account/signUpScreen");
+      router.replace("/signUpScreen");
     } catch (error) {
       Alert.alert("Error", "An unexpected error occurred");
       console.error("Unexpected error:", error);
@@ -423,7 +423,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       setProfilePicture("");
 
       // Navigate to sign in screen
-      router.replace("/(tabs)/accountCreation/account/signInScreen");
+      router.replace("/signInScreen");
     } catch (error) {
       console.error("Error signing out:", (error as Error).message);
     }

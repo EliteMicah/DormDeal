@@ -57,6 +57,10 @@ function RootLayoutNav() {
             headerShown: false,
           }}
         />
+        <Stack.Screen name="signInScreen" />
+        <Stack.Screen name="signUpScreen" />
+        <Stack.Screen name="verifyEmail" />
+        <Stack.Screen name="editProfileModal" options={{ presentation: "modal" }} />
       </Stack>
     </ThemeProvider>
   );
