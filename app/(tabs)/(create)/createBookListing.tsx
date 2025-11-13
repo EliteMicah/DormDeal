@@ -319,6 +319,67 @@ export default function CreateBookListing() {
             subscribedUsers.length,
             "subscribers"
           );
+
+          // Also send push notifications to subscribers
+          if (subscribedUsers.length > 0) {
+            console.log('Attempting to send push notifications to', subscribedUsers.length, 'subscribers');
+
+            // Get push tokens for ISBN subscribers
+            const { data: pushTokenData, error: rpcError } = await supabase
+              .rpc('get_push_tokens_for_isbn', { isbn_value: isbn.trim() });
+
+            console.log('RPC get_push_tokens_for_isbn result:', {
+              success: !rpcError,
+              tokenCount: pushTokenData?.length || 0,
+              error: rpcError
+            });
+
+            if (rpcError) {
+              console.error('Error getting push tokens:', rpcError);
+            }
+
+            if (pushTokenData && pushTokenData.length > 0) {
+              console.log('Push tokens retrieved:', pushTokenData);
+
+              // Import sendPushNotification dynamically to avoid issues
+              const { sendPushNotification } = await import('../../../utils/sendPushNotification');
+
+              // Send push notifications to all subscribers
+              for (const subscriber of pushTokenData) {
+                try {
+                  console.log('Sending push notification to:', subscriber.push_token.substring(0, 20) + '...');
+
+                  const result = await sendPushNotification({
+                    to: subscriber.push_token,
+                    title: 'Book Available! 📚',
+                    body: `${title || 'A book you subscribed to'} is now available for sale`,
+                    data: {
+                      type: 'isbn_match',
+                      isbn: isbn.trim(),
+                      listing_id: data[0].id
+                    },
+                    sound: 'default',
+                  });
+
+                  console.log('Push notification result:', result);
+
+                  // Mark notification as sent in database
+                  await supabase.rpc('mark_isbn_notification_sent', {
+                    target_user_id: subscriber.user_id,
+                    isbn_value: isbn.trim()
+                  });
+
+                  console.log('Marked notification as sent for user:', subscriber.user_id);
+                } catch (pushError) {
+                  console.error('Error sending push notification:', pushError);
+                  // Continue with other subscribers even if one fails
+                }
+              }
+              console.log(`✅ Sent ${pushTokenData.length} push notifications for ISBN match`);
+            } else {
+              console.log('⚠️ No push tokens found for subscribers');
+            }
+          }
         } catch (notificationError) {
           console.error("Error sending ISBN notifications:", notificationError);
           // Don't block the listing creation if notification fails

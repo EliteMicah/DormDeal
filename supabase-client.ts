@@ -170,7 +170,7 @@ export const NotificationService = {
         const { error } = await supabase.from("isbn_subscriptions").insert({
           user_id: userId,
           isbn: isbn,
-          title: title,
+          title: title || "Waiting for listing",
           author: author || null,
         });
 
@@ -515,6 +515,49 @@ export const SimpleMessagingService = {
           .single();
 
         if (error) throw error;
+
+        // Send push notification to recipient (non-blocking)
+        (async () => {
+          try {
+            const { data: recipientData } = await supabase
+              .rpc('get_message_recipient', {
+                conversation_uuid: conversationId,
+                sender_uuid: user.id
+              });
+
+            if (recipientData && recipientData.length > 0 && recipientData[0].push_token) {
+              const recipient = recipientData[0];
+
+              // Get sender's username
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', user.id)
+                .single();
+
+              const senderName = senderProfile?.username || 'Someone';
+
+              // Import and send push notification
+              const { sendPushNotification } = await import('./utils/sendPushNotification');
+              await sendPushNotification({
+                to: recipient.push_token,
+                title: `New message from ${senderName}`,
+                body: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+                data: {
+                  type: 'new_message',
+                  conversation_id: conversationId,
+                  sender_id: user.id
+                },
+                sound: 'default',
+              });
+              console.log('Push notification sent for new message');
+            }
+          } catch (pushError) {
+            console.error('Error sending push notification for message:', pushError);
+            // Don't fail the message send if push notification fails
+          }
+        })();
+
         return data;
       } catch (error) {
         console.error("Error sending message:", error);

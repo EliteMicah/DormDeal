@@ -20,6 +20,13 @@ interface ISBNSubscription {
   author?: string;
   notification_sent: boolean;
   created_at: string;
+  listing?: {
+    id: number;
+    title: string;
+    price: number;
+    condition: string;
+    image_url?: string;
+  };
 }
 
 export default function ISBNSubscriptionsScreen() {
@@ -53,7 +60,24 @@ export default function ISBNSubscriptionsScreen() {
         return;
       }
 
-      setSubscriptions(data || []);
+      // Fetch matching book listings for each subscription
+      const subscriptionsWithListings = await Promise.all(
+        (data || []).map(async (sub) => {
+          const { data: listings } = await supabase
+            .from("book_listing")
+            .select("id, title, price, condition, image_url")
+            .eq("isbn", sub.isbn)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          return {
+            ...sub,
+            listing: listings && listings.length > 0 ? listings[0] : undefined,
+          };
+        })
+      );
+
+      setSubscriptions(subscriptionsWithListings);
     } catch (error) {
       console.error("Unexpected error:", error);
       Alert.alert("Error", "Something went wrong");
@@ -98,49 +122,87 @@ export default function ISBNSubscriptionsScreen() {
     );
   };
 
-  const renderSubscription = ({ item }: { item: ISBNSubscription }) => (
-    <View style={styles.subscriptionCard}>
-      <View style={styles.subscriptionInfo}>
-        <Text style={styles.isbnText}>ISBN: {item.isbn}</Text>
-        {item.title && <Text style={styles.titleText}>{item.title}</Text>}
-        {item.author && <Text style={styles.authorText}>by {item.author}</Text>}
-        <View style={styles.statusRow}>
-          <View
-            style={[
-              styles.statusBadge,
-              item.notification_sent
-                ? styles.notifiedBadge
-                : styles.activeBadge,
-            ]}
-          >
-            <Text
+  const renderSubscription = ({ item }: { item: ISBNSubscription }) => {
+    const CardWrapper = item.listing ? TouchableOpacity : View;
+    const cardProps = item.listing
+      ? {
+          onPress: () =>
+            router.push({
+              pathname: "/(tabs)/(home)/bookDetailsScreen",
+              params: { bookId: item.listing!.id.toString() },
+            }),
+          activeOpacity: 0.7,
+        }
+      : {};
+
+    return (
+      <CardWrapper style={styles.subscriptionCard} {...cardProps}>
+        <View style={styles.subscriptionInfo}>
+          <Text style={styles.isbnText}>ISBN: {item.isbn}</Text>
+          {item.listing ? (
+            <>
+              <Text style={styles.titleText}>{item.listing.title}</Text>
+              <View style={styles.listingDetails}>
+                <Text style={styles.priceText}>${item.listing.price}</Text>
+                <Text style={styles.conditionText}> • {item.listing.condition}</Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.titleText}>
+                {item.title || "Waiting for listing"}
+              </Text>
+              {item.author && (
+                <Text style={styles.authorText}>by {item.author}</Text>
+              )}
+            </>
+          )}
+          <View style={styles.statusRow}>
+            <View
               style={[
-                styles.statusText,
-                item.notification_sent
-                  ? styles.notifiedText
-                  : styles.activeText,
+                styles.statusBadge,
+                item.listing
+                  ? styles.availableBadge
+                  : item.notification_sent
+                  ? styles.notifiedBadge
+                  : styles.activeBadge,
               ]}
             >
-              {item.notification_sent ? "Notified" : "Active"}
+              <Text
+                style={[
+                  styles.statusText,
+                  item.listing
+                    ? styles.availableText
+                    : item.notification_sent
+                    ? styles.notifiedText
+                    : styles.activeText,
+                ]}
+              >
+                {item.listing
+                  ? "Available"
+                  : item.notification_sent
+                  ? "Notified"
+                  : "Waiting"}
+              </Text>
+            </View>
+            <Text style={styles.dateText}>
+              {new Date(item.created_at).toLocaleDateString()}
             </Text>
           </View>
-          <Text style={styles.dateText}>
-            {new Date(item.created_at).toLocaleDateString()}
-          </Text>
         </View>
-      </View>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDeleteSubscription(item.id)}
-      >
-        <Ionicons name="trash-outline" size={20} color="#ef4444" />
-      </TouchableOpacity>
-    </View>
-  );
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteSubscription(item.id)}
+        >
+          <Ionicons name="trash-outline" size={20} color="#ef4444" />
+        </TouchableOpacity>
+      </CardWrapper>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      
+
 
       <View style={styles.header}>
         <Text style={styles.title}>ISBN Alerts</Text>
@@ -300,6 +362,27 @@ const styles = StyleSheet.create({
   },
   notifiedText: {
     color: "#3b82f6",
+  },
+  availableBadge: {
+    backgroundColor: "#d1fae5",
+  },
+  availableText: {
+    color: "#059669",
+  },
+  listingDetails: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  priceText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#059669",
+  },
+  conditionText: {
+    fontSize: 14,
+    color: "#6b7280",
   },
   dateText: {
     fontSize: 12,

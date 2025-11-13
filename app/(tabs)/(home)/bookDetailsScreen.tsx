@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
-import { supabase } from "../../../supabase-client";
+import { supabase, SimpleMessagingService } from "../../../supabase-client";
 
 // Book listing interface
 interface BookListing {
@@ -319,6 +319,13 @@ export default function BookDetailsScreen() {
         });
 
         if (error) {
+          // If it's a duplicate key error, it means the bookmark already exists
+          // Just update the UI to reflect that
+          if (error.code === "23505") {
+            console.log("Bookmark already exists, updating UI");
+            setIsBookmarked(true);
+            return;
+          }
           console.error("Error adding bookmark:", error);
           return;
         }
@@ -327,6 +334,95 @@ export default function BookDetailsScreen() {
       }
     } catch (error) {
       console.error("Unexpected error toggling bookmark:", error);
+    }
+  };
+
+  const handleMessageSeller = async () => {
+    if (!bookDetails?.user_id || !currentUserId) {
+      Alert.alert("Error", "Unable to start conversation. Please try again.");
+      return;
+    }
+
+    if (bookDetails.user_id === currentUserId) {
+      Alert.alert("Error", "You cannot message yourself.");
+      return;
+    }
+
+    try {
+      const messagingService = SimpleMessagingService.getInstance();
+      const conversationId = await messagingService.getOrCreateDirectConversation(
+        bookDetails.user_id
+      );
+
+      // Navigate to chat screen with conversation ID
+      router.push({
+        pathname: "/(tabs)/(home)/chatScreen",
+        params: { conversationId },
+      });
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      Alert.alert("Error", "Failed to start conversation. Please try again.");
+    }
+  };
+
+  const handleMakeOffer = async () => {
+    if (!bookDetails?.user_id || !currentUserId) {
+      Alert.alert("Error", "Unable to start conversation. Please try again.");
+      return;
+    }
+
+    if (bookDetails.user_id === currentUserId) {
+      Alert.alert("Error", "You cannot make an offer on your own listing.");
+      return;
+    }
+
+    // Show a simple prompt for the offer amount
+    Alert.prompt(
+      "Make an Offer",
+      `Enter your offer for "${bookDetails.title}" (Current price: $${bookDetails.price})`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Send Offer",
+          onPress: (offerAmount: any) => {
+            if (offerAmount && !isNaN(parseFloat(offerAmount))) {
+              sendOfferMessage(parseFloat(offerAmount));
+            } else {
+              Alert.alert("Error", "Please enter a valid offer amount.");
+            }
+          },
+        },
+      ],
+      "plain-text",
+      "",
+      "numeric"
+    );
+  };
+
+  const sendOfferMessage = async (offerAmount: number) => {
+    try {
+      const messagingService = SimpleMessagingService.getInstance();
+      const conversationId = await messagingService.getOrCreateDirectConversation(
+        bookDetails!.user_id
+      );
+
+      // Send the offer message
+      const offerMessage = `Hi! I'm interested in your "${
+        bookDetails!.title
+      }". Would you accept $${offerAmount.toFixed(2)} for it?`;
+      await messagingService.sendMessage(conversationId, offerMessage);
+
+      // Navigate to the chat screen
+      router.push({
+        pathname: "/(tabs)/(home)/chatScreen",
+        params: { conversationId },
+      });
+    } catch (error) {
+      console.error("Error sending offer:", error);
+      Alert.alert("Error", "Failed to send offer. Please try again.");
     }
   };
 
@@ -507,10 +603,16 @@ export default function BookDetailsScreen() {
           {/* Buyer Action Buttons - Only show for non-owners */}
           {!isOwner && (
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.primaryButton}>
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={handleMessageSeller}
+              >
                 <Text style={styles.primaryButtonText}>Message Seller</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.secondaryButton}>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={handleMakeOffer}
+              >
                 <Text style={styles.secondaryButtonText}>Make Offer</Text>
               </TouchableOpacity>
             </View>

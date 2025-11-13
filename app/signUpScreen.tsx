@@ -105,7 +105,7 @@ export default function SignUpScreen() {
         console.log("School not supported, showing alert");
         Alert.alert(
           "Unsupported School",
-          "Your university is not yet supported. Please reach out to @RebookedOfficial on Instagram to have your school added!"
+          "Your university is not yet supported. Please reach out to @DormDealOfficial on Instagram to have your school added!"
         );
         setLoading(false);
         return;

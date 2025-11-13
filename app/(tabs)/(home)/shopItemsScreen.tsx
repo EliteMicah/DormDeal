@@ -74,9 +74,22 @@ export default function shopItemsScreen() {
 
   const fetchItems = async () => {
     try {
+      // Get the current user
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.error("Error getting user:", userError);
+        setIsLoading(false);
+        return;
+      }
+
       let itemQuery = supabase
         .from("item_listing")
         .select("*")
+        .neq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       // Apply search filters

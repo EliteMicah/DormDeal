@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import {
   GestureHandlerRootView,
-  PanGestureHandler,
 } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -318,11 +317,7 @@ class ChatScreenContent extends Component<any, any> {
     return otherUser?.username || "Unknown User";
   };
 
-  onSwipeGesture = (event: any) => {
-    if (event.nativeEvent.velocityY > 500) {
-      Keyboard.dismiss();
-    }
-  };
+  // Removed onSwipeGesture - using ScrollView's keyboardShouldPersistTaps instead
 
   render() {
     if (this.state.loading) {
@@ -338,21 +333,31 @@ class ChatScreenContent extends Component<any, any> {
     return (
       <GestureHandlerRootView style={styles.container}>
         <SafeAreaView style={styles.container} edges={["top"]}>
-          
+
           <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+          {/* Header with username */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>
+                {this.getConversationTitle()}
+              </Text>
+            </View>
+          </View>
 
           <KeyboardAvoidingView
             style={styles.keyboardAvoidingView}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
           >
-            <PanGestureHandler onGestureEvent={this.onSwipeGesture}>
-              <View style={styles.messagesList}>
-                <FlatList
-                  ref={this.flatListRef}
-                  data={this.state.messages}
-                  keyExtractor={(item, index) =>
-                    item.id ? item.id.toString() : `message-${index}`
-                  }
+            <View style={styles.messagesList}>
+              <FlatList
+                ref={this.flatListRef}
+                data={this.state.messages}
+                keyExtractor={(item, index) =>
+                  item.id ? item.id.toString() : `message-${index}`
+                }
+                keyboardShouldPersistTaps="handled"
+                onScrollBeginDrag={Keyboard.dismiss}
                   renderItem={({ item, index }) => {
                     const isMyMessage =
                       item.sender_id === this.state.currentUserId;
@@ -477,7 +482,6 @@ class ChatScreenContent extends Component<any, any> {
                   </View>
                 </View>
               </View>
-            </PanGestureHandler>
           </KeyboardAvoidingView>
         </SafeAreaView>
       </GestureHandlerRootView>
@@ -561,6 +565,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  header: {
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerContent: {
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F2937",
   },
   errorContainer: {
     flex: 1,

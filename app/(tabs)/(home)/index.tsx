@@ -271,10 +271,13 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.iconButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              activeOpacity={0.6}
-              onPress={() =>
-                router.navigate("/(tabs)/(profile)/isbnSubscriptionsScreen")
-              }
+              activeOpacity={1}
+              onPress={() => {
+                router.push("/(tabs)/(profile)");
+                setTimeout(() => {
+                  router.push("/(tabs)/(profile)/isbnSubscriptionsScreen");
+                }, 50);
+              }}
             >
               <Ionicons name="notifications-outline" size={24} color="#333" />
               {hasNotifications && (

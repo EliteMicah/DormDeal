@@ -20,7 +20,7 @@ export default function verifyEmail() {
         <Text style={styles.secondText}>
           If you have any issues, please contact
         </Text>
-        <Text style={styles.secondText}>@RebookedOfficial on instagram</Text>
+        <Text style={styles.secondText}>@DormDealOfficial on instagram</Text>
       </View>
     </SafeAreaView>
   );
