@@ -9,7 +9,8 @@ lib/
 .env
 .env.local
 .claude
-commit.sh
+config
+
 
 # Expo
 .expo/

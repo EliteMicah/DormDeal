@@ -6,11 +6,12 @@ import {
   View,
   Image,
   ActivityIndicator,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../supabase-client";
 
 interface ItemListing {
@@ -26,6 +27,43 @@ interface ItemListing {
   description?: string;
   username?: string;
 }
+
+const SkeletonItemCard = () => {
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnimation, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnimation, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return (
+    <View style={styles.card}>
+      <Animated.View style={[styles.skeletonImage, { opacity }]} />
+      <View style={styles.cardInfo}>
+        <Animated.View style={[styles.skeletonTitle, { opacity }]} />
+        <Animated.View style={[styles.skeletonPrice, { opacity }]} />
+        <Animated.View style={[styles.skeletonSeller, { opacity }]} />
+      </View>
+    </View>
+  );
+};
 
 const ItemCard = ({
   item,
@@ -178,9 +216,13 @@ export default function shopItemsScreen() {
       </TouchableOpacity>
 
       {isLoading ? (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" color="#3b82f6" />
-        </View>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.grid}>
+            {[...Array(6)].map((_, index) => (
+              <SkeletonItemCard key={`skeleton-${index}`} />
+            ))}
+          </View>
+        </ScrollView>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {items.length === 0 ? (
@@ -267,11 +309,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#9ca3af",
   },
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -337,5 +374,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9ca3af",
     textAlign: "center",
+  },
+  skeletonImage: {
+    width: "100%",
+    height: 140,
+    backgroundColor: "#e5e7eb",
+  },
+  skeletonTitle: {
+    height: 14,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+    width: "90%",
+  },
+  skeletonPrice: {
+    height: 16,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+    width: "50%",
+  },
+  skeletonSeller: {
+    height: 12,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    width: "70%",
   },
 });

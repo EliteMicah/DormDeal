@@ -3,7 +3,9 @@
     "name": "DormDeal",
     "slug": "DormDeal",
     "version": "1.0.1",
-    "platforms": ["ios"],
+    "platforms": [
+      "ios"
+    ],
     "orientation": "portrait",
     "icon": "./assets/images/RebookedIcon.png",
     "scheme": "dormdeal",
@@ -32,7 +34,10 @@
       "fallbackToCacheTimeout": 0
     },
     "android": {
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"],
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/SplashRebooked.png",
         "backgroundColor": "#ffffff"
@@ -54,6 +59,14 @@
           "icon": "./assets/images/RebookedIcon.png",
           "color": "#3b82f6",
           "sounds": []
+        }
+      ],
+      "expo-build-properties",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.elitemicah.dormdeal",
+          "enableGooglePay": false
         }
       ]
     ],
