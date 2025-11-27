@@ -8,11 +8,12 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../supabase-client";
 
 // Book listing interface
@@ -29,6 +30,43 @@ interface BookListing {
   description?: string;
   username?: string;
 }
+
+const SkeletonBookCard = () => {
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnimation, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnimation, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return (
+    <View style={styles.bookCard}>
+      <Animated.View style={[styles.skeletonImage, { opacity }]} />
+      <View style={styles.bookInfo}>
+        <Animated.View style={[styles.skeletonTitle, { opacity }]} />
+        <Animated.View style={[styles.skeletonPrice, { opacity }]} />
+        <Animated.View style={[styles.skeletonSeller, { opacity }]} />
+      </View>
+    </View>
+  );
+};
 
 const BookSection = ({
   title,
@@ -57,9 +95,11 @@ const BookSection = ({
       style={styles.horizontalScroll}
     >
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#3b82f6" />
-        </View>
+        <>
+          {[...Array(5)].map((_, index) => (
+            <SkeletonBookCard key={`skeleton-${index}`} />
+          ))}
+        </>
       ) : books.length > 0 ? (
         books.slice(0, 5).map((book) => (
           <TouchableOpacity
@@ -562,10 +602,6 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingRight: 24,
   },
-  loadingContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -740,5 +776,30 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  skeletonImage: {
+    width: "100%",
+    height: 140,
+    backgroundColor: "#e5e7eb",
+  },
+  skeletonTitle: {
+    height: 14,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+    width: "90%",
+  },
+  skeletonPrice: {
+    height: 16,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+    width: "50%",
+  },
+  skeletonSeller: {
+    height: 12,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    width: "70%",
   },
 });

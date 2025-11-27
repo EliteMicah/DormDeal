@@ -13,6 +13,8 @@ import { useColorScheme } from "react-native";
 import { AuthProvider } from "../contexts/AuthContext";
 import { setupNotificationListeners } from "../utils/pushNotifications";
 import * as Notifications from "expo-notifications";
+import { StripeProvider } from "@stripe/stripe-react-native";
+import { STRIPE_PUBLISHABLE_KEY } from "../config/stripe";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -88,22 +90,24 @@ function RootLayoutNav() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="searchModal"
-            options={{
-              presentation: "modal",
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen name="signInScreen" />
-          <Stack.Screen name="signUpScreen" />
-          <Stack.Screen name="verifyEmail" />
-          <Stack.Screen name="editProfileModal" options={{ presentation: "modal" }} />
-        </Stack>
-      </ThemeProvider>
+      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+        <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="searchModal"
+              options={{
+                presentation: "modal",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen name="signInScreen" />
+            <Stack.Screen name="signUpScreen" />
+            <Stack.Screen name="verifyEmail" />
+            <Stack.Screen name="editProfileModal" options={{ presentation: "modal" }} />
+          </Stack>
+        </ThemeProvider>
+      </StripeProvider>
     </AuthProvider>
   );
 }
