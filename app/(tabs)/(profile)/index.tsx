@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  Animated,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +26,113 @@ interface BookListing {
   created_at: string;
   type: "book" | "item"; // Add type identifier
 }
+
+// Skeleton Components
+const SkeletonProfileHeader = () => {
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnimation, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnimation, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return (
+    <View style={styles.profileHeader}>
+      <Animated.View style={[styles.skeletonProfileImage, { opacity }]} />
+      <View style={styles.profileInfo}>
+        <Animated.View style={[styles.skeletonUsername, { opacity }]} />
+        <Animated.View style={[styles.skeletonUniversity, { opacity }]} />
+      </View>
+      <Animated.View style={[styles.skeletonEditIcon, { opacity }]} />
+    </View>
+  );
+};
+
+const SkeletonActions = () => {
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnimation, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnimation, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return (
+    <View style={styles.actionsContainer}>
+      <Animated.View style={[styles.skeletonActionButton, { opacity }]} />
+      <Animated.View style={[styles.skeletonActionButton, { opacity }]} />
+    </View>
+  );
+};
+
+const SkeletonListingCard = () => {
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnimation, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnimation, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return (
+    <View style={styles.listingCard}>
+      <Animated.View style={[styles.skeletonListingImage, { opacity }]} />
+      <View style={styles.listingInfo}>
+        <Animated.View style={[styles.skeletonListingTitle, { opacity }]} />
+        <Animated.View style={[styles.skeletonListingPrice, { opacity }]} />
+      </View>
+    </View>
+  );
+};
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -193,14 +301,6 @@ export default function ProfileScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
-        <Text>Loading profile...</Text>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <EditProfileModal
@@ -212,56 +312,66 @@ export default function ProfileScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.profileImageContainer}>
-            {profilePicture ? (
-              <Image
-                source={{ uri: profilePicture }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <View style={styles.profileImagePlaceholder}>
-                <Ionicons name="person" size={32} color="#9ca3af" />
-              </View>
-            )}
-          </View>
+        {loading ? (
+          <SkeletonProfileHeader />
+        ) : (
+          <View style={styles.profileHeader}>
+            <View style={styles.profileImageContainer}>
+              {profilePicture ? (
+                <Image
+                  source={{ uri: profilePicture }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <View style={styles.profileImagePlaceholder}>
+                  <Ionicons name="person" size={32} color="#9ca3af" />
+                </View>
+              )}
+            </View>
 
-          <View style={styles.profileInfo}>
-            <Text style={styles.username}>{username || "Username"}</Text>
-            <Text style={styles.university}>{university}</Text>
-          </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.username}>{username || "Username"}</Text>
+              <Text style={styles.university}>{university}</Text>
+            </View>
 
-          <TouchableOpacity onPress={handleEditProfile}>
-            <Ionicons name="create-outline" size={20} color="#6b7280" />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity onPress={handleEditProfile}>
+              <Ionicons name="create-outline" size={20} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Actions */}
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push("/savedListingsScreen")}
-          >
-            <Ionicons name="bookmark-outline" size={20} color="#3b82f6" />
-            <Text style={styles.actionText}>Saved</Text>
-          </TouchableOpacity>
+        {loading ? (
+          <SkeletonActions />
+        ) : (
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push("/savedListingsScreen")}
+            >
+              <Ionicons name="bookmark-outline" size={20} color="#3b82f6" />
+              <Text style={styles.actionText}>Saved</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push("/isbnSubscriptionsScreen")}
-          >
-            <Ionicons name="notifications-outline" size={20} color="#3b82f6" />
-            <Text style={styles.actionText}>ISBN Alerts</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push("/isbnSubscriptionsScreen")}
+            >
+              <Ionicons name="notifications-outline" size={20} color="#3b82f6" />
+              <Text style={styles.actionText}>ISBN Alerts</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Listings Section */}
         <View style={styles.listingsSection}>
           <Text style={styles.sectionTitle}>My Listings</Text>
 
           {listingsLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#3b82f6" />
+            <View style={styles.listingsGrid}>
+              {[...Array(4)].map((_, index) => (
+                <SkeletonListingCard key={`skeleton-${index}`} />
+              ))}
             </View>
           ) : userListings.length > 0 ? (
             <View style={styles.listingsGrid}>
@@ -449,5 +559,55 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "500",
+  },
+  // Skeleton styles
+  skeletonProfileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#e5e7eb",
+  },
+  skeletonUsername: {
+    height: 20,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+    width: "60%",
+  },
+  skeletonUniversity: {
+    height: 14,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    width: "80%",
+  },
+  skeletonEditIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#e5e7eb",
+  },
+  skeletonActionButton: {
+    flex: 1,
+    height: 40,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 8,
+  },
+  skeletonListingImage: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#e5e7eb",
+  },
+  skeletonListingTitle: {
+    height: 14,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+    width: "80%",
+  },
+  skeletonListingPrice: {
+    height: 16,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 4,
+    width: "40%",
   },
 });

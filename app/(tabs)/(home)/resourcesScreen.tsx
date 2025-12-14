@@ -1,10 +1,10 @@
 import {
   StyleSheet,
   TouchableOpacity,
-  Linking,
   Text,
   View,
   ScrollView,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -74,16 +74,28 @@ export default function ResourcesScreen() {
         {
           icon: "chatbubble-outline",
           title: "Give Feedback",
-          onPress: () => Linking.openURL("https://forms.gle/6C28tioZvK54M6CG6"),
+          onPress: () => router.push("/feedbackScreen"),
         },
       ],
     },
   ];
 
+  const handlePress = (item: ResourceItem) => {
+    if (item.onPress) {
+      item.onPress();
+    } else {
+      Alert.alert(
+        "Coming Soon",
+        "This feature is currently in development and will be available soon!",
+        [{ text: "OK" }]
+      );
+    }
+  };
+
   const ResourceCard = ({ item }: { item: ResourceItem }) => (
     <TouchableOpacity
       style={styles.resourceCard}
-      onPress={item.onPress}
+      onPress={() => handlePress(item)}
       activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>
