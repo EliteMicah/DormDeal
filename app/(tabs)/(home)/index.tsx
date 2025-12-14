@@ -25,6 +25,15 @@ type RouteType =
   | "/eventCardScreen"
   | "/resourcesScreen";
 
+// Define a type for the featured event
+type FeaturedEvent = {
+  title: string;
+  description: string;
+  image: any;
+  date: string;
+  location: string;
+};
+
 export default function HomeScreen() {
   const router = useRouter();
   const { user, userId, isLoading: authLoading, isAuthenticated } = useAuth();
@@ -38,14 +47,7 @@ export default function HomeScreen() {
   const messagingService = useRef(SimpleMessagingService.getInstance());
   const isUnmounted = useRef(false);
 
-  const featuredEvent = {
-    title: "Spring Book Exchange",
-    description:
-      "Join the biggest textbook exchange event this semester! Trade, sell, or buy books from fellow students.",
-    image: require("../../../assets/images/comingsoon.jpg"),
-    date: "Sept 15",
-    location: "Biola Library",
-  };
+  const [featuredEvent, setFeaturedEvent] = useState<FeaturedEvent | null>(null); // Shows "No Events Currently" placeholder
 
   const quickActions: {
     id: number;
@@ -322,41 +324,53 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured Event</Text>
           </View>
-          <TouchableOpacity
-            style={styles.featuredCard}
-            onPress={() => router.push("/eventCardScreen")}
-            activeOpacity={0.9}
-          >
-            <View style={styles.featuredImageContainer}>
-              <Image
-                source={featuredEvent.image}
-                style={styles.featuredImage}
-                resizeMode="cover"
-              />
-              <View style={styles.featuredOverlay}>
-                <View style={styles.eventBadge}>
-                  <Text style={styles.eventBadgeText}>
-                    {featuredEvent.date}
-                  </Text>
+          {featuredEvent ? (
+            <TouchableOpacity
+              style={styles.featuredCard}
+              onPress={() => router.push("/eventCardScreen")}
+              activeOpacity={0.9}
+            >
+              <View style={styles.featuredImageContainer}>
+                <Image
+                  source={featuredEvent.image}
+                  style={styles.featuredImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.featuredOverlay}>
+                  <View style={styles.eventBadge}>
+                    <Text style={styles.eventBadgeText}>
+                      {featuredEvent.date}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-            <View style={styles.featuredContent}>
-              <Text style={styles.featuredTitle}>{featuredEvent.title}</Text>
-              <Text style={styles.featuredDescription} numberOfLines={2}>
-                {featuredEvent.description}
+              <View style={styles.featuredContent}>
+                <Text style={styles.featuredTitle}>{featuredEvent.title}</Text>
+                <Text style={styles.featuredDescription} numberOfLines={2}>
+                  {featuredEvent.description}
+                </Text>
+                <View style={styles.featuredFooter}>
+                  <View style={styles.locationContainer}>
+                    <Ionicons name="location-outline" size={14} color="#666" />
+                    <Text style={styles.locationText}>
+                      {featuredEvent.location}
+                    </Text>
+                  </View>
+                  <Text style={styles.learnMore}>Learn more →</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.noEventsCard}>
+              <View style={styles.noEventsIconContainer}>
+                <Ionicons name="calendar-outline" size={48} color="#B0B0B0" />
+              </View>
+              <Text style={styles.noEventsTitle}>No Events Currently</Text>
+              <Text style={styles.noEventsDescription}>
+                Check back soon for upcoming campus events and activities!
               </Text>
-              <View style={styles.featuredFooter}>
-                <View style={styles.locationContainer}>
-                  <Ionicons name="location-outline" size={14} color="#666" />
-                  <Text style={styles.locationText}>
-                    {featuredEvent.location}
-                  </Text>
-                </View>
-                <Text style={styles.learnMore}>Learn more →</Text>
-              </View>
             </View>
-          </TouchableOpacity>
+          )}
         </View>
 
         {/* Quick Actions */}
@@ -427,7 +441,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#FFFFFF",
   },
   loadingContainer: {
     justifyContent: "center",
@@ -468,7 +482,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#FFFFFF",
   },
   headerLeft: {
     flex: 1,
@@ -632,6 +646,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4A90E2",
     fontWeight: "600",
+  },
+  noEventsCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    minHeight: 200,
+  },
+  noEventsIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  noEventsTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  noEventsDescription: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    lineHeight: 20,
   },
   quickActionsGrid: {
     flexDirection: "row",

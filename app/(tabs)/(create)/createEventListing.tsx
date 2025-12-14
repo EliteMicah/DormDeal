@@ -16,12 +16,12 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { useStripe } from "@stripe/stripe-react-native";
 import {
-  PaymentService,
-  PAYMENT_METHODS,
-  EVENT_LISTING_FEE,
-  EventService,
-} from "../../../supabase-client";
+  createPaymentIntent,
+  confirmPayment,
+} from "../../../services/paymentService";
+import { EVENT_LISTING_FEE, EventService } from "../../../supabase-client";
 
 interface EventFormData {
   title: string;
@@ -37,22 +37,14 @@ interface EventFormData {
   image: string | null;
 }
 
-interface PaymentResult {
-  success: boolean;
-  transactionId?: string;
-  error?: string;
-}
-
 export default function CreateEventListing() {
   const router = useRouter();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(
-    null
-  );
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
 
-  const paymentService = PaymentService.getInstance();
   const eventService = EventService.getInstance();
 
   const [formData, setFormData] = useState<EventFormData>({
@@ -96,7 +88,7 @@ export default function CreateEventListing() {
         mediaTypes: "images",
         allowsEditing: true,
         aspect: [16, 9],
-        quality: 0.8,
+        quality: 0.5,
       });
 
       if (!result.canceled) {
@@ -114,21 +106,22 @@ export default function CreateEventListing() {
   const validateForm = (): boolean => {
     const newErrors: Partial<EventFormData> = {};
 
-    // if (!formData.title.trim()) newErrors.title = "Event title is required";
-    // if (!formData.description.trim())
-    //   newErrors.description = "Description is required";
-    // if (!formData.date.trim()) newErrors.date = "Event date is required";
-    // if (!formData.time.trim()) newErrors.time = "Event time is required";
-    // if (!formData.location.trim()) newErrors.location = "Location is required";
-    // if (!formData.contactEmail.trim())
-    //   newErrors.contactEmail = "Contact email is required";
-    // else if (!/\S+@\S+\.\S+/.test(formData.contactEmail)) {
-    //   newErrors.contactEmail = "Please enter a valid email address";
-    // }
+    if (!formData.image) newErrors.image = "Image is required";
+    if (!formData.title.trim()) newErrors.title = "Event title is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+    if (!formData.date.trim()) newErrors.date = "Event date is required";
+    if (!formData.time.trim()) newErrors.time = "Event time is required";
+    if (!formData.location.trim()) newErrors.location = "Location is required";
+    if (!formData.contactEmail.trim())
+      newErrors.contactEmail = "Contact email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.contactEmail)) {
+      newErrors.contactEmail = "Please enter a valid email address";
+    }
 
-    // if (formData.maxCapacity && isNaN(Number(formData.maxCapacity))) {
-    //   newErrors.maxCapacity = "Max capacity must be a number";
-    // }
+    if (formData.maxCapacity && isNaN(Number(formData.maxCapacity))) {
+      newErrors.maxCapacity = "Max capacity must be a number";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -145,83 +138,64 @@ export default function CreateEventListing() {
 
     setPaymentProcessing(true);
 
-    // Feature still in progress
     try {
-      Alert.alert(
-        "Feature Still in Progress",
-        "Payment processing for event listings is currently under development. Please check back later!",
-        [
-          {
-            text: "OK",
-            onPress: () => setPaymentProcessing(false),
-          },
-        ]
-      );
-    } catch (error) {
-      setPaymentProcessing(false);
-      Alert.alert("Error", "Something went wrong. Please try again.");
-    }
-  };
+      // Create payment intent on backend
+      const clientSecret = await createPaymentIntent(EVENT_LISTING_FEE);
 
-  const processPayment = async (method: string) => {
-    try {
-      const result = await paymentService.processPayment(
-        method,
-        EVENT_LISTING_FEE,
-        "Event Listing Creation Fee"
-      );
+      // Initialize the payment sheet
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: "DormDeal",
+        paymentIntentClientSecret: clientSecret,
+        defaultBillingDetails: {
+          name: "Event Creator",
+        },
+        allowsDelayedPaymentMethods: false,
+      });
 
-      setPaymentProcessing(false);
+      if (initError) {
+        Alert.alert("Error", initError.message);
+        setPaymentProcessing(false);
+        return;
+      }
 
-      if (result.success) {
+      // Present the payment sheet
+      const { error: paymentError } = await presentPaymentSheet();
+
+      if (paymentError) {
+        if (paymentError.code !== "Canceled") {
+          Alert.alert("Payment Failed", paymentError.message);
+        }
+        setPaymentProcessing(false);
+      } else {
+        // Payment successful
         setPaymentCompleted(true);
-        setPaymentResult(result);
-
-        // Generate and log receipt
-        const receipt = paymentService.generateReceipt(
-          result.transactionId!,
-          method,
-          EVENT_LISTING_FEE,
-          "Event Listing Creation Fee"
-        );
-        console.log("Payment Receipt:", receipt);
+        setPaymentIntentId(clientSecret);
+        setPaymentProcessing(false);
 
         Alert.alert(
           "Payment Successful! 🎉",
-          `Your $${EVENT_LISTING_FEE} payment via ${method.replace(
-            "_",
-            " "
-          )} was processed successfully.\n\nTransaction ID: ${result.transactionId?.slice(
-            -8
-          )}`,
+          `Your $${EVENT_LISTING_FEE} event listing fee was processed successfully.`,
           [
             {
-              text: "Continue",
+              text: "Continue to Create Event",
               onPress: () => handleSubmit(),
             },
           ]
         );
-      } else {
-        Alert.alert(
-          "Payment Failed",
-          result.error || "Payment could not be processed. Please try again.",
-          [
-            {
-              text: "Try Again",
-              onPress: () => handlePayment(),
-            },
-            {
-              text: "Cancel",
-              style: "cancel",
-            },
-          ]
-        );
+
+        // Optionally confirm on backend
+        try {
+          await confirmPayment(clientSecret, EVENT_LISTING_FEE);
+        } catch (confirmError) {
+          console.error("Error confirming payment on backend:", confirmError);
+        }
       }
     } catch (error) {
+      console.error("Payment error:", error);
       setPaymentProcessing(false);
       Alert.alert(
-        "Error",
-        "Something went wrong with the payment. Please try again."
+        "Connection Error",
+        "Could not connect to payment server. Please try again."
       );
     }
   };
@@ -230,7 +204,7 @@ export default function CreateEventListing() {
     setLoading(true);
 
     try {
-      if (!paymentResult?.transactionId) {
+      if (!paymentIntentId) {
         throw new Error("Payment information not found");
       }
 
@@ -273,7 +247,7 @@ export default function CreateEventListing() {
         requirements: requirementsArray,
         additional_info: formData.additionalInfo.trim() || undefined,
         contact_email: formData.contactEmail.trim(),
-        payment_transaction_id: paymentResult.transactionId,
+        payment_transaction_id: paymentIntentId,
         image_url: undefined, // Will be set after image upload
         temp_image_uri: formData.image || undefined, // Pass undefined if image is null
       };
@@ -311,7 +285,7 @@ export default function CreateEventListing() {
               image: null,
             });
             setPaymentCompleted(false);
-            setPaymentResult(null);
+            setPaymentIntentId(null);
           },
         },
       ]);
@@ -330,8 +304,6 @@ export default function CreateEventListing() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      
-
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}

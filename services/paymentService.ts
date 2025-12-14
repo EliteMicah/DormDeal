@@ -2,6 +2,7 @@
 // This file contains API calls to your backend for payment processing
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export interface CreatePaymentIntentResponse {
   paymentIntent: string;
@@ -43,6 +44,8 @@ export async function createPaymentIntent(amount: number): Promise<string> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         amount: Math.round(amount * 100), // Convert to cents
@@ -50,7 +53,9 @@ export async function createPaymentIntent(amount: number): Promise<string> {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create payment intent');
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error('Payment intent error:', errorData);
+      throw new Error(errorData.error || `Failed to create payment intent: ${response.status}`);
     }
 
     const data = await response.json();
@@ -71,6 +76,8 @@ export async function confirmPayment(paymentIntentId: string, amount: number) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         paymentIntentId,

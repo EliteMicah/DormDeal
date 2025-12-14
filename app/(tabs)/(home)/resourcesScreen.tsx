@@ -35,6 +35,7 @@ export default function ResourcesScreen() {
         {
           icon: "calendar-outline",
           title: "Events",
+          onPress: () => router.push("/allEventsScreen"),
         },
       ],
     },
@@ -65,6 +66,7 @@ export default function ResourcesScreen() {
         {
           icon: "notifications-outline",
           title: "Updates · What's new",
+          onPress: () => router.push("/updatesScreen"),
         },
         {
           icon: "heart-outline",
@@ -119,8 +121,6 @@ export default function ResourcesScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      
-
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}

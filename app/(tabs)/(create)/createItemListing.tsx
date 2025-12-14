@@ -152,7 +152,7 @@ export default function CreateItemListing() {
         mediaTypes: "images",
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 1,
+        quality: 0.4,
       });
 
       if (!result.canceled) {
@@ -355,8 +355,6 @@ export default function CreateItemListing() {
 
   return (
     <SafeAreaView style={styles.maincontainer} edges={["top"]}>
-      
-
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
@@ -371,7 +369,10 @@ export default function CreateItemListing() {
         >
           <Text style={styles.mainTitle}>Create Listing</Text>
 
-          <TouchableOpacity style={styles.imageContainer} onPress={showImageOptions}>
+          <TouchableOpacity
+            style={styles.imageContainer}
+            onPress={showImageOptions}
+          >
             {image ? (
               <Image source={{ uri: image }} style={styles.image} />
             ) : (
