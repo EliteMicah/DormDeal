@@ -70,7 +70,7 @@ function RootLayoutNav() {
           // Navigate directly to the chat screen with the conversation
           router.push({
             pathname: '/(tabs)/(home)/chatScreen',
-            params: { conversationId: data.conversation_id },
+            params: { conversationId: String(data.conversation_id) },
           });
         } else if (data?.type === 'new_message') {
           // Fallback to messaging screen if no conversation_id
@@ -78,7 +78,7 @@ function RootLayoutNav() {
         } else if (data?.type === 'isbn_match' && data?.isbn) {
           router.push({
             pathname: '/searchModal',
-            params: { isbn: data.isbn },
+            params: { isbn: String(data.isbn) },
           });
         }
         // Add more navigation logic based on your notification types
