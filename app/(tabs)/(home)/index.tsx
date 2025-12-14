@@ -321,13 +321,6 @@ export default function HomeScreen() {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured Event</Text>
-            <TouchableOpacity
-              style={styles.seeAllButton}
-              onPress={() => router.push("/allEventsScreen")}
-            >
-              <Text style={styles.seeAllText}>See All</Text>
-              <Ionicons name="chevron-forward" size={16} color="#4A90E2" />
-            </TouchableOpacity>
           </View>
           <TouchableOpacity
             style={styles.featuredCard}

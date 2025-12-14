@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Modal,
   View,
@@ -74,6 +74,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   // Animation values for delete button
   const deleteProgress = useRef(new Animated.Value(0)).current;
   const deleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync state with props when modal becomes visible
+  useEffect(() => {
+    if (visible) {
+      setUsername(currentUsername);
+      setProfilePicture(currentProfilePicture);
+      setOriginalProfilePicture(currentProfilePicture);
+    }
+  }, [visible, currentUsername, currentProfilePicture]);
 
   const deleteOldProfilePicture = async (oldUrl: string) => {
     if (!oldUrl || !oldUrl.includes("avatars")) return;
