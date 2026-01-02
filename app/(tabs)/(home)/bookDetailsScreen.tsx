@@ -5,17 +5,19 @@ import {
   View,
   ScrollView,
   Image,
-  ActivityIndicator,
   Alert,
   TextInput,
   Modal,
   FlatList,
+  ActivityIndicator,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { supabase, SimpleMessagingService } from "../../../supabase-client";
+import { SkeletonBookDetailsScreen } from "../../../components/SkeletonBookDetailsScreen";
 
 // Book listing interface
 interface BookListing {
@@ -350,9 +352,10 @@ export default function BookDetailsScreen() {
 
     try {
       const messagingService = SimpleMessagingService.getInstance();
-      const conversationId = await messagingService.getOrCreateDirectConversation(
-        bookDetails.user_id
-      );
+      const conversationId =
+        await messagingService.getOrCreateDirectConversation(
+          bookDetails.user_id
+        );
 
       // Navigate to chat screen with conversation ID
       router.push({
@@ -405,9 +408,10 @@ export default function BookDetailsScreen() {
   const sendOfferMessage = async (offerAmount: number) => {
     try {
       const messagingService = SimpleMessagingService.getInstance();
-      const conversationId = await messagingService.getOrCreateDirectConversation(
-        bookDetails!.user_id
-      );
+      const conversationId =
+        await messagingService.getOrCreateDirectConversation(
+          bookDetails!.user_id
+        );
 
       // Send the offer message
       const offerMessage = `Hi! I'm interested in your "${
@@ -423,6 +427,27 @@ export default function BookDetailsScreen() {
     } catch (error) {
       console.error("Error sending offer:", error);
       Alert.alert("Error", "Failed to send offer. Please try again.");
+    }
+  };
+
+  const handleCompareOnAmazon = async () => {
+    if (!bookDetails?.isbn) {
+      Alert.alert("Error", "ISBN not available for this listing.");
+      return;
+    }
+
+    // Filter for paperback books in the Books department
+    const amazonUrl = `https://www.amazon.com/s?k=${bookDetails.isbn}&i=stripbooks&rh=p_n_feature_browse-bin:2656022011`;
+    try {
+      const supported = await Linking.canOpenURL(amazonUrl);
+      if (supported) {
+        await Linking.openURL(amazonUrl);
+      } else {
+        Alert.alert("Error", "Unable to open Amazon link.");
+      }
+    } catch (error) {
+      console.error("Error opening Amazon:", error);
+      Alert.alert("Error", "Failed to open Amazon. Please try again.");
     }
   };
 
@@ -483,10 +508,7 @@ export default function BookDetailsScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.mainContainer}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#38b6ff" />
-          <Text style={styles.loadingText}>Loading book details...</Text>
-        </View>
+        <SkeletonBookDetailsScreen />
       </SafeAreaView>
     );
   }
@@ -508,9 +530,7 @@ export default function BookDetailsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
-      
-
+    <SafeAreaView style={styles.mainContainer} edges={[]}>
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -577,9 +597,13 @@ export default function BookDetailsScreen() {
             <>
               <View style={styles.titleRow}>
                 <View style={styles.titleInfo}>
-                  <Text style={styles.title}>{bookDetails.title}</Text>
-                  <Text style={styles.price}>${bookDetails.price}</Text>
-                  <Text style={styles.metadata}>
+                  <Text style={styles.title} selectable={true}>
+                    {bookDetails.title}
+                  </Text>
+                  <Text style={styles.price} selectable={true}>
+                    ${bookDetails.price}
+                  </Text>
+                  <Text style={styles.metadata} selectable={true}>
                     {bookDetails.condition} · Posted{" "}
                     {formatDate(bookDetails.created_at)}
                   </Text>
@@ -633,7 +657,7 @@ export default function BookDetailsScreen() {
                 numberOfLines={4}
               />
             ) : (
-              <Text style={styles.sectionText}>
+              <Text style={styles.sectionText} selectable={true}>
                 {bookDetails.description || "No description provided."}
               </Text>
             )}
@@ -673,15 +697,33 @@ export default function BookDetailsScreen() {
                 {bookDetails.isbn && (
                   <View style={styles.detailItem}>
                     <Text style={styles.detailLabel}>ISBN</Text>
-                    <Text style={styles.detailValue}>{bookDetails.isbn}</Text>
+                    <Text style={styles.detailValue} selectable={true}>
+                      {bookDetails.isbn}
+                    </Text>
                   </View>
                 )}
                 <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Payment</Text>
-                  <Text style={styles.detailValue}>
+                  <Text style={styles.detailLabel}>Preferred Payment</Text>
+                  <Text style={styles.detailValue} selectable={true}>
                     {bookDetails.payment_type}
                   </Text>
                 </View>
+                {bookDetails.isbn && (
+                  <TouchableOpacity
+                    style={styles.detailItem}
+                    onPress={handleCompareOnAmazon}
+                  >
+                    <Text style={styles.detailLabel}>Compare Price</Text>
+                    <View style={styles.comparePriceValue}>
+                      <Text style={styles.comparePriceText}>Amazon</Text>
+                      <MaterialIcons
+                        name="open-in-new"
+                        size={18}
+                        color="#4169e1"
+                      />
+                    </View>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </View>
@@ -689,14 +731,14 @@ export default function BookDetailsScreen() {
           {/* Seller */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Seller</Text>
-            <Text style={styles.sellerName}>
+            <Text style={styles.sellerName} selectable={true}>
               {sellerInfo?.username || "Error Fetching Username"}
             </Text>
           </View>
         </View>
       </ScrollView>
 
-      {/* Fixed bottom buttons */}
+      {/* Owner Editing page */}
       {isOwner && (
         <View style={styles.fixedBottomButtons}>
           {isEditing ? (
@@ -780,9 +822,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 75,
   },
   imageContainer: {
+    marginTop: -55,
     width: "100%",
     height: 280,
     backgroundColor: "#f8f8f8",
@@ -1083,16 +1126,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#4169e1",
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
-  },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
@@ -1130,5 +1163,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f8f8",
     justifyContent: "center",
     alignItems: "center",
+  },
+  comparePriceValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  comparePriceText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#4169e1",
   },
 });

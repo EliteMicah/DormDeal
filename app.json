@@ -2,16 +2,14 @@
   "expo": {
     "name": "DormDeal",
     "slug": "DormDeal",
-    "version": "1.0.1",
-    "platforms": [
-      "ios"
-    ],
+    "version": "1.0.4",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/images/RebookedIcon.png",
     "scheme": "dormdeal",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/RebookedIcon.png",
+      "image": "./assets/images/SplashScreen.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -34,10 +32,7 @@
       "fallbackToCacheTimeout": 0
     },
     "android": {
-      "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE"
-      ],
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/SplashRebooked.png",
         "backgroundColor": "#ffffff"

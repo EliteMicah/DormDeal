@@ -26,6 +26,7 @@ import React, {
 } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase, SimpleMessagingService } from "../../../supabase-client";
+import { SkeletonChatScreen } from "../../../components/SkeletonChatScreen";
 
 // Error boundary class component
 class ChatErrorBoundary extends Component<
@@ -323,9 +324,7 @@ class ChatScreenContent extends Component<any, any> {
     if (this.state.loading) {
       return (
         <SafeAreaView style={styles.container}>
-          <View style={styles.loadingContainer}>
-            <Text>Loading conversation...</Text>
-          </View>
+          <SkeletonChatScreen />
         </SafeAreaView>
       );
     }
@@ -603,11 +602,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     textAlign: "center",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   keyboardAvoidingView: {
     flex: 1,

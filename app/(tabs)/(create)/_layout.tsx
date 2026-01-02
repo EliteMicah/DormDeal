@@ -11,12 +11,10 @@ export default function CreateLayout() {
         headerTintColor: "black",
         headerTransparent: true,
         headerShadowVisible: false,
+        headerBackButtonDisplayMode: "minimal",
       }}
     >
-      <Stack.Screen
-        name="index"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="createBookListing" />
       <Stack.Screen name="createItemListing" />
       <Stack.Screen name="createEventListing" />

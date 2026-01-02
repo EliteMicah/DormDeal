@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -17,6 +17,7 @@ import {
 } from "../../../supabase-client";
 import { useFocusEffect } from "expo-router";
 import { useAuth } from "../../../contexts/AuthContext";
+import { AuthGuard } from "../../../components/AuthGuard";
 
 // Define a type for the routes
 type RouteType =
@@ -36,7 +37,7 @@ type FeaturedEvent = {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, userId, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user, userId } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [hasNotifications, setHasNotifications] = useState(false);
@@ -47,7 +48,9 @@ export default function HomeScreen() {
   const messagingService = useRef(SimpleMessagingService.getInstance());
   const isUnmounted = useRef(false);
 
-  const [featuredEvent, setFeaturedEvent] = useState<FeaturedEvent | null>(null); // Shows "No Events Currently" placeholder
+  const [featuredEvent, setFeaturedEvent] = useState<FeaturedEvent | null>(
+    null
+  ); // Shows "No Events Currently" placeholder
 
   const quickActions: {
     id: number;
@@ -183,19 +186,12 @@ export default function HomeScreen() {
     };
   }, []);
 
-  // Initial data fetch - only when auth is ready
+  // Initial data fetch
   useEffect(() => {
-    if (authLoading) return;
-
-    if (!isAuthenticated) {
-      router.replace("/signInScreen");
-      return;
-    }
-
     if (userId && !isUnmounted.current) {
       fetchAllUserData(userId);
     }
-  }, [authLoading, isAuthenticated, userId]);
+  }, [userId]);
 
   // Subscribe to real-time notifications and refresh counts on focus
   useFocusEffect(
@@ -240,201 +236,224 @@ export default function HomeScreen() {
     }, [userId])
   );
 
-  if (isLoading) {
-    return (
-      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
-        <View style={styles.loadingContent}>
-          <Text style={styles.loadingText}>Welcome to DormDeal</Text>
-          <View style={styles.loadingDots}>
-            <View style={[styles.dot, styles.dot1]} />
-            <View style={[styles.dot, styles.dot2]} />
-            <View style={[styles.dot, styles.dot3]} />
-          </View>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={[styles.container]} edges={["top"]}>
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>
-              Hello, {username || "Student"}! 👋
-            </Text>
-            <Text style={styles.subtitle}>What are you looking for today?</Text>
-          </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              activeOpacity={1}
-              onPress={() => {
-                router.push("/(tabs)/(profile)");
-                setTimeout(() => {
-                  router.push("/(tabs)/(profile)/isbnSubscriptionsScreen");
-                }, 50);
-              }}
-            >
-              <Ionicons name="notifications-outline" size={24} color="#333" />
-              {hasNotifications && (
-                <View style={styles.notificationBadgeContainer}>
-                  <View style={styles.notificationDot} />
-                  {unreadCount > 0 && (
-                    <View style={styles.notificationBadge}>
-                      <Text style={styles.notificationBadgeText}>
-                        {unreadCount > 99 ? "99+" : unreadCount.toString()}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.iconButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              activeOpacity={1}
-              onPress={() => router.push("/messagingScreen")}
-            >
-              <Ionicons name="chatbubble-outline" size={24} color="#333" />
-              {hasMessages && (
-                <View style={styles.notificationBadgeContainer}>
-                  <View style={styles.notificationDot} />
-                  {unreadMessageCount > 0 && (
-                    <View style={styles.notificationBadge}>
-                      <Text style={styles.notificationBadgeText}>
-                        {unreadMessageCount > 99
-                          ? "99+"
-                          : unreadMessageCount.toString()}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-        {/* Featured Event Card */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Featured Event</Text>
-          </View>
-          {featuredEvent ? (
-            <TouchableOpacity
-              style={styles.featuredCard}
-              onPress={() => router.push("/eventCardScreen")}
-              activeOpacity={0.9}
-            >
-              <View style={styles.featuredImageContainer}>
-                <Image
-                  source={featuredEvent.image}
-                  style={styles.featuredImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.featuredOverlay}>
-                  <View style={styles.eventBadge}>
-                    <Text style={styles.eventBadgeText}>
-                      {featuredEvent.date}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <View style={styles.featuredContent}>
-                <Text style={styles.featuredTitle}>{featuredEvent.title}</Text>
-                <Text style={styles.featuredDescription} numberOfLines={2}>
-                  {featuredEvent.description}
-                </Text>
-                <View style={styles.featuredFooter}>
-                  <View style={styles.locationContainer}>
-                    <Ionicons name="location-outline" size={14} color="#666" />
-                    <Text style={styles.locationText}>
-                      {featuredEvent.location}
-                    </Text>
-                  </View>
-                  <Text style={styles.learnMore}>Learn more →</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.noEventsCard}>
-              <View style={styles.noEventsIconContainer}>
-                <Ionicons name="calendar-outline" size={48} color="#B0B0B0" />
-              </View>
-              <Text style={styles.noEventsTitle}>No Events Currently</Text>
-              <Text style={styles.noEventsDescription}>
-                Check back soon for upcoming campus events and activities!
-              </Text>
+    <AuthGuard>
+      {isLoading ? (
+        <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+          <View style={styles.loadingContent}>
+            <Text style={styles.loadingText}>Welcome to DormDeal</Text>
+            <View style={styles.loadingDots}>
+              <View style={[styles.dot, styles.dot1]} />
+              <View style={[styles.dot, styles.dot2]} />
+              <View style={[styles.dot, styles.dot3]} />
             </View>
-          )}
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.sectionContainer}>
-          <Text
-            style={[styles.sectionTitle, { marginTop: 10, marginBottom: 10 }]}
+          </View>
+        </SafeAreaView>
+      ) : (
+        <SafeAreaView style={[styles.container]} edges={["top"]}>
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
           >
-            Shop by Category
-          </Text>
-          <View style={styles.quickActionsGrid}>
-            {quickActions.map((action) => (
-              <TouchableOpacity
-                key={action.id}
+            {/* Header */}
+            <View style={styles.header}>
+              <View style={styles.headerLeft}>
+                <Text style={styles.greeting}>
+                  Hello, {username || "Student"}! 👋
+                </Text>
+                <Text style={styles.subtitle}>
+                  What are you looking for today?
+                </Text>
+              </View>
+              <View style={styles.headerRight}>
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  activeOpacity={1}
+                  onPress={() => {
+                    router.push("/(tabs)/(profile)");
+                    setTimeout(() => {
+                      router.push("/(tabs)/(profile)/isbnSubscriptionsScreen");
+                    }, 50);
+                  }}
+                >
+                  <Ionicons
+                    name="notifications-outline"
+                    size={24}
+                    color="#333"
+                  />
+                  {hasNotifications && (
+                    <View style={styles.notificationBadgeContainer}>
+                      <View style={styles.notificationDot} />
+                      {unreadCount > 0 && (
+                        <View style={styles.notificationBadge}>
+                          <Text style={styles.notificationBadgeText}>
+                            {unreadCount > 99 ? "99+" : unreadCount.toString()}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  activeOpacity={1}
+                  onPress={() => router.push("/messagesScreen")}
+                >
+                  <Ionicons name="chatbubble-outline" size={24} color="#333" />
+                  {hasMessages && (
+                    <View style={styles.notificationBadgeContainer}>
+                      <View style={styles.notificationDot} />
+                      {unreadMessageCount > 0 && (
+                        <View style={styles.notificationBadge}>
+                          <Text style={styles.notificationBadgeText}>
+                            {unreadMessageCount > 99
+                              ? "99+"
+                              : unreadMessageCount.toString()}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/* Featured Event Card */}
+            <View style={styles.sectionContainer}>
+              {featuredEvent ? (
+                <TouchableOpacity
+                  style={styles.featuredCard}
+                  onPress={() => router.push("/eventCardScreen")}
+                  activeOpacity={0.9}
+                >
+                  <View style={styles.featuredImageContainer}>
+                    <Image
+                      source={featuredEvent.image}
+                      style={styles.featuredImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.featuredOverlay}>
+                      <View style={styles.eventBadge}>
+                        <Text style={styles.eventBadgeText}>
+                          {featuredEvent.date}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.featuredContent}>
+                    <Text style={styles.featuredTitle}>
+                      {featuredEvent.title}
+                    </Text>
+                    <Text style={styles.featuredDescription} numberOfLines={2}>
+                      {featuredEvent.description}
+                    </Text>
+                    <View style={styles.featuredFooter}>
+                      <View style={styles.locationContainer}>
+                        <Ionicons
+                          name="location-outline"
+                          size={14}
+                          color="#666"
+                        />
+                        <Text style={styles.locationText}>
+                          {featuredEvent.location}
+                        </Text>
+                      </View>
+                      <Text style={styles.learnMore}>Learn more →</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.noEventsCard}>
+                  <View style={styles.noEventsIconContainer}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={48}
+                      color="#B0B0B0"
+                    />
+                  </View>
+                  <Text style={styles.noEventsTitle}>No Events Currently</Text>
+                  <Text style={styles.noEventsDescription}>
+                    Check back soon for upcoming campus events and activities!
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Quick Actions */}
+            <View style={styles.sectionContainer}>
+              <Text
                 style={[
-                  styles.quickActionCard,
-                  { backgroundColor: action.color },
+                  styles.sectionTitle,
+                  { marginTop: 10, marginBottom: 10 },
                 ]}
-                onPress={() => {
-                  if (action.category) {
-                    router.push({
-                      pathname: action.route,
-                      params: { category: action.category },
-                    });
-                  } else {
-                    router.push(action.route);
-                  }
-                }}
-                activeOpacity={0.8}
               >
-                <Text style={styles.quickActionIcon}>{action.icon}</Text>
-                <Text style={styles.quickActionTitle}>{action.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Resources Section */}
-        <View
-          style={[styles.sectionContainer, styles.resourcesSectionContainer]}
-        >
-          <TouchableOpacity
-            style={styles.resourcesCard}
-            onPress={() => router.push("/resourcesScreen")}
-            activeOpacity={0.9}
-          >
-            <View style={styles.resourcesContent}>
-              <View style={styles.resourcesIcon}>
-                <Ionicons name="library-outline" size={24} color="#4A90E2" />
+                Shop by Category
+              </Text>
+              <View style={styles.quickActionsGrid}>
+                {quickActions.map((action) => (
+                  <TouchableOpacity
+                    key={action.id}
+                    style={[
+                      styles.quickActionCard,
+                      { backgroundColor: action.color },
+                    ]}
+                    onPress={() => {
+                      if (action.category) {
+                        router.push({
+                          pathname: action.route,
+                          params: { category: action.category },
+                        });
+                      } else {
+                        router.push(action.route);
+                      }
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.quickActionIcon}>{action.icon}</Text>
+                    <Text style={styles.quickActionTitle}>{action.title}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-              <View style={styles.resourcesText}>
-                <Text style={styles.resourcesTitle}>Campus Resources</Text>
-                <Text style={styles.resourcesSubtitle}>
-                  Study guides, tutoring, and academic support
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#666" />
             </View>
-          </TouchableOpacity>
-        </View>
 
-        {/* Bottom spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </SafeAreaView>
+            {/* Resources Section */}
+            <View
+              style={[
+                styles.sectionContainer,
+                styles.resourcesSectionContainer,
+              ]}
+            >
+              <TouchableOpacity
+                style={styles.resourcesCard}
+                onPress={() => router.push("/resourcesScreen")}
+                activeOpacity={0.9}
+              >
+                <View style={styles.resourcesContent}>
+                  <View style={styles.resourcesIcon}>
+                    <Ionicons
+                      name="library-outline"
+                      size={24}
+                      color="#4A90E2"
+                    />
+                  </View>
+                  <View style={styles.resourcesText}>
+                    <Text style={styles.resourcesTitle}>Campus Resources</Text>
+                    <Text style={styles.resourcesSubtitle}>
+                      Study guides, tutoring, and academic support
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* Bottom spacing */}
+            <View style={styles.bottomSpacing} />
+          </ScrollView>
+        </SafeAreaView>
+      )}
+    </AuthGuard>
   );
 }
 

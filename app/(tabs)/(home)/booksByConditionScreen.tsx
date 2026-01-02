@@ -5,13 +5,13 @@ import {
   Text,
   View,
   Image,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../supabase-client";
+import { SkeletonBookCardGrid } from "../../../components/SkeletonBookCardGrid";
 
 interface BookListing {
   id: number;
@@ -72,10 +72,20 @@ export default function BooksByConditionScreen() {
 
   const fetchBooks = async () => {
     try {
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       let bookQuery = supabase
         .from("book_listing")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // Exclude current user's listings
+      if (user) {
+        bookQuery = bookQuery.neq("user_id", user.id);
+      }
 
       // Apply search filters
       if (query && typeof query === "string") {
@@ -160,52 +170,52 @@ export default function BooksByConditionScreen() {
         <Text style={styles.searchText}>Search books...</Text>
       </TouchableOpacity>
 
-      {isLoading ? (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" color="#3b82f6" />
-        </View>
-      ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {books.length === 0 ? (
-            <View style={styles.empty}>
-              <Ionicons name="book-outline" size={64} color="#d1d5db" />
-              <Text style={styles.emptyText}>
-                {query ||
-                isbn ||
-                (paymentType && paymentType !== "Any") ||
-                minPrice ||
-                maxPrice
-                  ? "No books found matching your search"
-                  : `No ${condition?.toString().toLowerCase()} books available`}
-              </Text>
-              <Text style={styles.emptySubtext}>
-                {query ||
-                isbn ||
-                (paymentType && paymentType !== "Any") ||
-                minPrice ||
-                maxPrice
-                  ? "Try adjusting your search criteria"
-                  : "Check back later or try a different condition"}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.grid}>
-              {books.map((book) => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/bookDetailsScreen",
-                      params: { bookId: book.id },
-                    })
-                  }
-                />
-              ))}
-            </View>
-          )}
-        </ScrollView>
-      )}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {isLoading ? (
+          <View style={styles.grid}>
+            {[...Array(6)].map((_, index) => (
+              <SkeletonBookCardGrid key={`skeleton-${index}`} />
+            ))}
+          </View>
+        ) : books.length === 0 ? (
+          <View style={styles.empty}>
+            <Ionicons name="book-outline" size={64} color="#d1d5db" />
+            <Text style={styles.emptyText}>
+              {query ||
+              isbn ||
+              (paymentType && paymentType !== "Any") ||
+              minPrice ||
+              maxPrice
+                ? "No books found matching your search"
+                : `No ${condition?.toString().toLowerCase()} books available`}
+            </Text>
+            <Text style={styles.emptySubtext}>
+              {query ||
+              isbn ||
+              (paymentType && paymentType !== "Any") ||
+              minPrice ||
+              maxPrice
+                ? "Try adjusting your search criteria"
+                : "Check back later or try a different condition"}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.grid}>
+            {books.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                onPress={() =>
+                  router.push({
+                    pathname: "/bookDetailsScreen",
+                    params: { bookId: book.id },
+                  })
+                }
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -247,11 +257,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: "#9ca3af",
-  },
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   content: {
     flex: 1,

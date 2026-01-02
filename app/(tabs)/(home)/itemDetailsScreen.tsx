@@ -575,9 +575,13 @@ export default function ItemDetailsScreen() {
             <>
               <View style={styles.titleRow}>
                 <View style={styles.titleInfo}>
-                  <Text style={styles.title}>{itemDetails.title}</Text>
-                  <Text style={styles.price}>${itemDetails.price}</Text>
-                  <Text style={styles.metadata}>
+                  <Text style={styles.title} selectable={true}>
+                    {itemDetails.title}
+                  </Text>
+                  <Text style={styles.price} selectable={true}>
+                    ${itemDetails.price}
+                  </Text>
+                  <Text style={styles.metadata} selectable={true}>
                     {itemDetails.condition} · Posted{" "}
                     {formatDate(itemDetails.created_at)}
                   </Text>
@@ -639,7 +643,7 @@ export default function ItemDetailsScreen() {
                 numberOfLines={4}
               />
             ) : (
-              <Text style={styles.sectionText}>
+              <Text style={styles.sectionText} selectable={true}>
                 {itemDetails.description || "No description provided."}
               </Text>
             )}
@@ -649,15 +653,17 @@ export default function ItemDetailsScreen() {
           {!isEditing && itemDetails.category && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Category</Text>
-              <Text style={styles.sectionText}>{itemDetails.category}</Text>
+              <Text style={styles.sectionText} selectable={true}>
+                {itemDetails.category}
+              </Text>
             </View>
           )}
 
           {/* Payment Method - Only show when not editing */}
           {!isEditing && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Payment Method</Text>
-              <Text style={styles.sectionText}>
+              <Text style={styles.sectionTitle}>Preferred Payment</Text>
+              <Text style={styles.sectionText} selectable={true}>
                 {itemDetails.payment_type || "Not specified"}
               </Text>
             </View>
@@ -666,7 +672,7 @@ export default function ItemDetailsScreen() {
           {/* Seller */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Seller</Text>
-            <Text style={styles.sellerName}>
+            <Text style={styles.sellerName} selectable={true}>
               {sellerInfo?.username || "Anonymous User"}
             </Text>
           </View>

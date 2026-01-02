@@ -14,7 +14,6 @@ import { AuthProvider } from "../contexts/AuthContext";
 import { setupNotificationListeners } from "../utils/pushNotifications";
 import * as Notifications from "expo-notifications";
 import { StripeProvider } from "@stripe/stripe-react-native";
-import { STRIPE_PUBLISHABLE_KEY } from "../config/stripe";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -57,27 +56,27 @@ function RootLayoutNav() {
     const cleanup = setupNotificationListeners(
       // Handle notification received while app is in foreground
       (notification) => {
-        console.log('Foreground notification:', notification);
+        console.log("Foreground notification:", notification);
         // You can show an in-app alert or update UI here
       },
       // Handle notification tap
       (response) => {
-        console.log('Notification tapped:', response);
+        console.log("Notification tapped:", response);
         const data = response.notification.request.content.data;
 
         // Navigate based on notification type
-        if (data?.type === 'new_message' && data?.conversation_id) {
+        if (data?.type === "new_message" && data?.conversation_id) {
           // Navigate directly to the chat screen with the conversation
           router.push({
-            pathname: '/(tabs)/(home)/chatScreen',
+            pathname: "/(tabs)/(home)/chatScreen",
             params: { conversationId: String(data.conversation_id) },
           });
-        } else if (data?.type === 'new_message') {
+        } else if (data?.type === "new_message") {
           // Fallback to messaging screen if no conversation_id
-          router.push('/(tabs)/(home)/messagingScreen');
-        } else if (data?.type === 'isbn_match' && data?.isbn) {
+          router.push("/(tabs)/(home)/messagesScreen");
+        } else if (data?.type === "isbn_match" && data?.isbn) {
           router.push({
-            pathname: '/searchModal',
+            pathname: "/searchModal",
             params: { isbn: String(data.isbn) },
           });
         }
@@ -90,8 +89,12 @@ function RootLayoutNav() {
 
   return (
     <AuthProvider>
-      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-        <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
+      <StripeProvider
+        publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""}
+      >
+        <ThemeProvider
+          value={colorScheme === "light" ? DarkTheme : DefaultTheme}
+        >
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
@@ -104,7 +107,10 @@ function RootLayoutNav() {
             <Stack.Screen name="signInScreen" />
             <Stack.Screen name="signUpScreen" />
             <Stack.Screen name="verifyEmail" />
-            <Stack.Screen name="editProfileModal" options={{ presentation: "modal" }} />
+            <Stack.Screen
+              name="editProfileModal"
+              options={{ presentation: "modal" }}
+            />
           </Stack>
         </ThemeProvider>
       </StripeProvider>
