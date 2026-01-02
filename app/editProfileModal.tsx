@@ -372,17 +372,135 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         return;
       }
 
-      // First delete the profile
+      console.log("Starting account deletion for user:", user.id);
+
+      // Delete all user data in order (to handle foreign key constraints)
+
+      // 1. Delete saved listings
+      const { error: savedListingsError } = await supabase
+        .from("saved_listings")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (savedListingsError) {
+        console.error("Error deleting saved listings:", savedListingsError);
+        // Continue anyway, this is not critical
+      }
+
+      // 2. Delete ISBN subscriptions
+      const { error: isbnSubsError } = await supabase
+        .from("isbn_subscriptions")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (isbnSubsError) {
+        console.error("Error deleting ISBN subscriptions:", isbnSubsError);
+        // Continue anyway
+      }
+
+      // 3. Delete notifications
+      const { error: notificationsError } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (notificationsError) {
+        console.error("Error deleting notifications:", notificationsError);
+        // Continue anyway
+      }
+
+      // 4. Delete message read status
+      const { error: readStatusError } = await supabase
+        .from("message_read_status")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (readStatusError) {
+        console.error("Error deleting message read status:", readStatusError);
+        // Continue anyway
+      }
+
+      // 5. Delete conversations and their messages
+      // First get all conversations where user is a participant
+      const { data: conversations } = await supabase
+        .from("direct_conversations")
+        .select("id")
+        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+      if (conversations && conversations.length > 0) {
+        const conversationIds = conversations.map((c) => c.id);
+
+        // Delete messages for these conversations
+        const { error: messagesError } = await supabase
+          .from("private_messages")
+          .delete()
+          .in("conversation_id", conversationIds);
+
+        if (messagesError) {
+          console.error("Error deleting messages:", messagesError);
+          // Continue anyway
+        }
+
+        // Delete the conversations themselves
+        const { error: conversationsError } = await supabase
+          .from("direct_conversations")
+          .delete()
+          .in("id", conversationIds);
+
+        if (conversationsError) {
+          console.error("Error deleting conversations:", conversationsError);
+          // Continue anyway
+        }
+      }
+
+      // 6. Delete book listings (and their images if needed)
+      const { error: bookListingsError } = await supabase
+        .from("book_listing")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (bookListingsError) {
+        console.error("Error deleting book listings:", bookListingsError);
+        Alert.alert("Error", "Failed to delete book listings");
+        return;
+      }
+
+      // 7. Delete item listings
+      const { error: itemListingsError } = await supabase
+        .from("item_listing")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (itemListingsError) {
+        console.error("Error deleting item listings:", itemListingsError);
+        Alert.alert("Error", "Failed to delete item listings");
+        return;
+      }
+
+      // 8. Delete events created by user (if any)
+      const { error: eventsError } = await supabase
+        .from("events")
+        .delete()
+        .eq("organizer_id", user.id);
+
+      if (eventsError) {
+        console.error("Error deleting events:", eventsError);
+        // Continue anyway
+      }
+
+      // 9. Finally delete the profile
       const { error: deleteError } = await supabase
         .from("profiles")
         .delete()
-        .eq("id", user.id); // Use user.id here
+        .eq("id", user.id);
 
       if (deleteError) {
         console.error("Error deleting profile:", deleteError.message);
         Alert.alert("Error", "Failed to delete account");
         return;
       }
+
+      console.log("Account deletion completed successfully");
 
       onClose();
       router.replace("/signUpScreen");

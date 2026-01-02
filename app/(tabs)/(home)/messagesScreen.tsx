@@ -16,10 +16,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { SimpleMessagingService as MessagingService } from "../../../supabase-client";
 import { useFocusEffect } from "@react-navigation/native";
+import { SkeletonConversationList } from "../../../components/SkeletonConversationList";
 
 // Use the types from the messaging service
 
-export default function MessagingScreen() {
+export default function MessagesScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
@@ -28,7 +29,9 @@ export default function MessagingScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
-  const [deletingConversationIds, setDeletingConversationIds] = useState<Set<string>>(new Set());
+  const [deletingConversationIds, setDeletingConversationIds] = useState<
+    Set<string>
+  >(new Set());
 
   // Use ref to maintain latest deleting IDs for callbacks
   const deletingIdsRef = useRef<Set<string>>(new Set());
@@ -209,7 +212,9 @@ export default function MessagingScreen() {
               console.log("Deleting conversation:", conversation.id);
 
               // Mark as deleting to prevent race conditions with real-time updates
-              setDeletingConversationIds((prev) => new Set(prev).add(conversation.id));
+              setDeletingConversationIds((prev) =>
+                new Set(prev).add(conversation.id)
+              );
 
               // Optimistically remove from UI first for better UX
               setConversations((prev) =>
@@ -349,7 +354,6 @@ export default function MessagingScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
@@ -441,10 +445,7 @@ export default function MessagingScreen() {
 
       {/* Search Results or Chat List */}
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4A90E2" />
-          <Text style={styles.loadingText}>Loading conversations...</Text>
-        </View>
+        <SkeletonConversationList count={6} />
       ) : searchQuery.length > 0 && searchResults.length > 0 ? (
         <View style={styles.searchResultsContainer}>
           <Text style={styles.searchResultsHeader}>Users</Text>
@@ -505,11 +506,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     marginLeft: 25,
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 12,
-    marginLeft: -8,
   },
   headerTitle: {
     fontSize: 24,
@@ -697,17 +693,6 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     lineHeight: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 40,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 16,
   },
   searchResultsContainer: {
     flex: 1,

@@ -4,17 +4,15 @@ import {
   TouchableOpacity,
   Text,
   View,
-  Image,
-  ActivityIndicator,
   TextInput,
   Alert,
-  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../../supabase-client";
+import { BookSection } from "../../../components/BookSection";
 
 // Book listing interface
 interface BookListing {
@@ -30,117 +28,6 @@ interface BookListing {
   description?: string;
   username?: string;
 }
-
-const SkeletonBookCard = () => {
-  const shimmerAnimation = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(shimmerAnimation, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shimmerAnimation, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const opacity = shimmerAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.3, 0.7],
-  });
-
-  return (
-    <View style={styles.bookCard}>
-      <Animated.View style={[styles.skeletonImage, { opacity }]} />
-      <View style={styles.bookInfo}>
-        <Animated.View style={[styles.skeletonTitle, { opacity }]} />
-        <Animated.View style={[styles.skeletonPrice, { opacity }]} />
-        <Animated.View style={[styles.skeletonSeller, { opacity }]} />
-      </View>
-    </View>
-  );
-};
-
-const BookSection = ({
-  title,
-  books,
-  router,
-  isLoading,
-  onSeeAll,
-}: {
-  title: string;
-  books: BookListing[];
-  router: any;
-  isLoading: boolean;
-  onSeeAll: () => void;
-}) => (
-  <View style={styles.section}>
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <TouchableOpacity style={styles.seeAllContainer} onPress={onSeeAll}>
-        <Text style={styles.seeAllText}>See All</Text>
-      </TouchableOpacity>
-    </View>
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.horizontalScrollContent}
-      style={styles.horizontalScroll}
-    >
-      {isLoading ? (
-        <>
-          {[...Array(5)].map((_, index) => (
-            <SkeletonBookCard key={`skeleton-${index}`} />
-          ))}
-        </>
-      ) : books.length > 0 ? (
-        books.slice(0, 5).map((book) => (
-          <TouchableOpacity
-            key={book.id}
-            style={styles.bookCard}
-            onPress={() =>
-              router.push({
-                pathname: "bookDetailsScreen",
-                params: { bookId: book.id },
-              })
-            }
-          >
-            {book.image_url ? (
-              <Image
-                source={{ uri: book.image_url }}
-                style={styles.bookImage}
-              />
-            ) : (
-              <View style={[styles.bookImage, styles.placeholderImage]}>
-                <Ionicons name="book-outline" size={32} color="#9ca3af" />
-              </View>
-            )}
-            <View style={styles.bookInfo}>
-              <Text style={styles.bookTitle} numberOfLines={1}>
-                {book.title}
-              </Text>
-              <Text style={styles.bookPrice}>${book.price}</Text>
-              <Text style={styles.bookSeller} numberOfLines={1}>
-                {book.username || "Anonymous"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))
-      ) : (
-        <Text style={styles.emptyText}>
-          No {title.toLowerCase()} books available
-        </Text>
-      )}
-    </ScrollView>
-  </View>
-);
 
 const EmptyState = ({ onSubscribe }: { onSubscribe: () => void }) => (
   <View style={styles.emptyContainer}>
@@ -572,36 +459,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  section: {
-    backgroundColor: "#ffffff",
-    marginBottom: 14,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginHorizontal: 24,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  seeAllContainer: {
-    justifyContent: "flex-end",
-  },
-  seeAllText: {
-    fontSize: 12,
-    color: "#6b7280",
-    fontWeight: "600",
-  },
-  horizontalScroll: {
-    paddingLeft: 24,
-  },
-  horizontalScrollContent: {
-    gap: 16,
-    paddingRight: 24,
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -621,11 +478,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 32,
   },
-  subscribeButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
   emptySubscribeButton: {
     backgroundColor: "#3b82f6",
     paddingHorizontal: 24,
@@ -638,61 +490,6 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 16,
-  },
-  bookCard: {
-    width: 160,
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#f3f4f6",
-    marginRight: 12,
-  },
-  bookImage: {
-    width: "100%",
-    height: 140,
-    backgroundColor: "#f9fafb",
-  },
-  placeholderImage: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bookInfo: {
-    padding: 12,
-  },
-  bookTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 4,
-  },
-  bookPrice: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#3b82f6",
-    marginBottom: 4,
-  },
-  bookSeller: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
-  emptyText: {
-    padding: 20,
-    textAlign: "center",
-    color: "#9ca3af",
-    fontStyle: "italic",
   },
   modalOverlay: {
     position: "absolute",
@@ -776,30 +573,5 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
-  },
-  skeletonImage: {
-    width: "100%",
-    height: 140,
-    backgroundColor: "#e5e7eb",
-  },
-  skeletonTitle: {
-    height: 14,
-    backgroundColor: "#e5e7eb",
-    borderRadius: 4,
-    marginBottom: 8,
-    width: "90%",
-  },
-  skeletonPrice: {
-    height: 16,
-    backgroundColor: "#e5e7eb",
-    borderRadius: 4,
-    marginBottom: 8,
-    width: "50%",
-  },
-  skeletonSeller: {
-    height: 12,
-    backgroundColor: "#e5e7eb",
-    borderRadius: 4,
-    width: "70%",
   },
 });

@@ -11,6 +11,7 @@ export default function HomeLayout() {
         headerTintColor: "black",
         headerTransparent: true,
         headerShadowVisible: false,
+        headerBackButtonDisplayMode: "minimal",
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -20,7 +21,7 @@ export default function HomeLayout() {
       <Stack.Screen name="eventCardScreen" />
       <Stack.Screen name="bookDetailsScreen" />
       <Stack.Screen name="itemDetailsScreen" />
-      <Stack.Screen name="messagingScreen" />
+      <Stack.Screen name="messagesScreen" />
       <Stack.Screen name="chatScreen" />
       <Stack.Screen name="newMessageScreen" />
       <Stack.Screen name="resourcesScreen" />
